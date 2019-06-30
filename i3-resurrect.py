@@ -1,6 +1,12 @@
+import errno
 import sys
+from os import makedirs
+from os.path import exists as path_exists
+from os.path import expanduser
+from os.path import join as join_path
 from subprocess import getoutput
 
+import click
 import i3ipc
 import psutil
 from wmctrl import Window
@@ -24,14 +30,43 @@ window_class_command_mappings = {
 # working directory from the window title.
 TERMINALS = ['Gnome-terminal', 'Alacritty']
 
+@click.group()
 def main():
-    i3 = i3ipc.Connection()
-    json_tree = getoutput('i3-save-tree --workspace 1')
-    json_lines = list(iter(json_tree.splitlines()))
-    for line in json_lines:
-        print(line)
+    pass
 
-    # Loop through windows.
+@main.command()
+@click.option('--workspace', '-w', help='The workspace to save')
+@click.option('--directory', '-d',
+              type=click.Path(file_okay=False, writable=True),
+              default=expanduser('~/.i3/i3-resurrect/'),
+              help='Directory to use for saving/restoring workspaces')
+def save(workspace, directory):
+    # Create directory if non-existent.
+    if not path_exists(directory):
+        try:
+            makedirs(directory)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+    # Save workspace layout to file.
+    json_tree = getoutput(f'i3-save-tree --workspace {workspace}')
+    json_lines = iter(json_tree.splitlines())
+    with open(join_path(directory, f'workspace_{workspace}.json'), 'w') as f:
+        # Strip out the comments that i3-save-tree includes, and remove unwanted
+        # swallow criteria.
+        for line in json_lines:
+            if line.strip().startswith('// '):
+                if 'class' in line:
+                    print(line.replace('// ', '   ', 1))
+                elif 'instance' in line:
+                    print(line.replace('// ', '   ', 1)[:-1])
+            else:
+                print(line)
+
+    i3 = i3ipc.Connection()
+
+    # Loop through windows and save commands to launch programs on saved
+    # workspace.
     for con in i3.get_tree():
         if (not con.window
                 or con.parent.type == 'dockarea'
