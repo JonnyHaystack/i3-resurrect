@@ -128,19 +128,17 @@ def save_commands(workspace, directory):
             try:
                 working_directory = procinfo.cwd()
             except Exception:
-                working_directory = '$HOME'
+                working_directory = '~'
 
             # If the program is a terminal, get the working directory from the
             # window title.
             if con.window_class in TERMINALS:
                 # Remove any non-ASCII characters.
                 working_directory = con.name.strip()
-                printable = set(string.printable)
-                filter(lambda x: x in printable, working_directory)
-                print(working_directory)
+                filter(lambda x: x in set(string.printable), working_directory)
 
-            # Change ~ to $HOME.
-            working_directory = working_directory.replace('~', '$HOME')
+            # Expand ~ to full path to home directory.
+            working_directory = os.path.expanduser(working_directory)
 
             # Create command to launch program.
             # If there is a special command mapping for this program, use that.
