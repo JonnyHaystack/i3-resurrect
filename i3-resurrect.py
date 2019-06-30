@@ -11,11 +11,6 @@ import psutil
 from wmctrl import Window
 
 
-# Function for printing to stderr.
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
 # Command mappings for specific programs whose process command is not the same
 # as the one that should be used to launch it.
 # Format: 'class': 'command'
@@ -29,9 +24,11 @@ window_class_command_mappings = {
 # working directory from the window title.
 TERMINALS = ['Gnome-terminal', 'Alacritty']
 
+
 @click.group()
 def main():
     pass
+
 
 @main.command('save')
 @click.option('--workspace', '-w', required=True, help='The workspace to save')
@@ -178,6 +175,11 @@ def restore_workspace(workspace, directory):
         stdout=sys.stdout,
         stderr=sys.stderr,
     )
+
+
+# Function for printing to stderr.
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 if __name__ == '__main__':
