@@ -162,7 +162,7 @@ def save_commands(workspace, directory):
 
 @main.command('restore')
 @click.option('--workspace', '-w', required=True,
-        help='The workspace to restore')
+              help='The workspace to restore')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=os.path.expanduser('~/.i3/i3-resurrect/'),
