@@ -128,10 +128,10 @@ def save_commands(workspace, directory):
                 working_directory = '~'
 
             # If the program is a terminal, get the working directory from the
-            # window title.
+            # window title. Yes, this is a complete hack.
             if con.window_class in TERMINALS:
-                # Remove any non-ASCII characters.
                 working_directory = con.name.strip()
+                # Remove any non-ASCII characters.
                 filter(lambda x: x in set(string.printable), working_directory)
 
             # Expand ~ to full path to home directory.
@@ -147,8 +147,8 @@ def save_commands(workspace, directory):
             else:
                 # If the program has no special mapping, launch it by cd'ing to
                 # its working directory (obtained by psutil) and then executing
-                # the first index of the cmdline (this works for almost all
-                # programs I use at least).
+                # the first index of the cmdline. This should work for almost
+                # all programs).
                 command = '(cd "{0}"; {1} &)'.format(
                     working_directory,
                     procinfo.cmdline()[0],
