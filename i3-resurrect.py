@@ -1,5 +1,7 @@
 import errno
 import os
+import shlex
+import string
 import subprocess
 import sys
 
@@ -31,16 +33,15 @@ TERMINALS = ['Gnome-terminal', 'Alacritty']
 def main():
     pass
 
-@main.command()
-@click.option('--workspace', '-w', help='The workspace to save')
+@main.command('save')
+@click.option('--workspace', '-w', required=True, help='The workspace to save')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=os.path.expanduser('~/.i3/i3-resurrect/'),
-              help='Directory to use for saving/restoring workspaces')
-def save(workspace, directory):
+              help='The directory to save the workspace to')
+def save_workspace(workspace, directory):
     """
-    Saves an i3 workspace's layout and commands to launch open programs to a
-    file.
+    Save an i3 workspace's layout and commands to a file.
     """
     # Create directory if non-existent.
     if not os.path.exists(directory):
@@ -61,7 +62,9 @@ def save_layout(workspace, directory):
     """
     Saves an i3 workspace layout to a file.
     """
-    json_tree = subprocess.getoutput(f'i3-save-tree --workspace {workspace}')
+    workspace_safe = shlex.quote(workspace)
+    json_tree = subprocess.getoutput(
+        f'i3-save-tree --workspace {workspace_safe}')
     json_lines = iter(json_tree.splitlines())
     with open(os.path.join(
             directory, f'workspace_{workspace}.json'), 'w') as file:
@@ -131,9 +134,10 @@ def save_commands(workspace, directory):
             # window title.
             if con.window_class in TERMINALS:
                 # Remove any non-ASCII characters.
-                working_directory = str(con.name
-                                        .encode('ascii', 'ignore')
-                                        .strip())
+                working_directory = con.name.strip()
+                printable = set(string.printable)
+                filter(lambda x: x in printable, working_directory)
+                print(working_directory)
 
             # Change ~ to $HOME.
             working_directory = working_directory.replace('~', '$HOME')
@@ -141,7 +145,7 @@ def save_commands(workspace, directory):
             # Create command to launch program.
             # If there is a special command mapping for this program, use that.
             if con.window_class in window_class_command_mappings:
-                command = '(cd {0}; {1} &)'.format(
+                command = '(cd "{0}"; {1} &)'.format(
                     working_directory,
                     window_class_command_mappings[con.window_class],
                 )
@@ -150,12 +154,32 @@ def save_commands(workspace, directory):
                 # its working directory (obtained by psutil) and then executing
                 # the first index of the cmdline (this works for almost all
                 # programs I use at least).
-                command = '(cd {0}; {1} &)'.format(
+                command = '(cd "{0}"; {1} &)'.format(
                     working_directory,
                     procinfo.cmdline()[0],
                 )
             # Print the command.
             file.write(f'\n\n{command}')
+
+
+@main.command('restore')
+@click.option('--workspace', '-w', required=True,
+        help='The workspace to restore')
+@click.option('--directory', '-d',
+              type=click.Path(file_okay=False, writable=True),
+              default=os.path.expanduser('~/.i3/i3-resurrect/'),
+              help='The directory to restore the workspace from')
+def restore_workspace(workspace, directory):
+    """
+    Restore an i3 workspace including running programs.
+    """
+    file_path = shlex.quote(
+        os.path.join(directory, f'workspace_{workspace}.sh'))
+    subprocess.Popen(
+        shlex.split(f'/usr/bin/env bash {file_path}'),
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+    )
 
 
 if __name__ == '__main__':
