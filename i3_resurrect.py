@@ -13,25 +13,6 @@ import psutil
 from wmctrl import Window
 
 
-# Load config
-config_file = shlex.quote(
-    os.path.expanduser('~/.config/i3-resurrect/config.json'))
-try:
-    CONFIG = json.loads(open(config_file).read())
-except JSONDecodeError as e:
-    print(f'Error in config file: "{str(e)}"')
-    exit(1)
-except PermissionError as e:
-    print(f'Could not read config file: {str(e)}')
-    exit(1)
-except FileNotFoundError:
-    CONFIG = {}
-
-# Specify which window classes are terminals so that we know to extract the
-# working directory from the window title.
-TERMINALS = ['Gnome-terminal', 'Alacritty']
-
-
 @click.group()
 def main():
     pass
@@ -227,4 +208,22 @@ def eprint(*args, **kwargs):
 
 
 if __name__ == '__main__':
+    # Load config
+    config_file = shlex.quote(
+        os.path.expanduser('~/.config/i3-resurrect/config.json'))
+    try:
+        CONFIG = json.loads(open(config_file).read())
+    except JSONDecodeError as e:
+        print(f'Error in config file: "{str(e)}"')
+        exit(1)
+    except PermissionError as e:
+        print(f'Could not read config file: {str(e)}')
+        exit(1)
+    except FileNotFoundError:
+        CONFIG = {}
+
+    # Specify which window classes are terminals so that we know to extract the
+    # working directory from the window title.
+    TERMINALS = ['Gnome-terminal', 'Alacritty']
+
     main()
