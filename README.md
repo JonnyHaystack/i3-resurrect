@@ -8,15 +8,10 @@ A simple but flexible solution to saving and restoring i3 workspace layouts
 * [Getting Started](#getting-started)
    * [Installation](#installation)
    * [Usage](#usage)
-      * [Command line](#command-line)
-      * [Example configuration in i3](#example-configuration-in-i3)
    * [Configuration](#configuration)
 * [Contributing](#contributing)
-* [Versioning](#versioning)
-* [Built With](#built-with)
-* [Authors](#authors)
+* [Contributors](#Contributors)
 * [License](#license)
-* [Acknowledgments](#acknowledgments)
 
 ## Introduction
 
@@ -150,7 +145,7 @@ on the desired window.
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-## Versioning
+### Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/JonnyHaystack/i3-resurrect/tags).
 
@@ -160,19 +155,19 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 * [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
 * [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
 
-## Authors
+## Contributors
 
 * **Jonathan Haylett** - *Creator* - [@JonnyHaystack](https://github.com/JonnyHaystack)
 
 See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrect/contributors) who participated in this project.
 
-## License
-
-This project is licensed under the GNU GPL Version 3 - see the [LICENSE](LICENSE) file for details
-
-## Acknowledgments
+### Acknowledgments
 
 * [@acrisci](https://github.com/acrisci) - for the i3ipc Python library
 * [@antocuni](https://bitbucket.org/antocuni) - for the wmctrl Python library
 * [@giampaolo](https://github.com/giampaolo) - for the psutil Python library
 * Everyone who has worked on i3
+
+## License
+
+This project is licensed under the GNU GPL Version 3 - see the [LICENSE](LICENSE) file for details
