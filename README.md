@@ -137,7 +137,7 @@ bindsym $mod+n mode "restore"
 
 ### Configuration
 
-The config file should be located at ~/.config/i3-resurrect/config.json. You will have to create
+The config file should be located at `~/.config/i3-resurrect/config.json`. You will have to create
 it yourself if you want to use it.
 
 In the case of a window where the process cmdline is not the same as the command you must run to
