@@ -146,19 +146,19 @@ command gnome-terminal. To get this working, you would put the following in your
 If you need to find out a window's class, type `xprop | grep WM_CLASS` in a terminal and then click
 on the desired window.
 
-## Built With
-
-* [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get the list of windows in a specified workspace
-* [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
-* [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
-
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/JonnyHaystack/i3-resurrect/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/JonnyHaystack/i3-resurrect/tags).
+
+## Built With
+
+* [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get the list of windows in a specified workspace
+* [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
+* [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
 
 ## Authors
 
