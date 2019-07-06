@@ -5,6 +5,7 @@ import shlex
 import string
 import subprocess
 import sys
+from json.decoder import JSONDecodeError
 
 import click
 import i3ipc
@@ -12,14 +13,19 @@ import psutil
 from wmctrl import Window
 
 
-# Command mappings for specific programs whose process command is not the same
-# as the one that should be used to launch it.
-# Format: 'class': 'command'
-window_class_command_mappings = {
-    'Gnome-terminal': 'gnome-terminal',
-    'Alacritty': 'alacritty',
-    'qutebrowser': 'qutebrowser',
-}
+# Load config
+config_file = shlex.quote(
+    os.path.expanduser('~/.config/i3-resurrect/config.json'))
+try:
+    CONFIG = json.loads(open(config_file).read())
+except JSONDecodeError as e:
+    print(f'Error in config file: "{str(e)}"')
+    exit(1)
+except PermissionError as e:
+    print(f'Could not read config file: {str(e)}')
+    exit(1)
+except FileNotFoundError:
+    CONFIG = {}
 
 # Specify which window classes are terminals so that we know to extract the
 # working directory from the window title.
@@ -146,13 +152,14 @@ def save_commands(workspace, directory):
 
             # Create command to launch program.
             # If there is a special command mapping for this program, use that.
-            if con.window_class in window_class_command_mappings:
-                command = window_class_command_mappings[con.window_class]
+            window_command_mappings = CONFIG.get('window_command_mappings', {})
+            if con.window_class in window_command_mappings:
+                command = window_command_mappings[con.window_class]
             else:
                 # If the program has no special mapping, launch it by executing
                 # the first index of the cmdline. This should work for almost
                 # all programs.
-                command = procinfo.cmdline()[0]
+                command = procinfo.cmdline()
 
             # Add the command to the list.
             commands.append({
@@ -199,9 +206,15 @@ def restore_workspace(workspace, directory):
         if not os.path.exists(working_directory):
             working_directory = os.path.expanduser('~')
 
+        # If command has multiple arguments, split them into an array.
+        if isinstance(command, list):
+            cmdline = command
+        else:
+            cmdline = shlex.split(command)
+
         # Execute command as subprocess.
         subprocess.Popen(
-            shlex.split(command),
+            cmdline,
             cwd=working_directory,
             stdout=sys.stdout,
             stderr=sys.stderr,
