@@ -1,4 +1,5 @@
 import errno
+import json
 import os
 import shlex
 import string
@@ -64,7 +65,7 @@ def save_layout(workspace, directory):
         f'i3-save-tree --workspace {workspace_safe}')
     json_lines = iter(json_tree.splitlines())
     with open(os.path.join(
-            directory, f'workspace_{workspace}.json'), 'w') as file:
+            directory, f'workspace_{workspace}_layout.json'), 'w') as file:
         # Strip out the comments that i3-save-tree includes, and remove
         # unwanted swallow criteria.
         for line in json_lines:
@@ -84,15 +85,15 @@ def save_commands(workspace, directory):
     Saves the commands to launch the programs open in the specified workspace
     to a file.
     """
+    i3 = i3ipc.Connection()
+
+    commands = []
+
     with open(os.path.join(
-            directory, f'workspace_{workspace}.sh'), 'w') as file:
-        # Write hashbang to start of file.
-        file.write('#!/usr/bin/env bash')
-
-        i3 = i3ipc.Connection()
-
+            directory, f'workspace_{workspace}_commands.json'), 'w') as file:
         # Loop through windows and save commands to launch programs on saved
         # workspace.
+        commands = []
         for con in i3.get_tree():
             if (not con.window
                     or con.parent.type == 'dockarea'
@@ -123,6 +124,7 @@ def save_commands(workspace, directory):
             procinfo = psutil.Process(pid)
 
             try:
+                # Obtain working directory using psutil.
                 working_directory = procinfo.cwd()
             except Exception:
                 working_directory = '~'
@@ -140,21 +142,21 @@ def save_commands(workspace, directory):
             # Create command to launch program.
             # If there is a special command mapping for this program, use that.
             if con.window_class in window_class_command_mappings:
-                command = '(cd "{0}"; {1} &)'.format(
-                    working_directory,
-                    window_class_command_mappings[con.window_class],
-                )
+                command = window_class_command_mappings[con.window_class]
             else:
-                # If the program has no special mapping, launch it by cd'ing to
-                # its working directory (obtained by psutil) and then executing
+                # If the program has no special mapping, launch it by executing
                 # the first index of the cmdline. This should work for almost
-                # all programs).
-                command = '(cd "{0}"; {1} &)'.format(
-                    working_directory,
-                    procinfo.cmdline()[0],
-                )
-            # Print the command.
-            file.write(f'\n\n{command}')
+                # all programs.
+                command = procinfo.cmdline()[0]
+
+            # Add the command to the list.
+            commands.append({
+                'command': command,
+                'working_directory': working_directory
+            })
+
+        # Write list of commands to file as JSON.
+        file.write(json.dumps(commands, indent=2))
 
 
 @main.command('restore')
@@ -168,13 +170,39 @@ def restore_workspace(workspace, directory):
     """
     Restore an i3 workspace including running programs.
     """
-    file_path = shlex.quote(
-        os.path.join(directory, f'workspace_{workspace}.sh'))
+    # Load workspace layout
+    layout_file = shlex.quote(
+        os.path.join(directory, f'workspace_{workspace}_layout.json'))
+
     subprocess.Popen(
-        shlex.split(f'/usr/bin/env bash {file_path}'),
+        shlex.split(f'/usr/bin/i3-msg "workspace --no-auto-back-and-forth '
+                    f'{workspace}; append_layout {layout_file}"'),
         stdout=sys.stdout,
         stderr=sys.stderr,
     )
+
+    # Restore programs.
+    commands_file = shlex.quote(
+        os.path.join(directory, f'workspace_{workspace}_commands.json'))
+
+    commands = json.loads(open(commands_file).read())
+
+    for entry in commands:
+        command = entry['command']
+        working_directory = entry['working_directory']
+
+        # If the working directory does not exist, set working directory to
+        # user's home directory.
+        if not os.path.exists(working_directory):
+            working_directory = os.path.expanduser('~')
+
+        # Execute command as subprocess.
+        subprocess.Popen(
+            shlex.split(command),
+            cwd=working_directory,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+        )
 
 
 # Function for printing to stderr.
