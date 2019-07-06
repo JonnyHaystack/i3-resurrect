@@ -2,6 +2,21 @@
 
 A simple but flexible solution to saving and restoring i3 workspace layouts
 
+## Table of Contents
+
+* [Introduction](#introduction)
+* [Getting Started](#getting-started)
+   * [Installation](#installation)
+   * [Usage](#usage)
+      * [Command line](#command-line)
+      * [Example configuration in i3](#example-configuration-in-i3)
+* [Built With](#built-with)
+* [Contributing](#contributing)
+* [Versioning](#versioning)
+* [Authors](#authors)
+* [License](#license)
+* [Acknowledgments](#acknowledgments)
+
 ## Introduction
 
 i3-resurrect originated as a mixture of hacked together Python and bash scripts that I
@@ -22,6 +37,9 @@ needed, and use the [i3ipc](https://github.com/acrisci/i3ipc-python),
 [wmctrl](https://bitbucket.org/antocuni/wmctrl), and
 [psutil](https://github.com/giampaolo/psutil) Python libraries to obtain the commands necessary
 to launch the programs in a saved workspace.
+
+Since I decided to release this publicly, I have improved the standard of the code a great deal
+and gotten rid of the hacky bash parts.
 
 For those interested, other excellent software I use to get things up and running quickly includes:
 - [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) - which obviously also inspired
