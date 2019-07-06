@@ -60,12 +60,15 @@ def save_layout(workspace, directory):
     """
     Saves an i3 workspace layout to a file.
     """
-    workspace_safe = shlex.quote(workspace)
-    json_tree = subprocess.getoutput(
-        f'i3-save-tree --workspace {workspace_safe}')
+    # Sanitise inputs properly.
+    layout_file = shlex.quote(
+        os.path.join(directory, f'workspace_{workspace}_layout.json'))
+    workspace = shlex.quote(workspace)
+
+    json_tree = subprocess.getoutput(f'i3-save-tree --workspace {workspace}')
+
     json_lines = iter(json_tree.splitlines())
-    with open(os.path.join(
-            directory, f'workspace_{workspace}_layout.json'), 'w') as file:
+    with open(layout_file, 'w') as file:
         # Strip out the comments that i3-save-tree includes, and remove
         # unwanted swallow criteria.
         for line in json_lines:
@@ -173,10 +176,10 @@ def restore_workspace(workspace, directory):
     # Load workspace layout
     layout_file = shlex.quote(
         os.path.join(directory, f'workspace_{workspace}_layout.json'))
-
+    workspace = shlex.quote(workspace)
     subprocess.Popen(
-        shlex.split(f'/usr/bin/i3-msg "workspace --no-auto-back-and-forth '
-                    f'{workspace}; append_layout {layout_file}"'),
+        shlex.split(f'i3-msg "workspace --no-auto-back-and-forth {workspace}; '
+                    f'append_layout {layout_file}"'),
         stdout=sys.stdout,
         stderr=sys.stderr,
     )
@@ -184,9 +187,7 @@ def restore_workspace(workspace, directory):
     # Restore programs.
     commands_file = shlex.quote(
         os.path.join(directory, f'workspace_{workspace}_commands.json'))
-
     commands = json.loads(open(commands_file).read())
-
     for entry in commands:
         command = entry['command']
         working_directory = entry['working_directory']
