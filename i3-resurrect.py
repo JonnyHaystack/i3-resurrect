@@ -119,7 +119,9 @@ def save_commands(workspace, directory):
 
             if not window:
                 continue
+
             pid = window.pid
+
             if pid == 0:
                 continue
 
