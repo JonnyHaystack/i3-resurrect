@@ -1,6 +1,6 @@
 # i3-resurrect
 
-A simple but flexible solution to saving and restoring i3 workspace layouts
+A simple but flexible solution to saving and restoring i3 workspaces
 
 ## Table of Contents
 
