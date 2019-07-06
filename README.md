@@ -41,15 +41,32 @@ and gotten rid of the hacky bash parts.
 
 ### Installation
 
+#### From PyPI (recommended)
+
+```
+pip3 install --user i3-resurrect
+```
+
+#### Manual
+
 Obtain source code
 ```
 git clone git@github.com:JonnyHaystack/i3-resurrect.git
 ```
 
-Install dependencies
+Install dependencies then run script directly
 ```
+# Install dependencies
 cd i3-resurrect
-pip install --user -r requirements.txt
+pip3 install --user -r requirements.txt
+
+# Run script directly
+python3 i3-resurrect.py
+```
+
+Or just install locally using pip
+```
+pip3 install --user .
 ```
 
 ### Usage
@@ -58,9 +75,10 @@ pip install --user -r requirements.txt
 
 ```
 # Save workspace '1'
-python3 i3-resurrect.py save -w 1
+i3-resurrect save -w 1
+
 # Restore workspace '1'
-python3 i3-resurrect.py restore -w 1
+i3-resurrect restore -w 1
 ```
 
 #### Example configuration in i3
