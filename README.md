@@ -10,6 +10,7 @@ A simple but flexible solution to saving and restoring i3 workspace layouts
    * [Usage](#usage)
       * [Command line](#command-line)
       * [Example configuration in i3](#example-configuration-in-i3)
+   * [Configuration](#configuration)
 * [Built With](#built-with)
 * [Contributing](#contributing)
 * [Versioning](#versioning)
@@ -67,6 +68,7 @@ pip install --user -r requirements.txt
 ### Usage
 
 #### Command line
+
 ```
 # Save workspace '1'
 python3 i3-resurrect.py save -w 1
@@ -75,6 +77,7 @@ python3 i3-resurrect.py restore -w 1
 ```
 
 #### Example configuration in i3
+
 ```
 # Save workspace mode.
 mode "save" {
@@ -121,6 +124,28 @@ mode "restore" {
 bindsym $mod+n mode "restore"
 ```
 
+### Configuration
+
+The config file should be located at ~/.config/i3-resurrect/config.json. You will have to create
+it yourself if you want to use it.
+
+In the case of a window where the process cmdline is not the same as the command you must run to
+launch that program, you can add an explicit window class to command mapping in the config file.
+
+For example, gnome-terminal's process is gnome-terminal-server, but we need to launch it with the
+command gnome-terminal. To get this working, you would put the following in your config file:
+
+```
+{
+  "window_command_mappings": {
+    "Gnome-terminal": "gnome-terminal"
+  }
+}
+```
+
+If you need to find out a window's class, type `xprop | grep WM_CLASS` in a terminal and then click
+on the desired window.
+
 ## Built With
 
 * [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get the list of windows in a specified workspace
@@ -133,7 +158,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/JonnyHaystack/i3-resurrect/tags). 
 
 ## Authors
 
