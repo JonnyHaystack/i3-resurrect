@@ -10,7 +10,7 @@ A simple but flexible solution to saving and restoring i3 workspace layouts
    * [Usage](#usage)
    * [Configuration](#configuration)
 * [Contributing](#contributing)
-* [Contributors](#Contributors)
+* [Contributors](#contributors)
 * [License](#license)
 
 ## Introduction
@@ -36,14 +36,6 @@ to launch the programs in a saved workspace.
 
 Since I decided to release this publicly, I have improved the standard of the code a great deal
 and gotten rid of the hacky bash parts.
-
-For those interested, other excellent software I use to get things up and running quickly includes:
-- [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) - which obviously also inspired
-the name of this project
-- [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) - an excellent companion to
-tmux-resurrect
-- [qutebrowser](https://github.com/qutebrowser/qutebrowser) - which has excellent session
-management, especially if you create bindings for saving and loading individual windows
 
 ## Getting Started
 
@@ -167,6 +159,16 @@ See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrec
 * [@antocuni](https://bitbucket.org/antocuni) - for the wmctrl Python library
 * [@giampaolo](https://github.com/giampaolo) - for the psutil Python library
 * Everyone who has worked on i3
+
+## Related projects
+
+For those interested, other excellent software I use to get things up and running quickly includes:
+- [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) - which obviously also inspired
+the name of this project
+- [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) - an excellent companion to
+tmux-resurrect
+- [qutebrowser](https://github.com/qutebrowser/qutebrowser) - which has excellent session
+management, especially if you create bindings for saving and loading individual windows
 
 ## License
 
