@@ -39,6 +39,12 @@ and gotten rid of the hacky bash parts.
 
 ## Getting Started
 
+### Requirements
+
+- i3
+- Working i3-save-tree command
+  - This requires the package `perl-anyevent-i3`
+
 ### Installation
 
 #### From PyPI (recommended)
