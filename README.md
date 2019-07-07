@@ -42,6 +42,7 @@ and gotten rid of the hacky bash parts.
 
 ### Requirements
 
+- Python 3
 - i3
 - Working i3-save-tree command
   - This requires the package `perl-anyevent-i3`
