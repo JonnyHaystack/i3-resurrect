@@ -6,6 +6,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
 
 * [Introduction](#introduction)
 * [Getting Started](#getting-started)
+   * [Requirements](#requirements)
    * [Installation](#installation)
    * [Usage](#usage)
    * [Configuration](#configuration)
