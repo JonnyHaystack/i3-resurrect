@@ -49,16 +49,9 @@ and gotten rid of the hacky bash parts.
 
 ### Installation
 
-
-#### From the AUR (recommended for Arch Linux users)
+#### From the AUR using yay (recommended for Arch Linux users)
 ```
-<aur helper> -S i3-resurrect-git
-```
-Or
-```
-git clone https://aur.archlinux.org/i3-resurrect-git.git
-cd i3-resurrect-git
-makepkg -si
+yay -S i3-resurrect-git
 ```
 
 #### From PyPI (recommended for everyone else)
