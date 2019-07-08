@@ -22,8 +22,7 @@ def main():
     global CONFIG
     global TERMINALS
     # Load config
-    config_file = shlex.quote(
-        os.path.expanduser('~/.config/i3-resurrect/config.json'))
+    config_file = os.path.expanduser('~/.config/i3-resurrect/config.json')
     try:
         CONFIG = json.loads(open(config_file).read())
     except JSONDecodeError as e:
@@ -72,8 +71,7 @@ def save_layout(workspace, directory):
     Saves an i3 workspace layout to a file.
     """
     # Sanitise inputs properly.
-    layout_file = shlex.quote(
-        os.path.join(directory, f'workspace_{workspace}_layout.json'))
+    layout_file = os.path.join(directory, f'workspace_{workspace}_layout.json')
     workspace = shlex.quote(workspace)
 
     json_tree = subprocess.getoutput(f'i3-save-tree --workspace {workspace}')
@@ -103,8 +101,12 @@ def save_commands(workspace, directory):
 
     commands = []
 
-    with open(os.path.join(
-            directory, f'workspace_{workspace}_commands.json'), 'w') as file:
+    commands_file = os.path.join(
+        directory,
+        f'workspace_{workspace}_commands.json',
+    )
+
+    with open(commands_file, 'w') as file:
         # Loop through windows and save commands to launch programs on saved
         # workspace.
         commands = []
@@ -185,9 +187,19 @@ def save_commands(workspace, directory):
               help='The directory to restore the workspace from')
 def restore_workspace(workspace, directory):
     """
-    Restore an i3 workspace including running programs.
+    Restores an i3 workspace including running programs.
     """
-    # Load workspace layout
+    # Load workspace layout.
+    restore_layout(workspace, directory)
+
+    # Restore programs.
+    restore_programs(workspace, directory)
+
+
+def restore_layout(workspace, directory):
+    """
+    Restores an i3 workspace layout.
+    """
     layout_file = shlex.quote(
         os.path.join(directory, f'workspace_{workspace}_layout.json'))
     workspace = shlex.quote(workspace)
@@ -198,9 +210,15 @@ def restore_workspace(workspace, directory):
         stderr=sys.stderr,
     )
 
-    # Restore programs.
-    commands_file = shlex.quote(
-        os.path.join(directory, f'workspace_{workspace}_commands.json'))
+
+def restore_programs(workspace, directory):
+    """
+    Restores the running programs from an i3 workspace.
+    """
+    commands_file = os.path.join(
+        directory,
+        f'workspace_{workspace}_commands.json',
+    )
     commands = json.loads(open(commands_file).read())
     for entry in commands:
         command = entry['command']
