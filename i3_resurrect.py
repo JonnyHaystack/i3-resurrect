@@ -202,13 +202,13 @@ def restore_layout(workspace, directory):
     """
     layout_file = shlex.quote(
         os.path.join(directory, f'workspace_{workspace}_layout.json'))
-    workspace = shlex.quote(workspace)
 
     i3 = i3ipc.Connection()
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
     # Load the layout into the workspace.
     i3.command(f'append_layout {layout_file}')
+
 
 def restore_programs(workspace, directory):
     """
