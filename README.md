@@ -99,16 +99,16 @@ i3-resurrect restore -w 1
 ```
 # Save workspace mode.
 mode "save" {
-  bindsym 1 exec "i3-resurrect save -w 1"
-  bindsym 2 exec "i3-resurrect save -w 2"
-  bindsym 3 exec "i3-resurrect save -w 3"
-  bindsym 4 exec "i3-resurrect save -w 4"
-  bindsym 5 exec "i3-resurrect save -w 5"
-  bindsym 6 exec "i3-resurrect save -w 6"
-  bindsym 7 exec "i3-resurrect save -w 7"
-  bindsym 8 exec "i3-resurrect save -w 8"
-  bindsym 9 exec "i3-resurrect save -w 9"
-  bindsym 0 exec "i3-resurrect save -w 0"
+  bindsym 1 exec i3-resurrect save -w 1
+  bindsym 2 exec i3-resurrect save -w 2
+  bindsym 3 exec i3-resurrect save -w 3
+  bindsym 4 exec i3-resurrect save -w 4
+  bindsym 5 exec i3-resurrect save -w 5
+  bindsym 6 exec i3-resurrect save -w 6
+  bindsym 7 exec i3-resurrect save -w 7
+  bindsym 8 exec i3-resurrect save -w 8
+  bindsym 9 exec i3-resurrect save -w 9
+  bindsym 0 exec i3-resurrect save -w 0
 
   # Back to normal: Enter, Escape, or s
   bindsym Return mode "default"
@@ -121,16 +121,16 @@ bindsym $mod+s mode "save"
 
 # Restore workspace mode.
 mode "restore" {
-  bindsym 1 exec "i3-resurrect restore -w 1"
-  bindsym 2 exec "i3-resurrect restore -w 2"
-  bindsym 3 exec "i3-resurrect restore -w 3"
-  bindsym 4 exec "i3-resurrect restore -w 4"
-  bindsym 5 exec "i3-resurrect restore -w 5"
-  bindsym 6 exec "i3-resurrect restore -w 6"
-  bindsym 7 exec "i3-resurrect restore -w 7"
-  bindsym 8 exec "i3-resurrect restore -w 8"
-  bindsym 9 exec "i3-resurrect restore -w 9"
-  bindsym 0 exec "i3-resurrect restore -w 0"
+  bindsym 1 exec i3-resurrect restore -w 1
+  bindsym 2 exec i3-resurrect restore -w 2
+  bindsym 3 exec i3-resurrect restore -w 3
+  bindsym 4 exec i3-resurrect restore -w 4
+  bindsym 5 exec i3-resurrect restore -w 5
+  bindsym 6 exec i3-resurrect restore -w 6
+  bindsym 7 exec i3-resurrect restore -w 7
+  bindsym 8 exec i3-resurrect restore -w 8
+  bindsym 9 exec i3-resurrect restore -w 9
+  bindsym 0 exec i3-resurrect restore -w 0
 
   # Back to normal: Enter, Escape, or n
   bindsym Return mode "default"
