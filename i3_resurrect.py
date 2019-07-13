@@ -5,27 +5,27 @@ import shlex
 import string
 import subprocess
 import sys
-from json.decoder import JSONDecodeError
 
 import click
 import i3ipc
 import psutil
 from wmctrl import Window
 
-
 TERMINALS = []
 CONFIG = {}
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group()
+@click.group(context_settings=CONTEXT_SETTINGS)
 def main():
     global CONFIG
     global TERMINALS
+
     # Load config
     config_file = os.path.expanduser('~/.config/i3-resurrect/config.json')
     try:
         CONFIG = json.loads(open(config_file).read())
-    except JSONDecodeError as e:
+    except json.decoder.JSONDecodeError as e:
         print(f'Error in config file: "{str(e)}"')
         exit(1)
     except PermissionError as e:
@@ -38,16 +38,19 @@ def main():
     # working directory from the window title.
     TERMINALS = ['Gnome-terminal', 'Alacritty']
 
-    pass
-
 
 @main.command('save')
 @click.option('--workspace', '-w', required=True, help='The workspace to save')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=os.path.expanduser('~/.i3/i3-resurrect/'),
-              help='The directory to save the workspace to')
-def save_workspace(workspace, directory):
+              help='The directory to save the workspace to',
+              show_default=True)
+@click.option('--swallow', '-s',
+              default='class,instance',
+              help='The swallow criteria to use',
+              show_default=True)
+def save_workspace(workspace, directory, swallow):
     """
     Save an i3 workspace's layout and commands to a file.
     """
@@ -184,7 +187,8 @@ def save_commands(workspace, directory):
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=os.path.expanduser('~/.i3/i3-resurrect/'),
-              help='The directory to restore the workspace from')
+              help='The directory to restore the workspace from',
+              show_default=True)
 def restore_workspace(workspace, directory):
     """
     Restores an i3 workspace including running programs.
