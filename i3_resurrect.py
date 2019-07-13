@@ -11,6 +11,8 @@ import i3ipc
 import psutil
 from wmctrl import Window
 
+import util
+
 TERMINALS = []
 CONFIG = {}
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -48,7 +50,8 @@ def main():
               show_default=True)
 @click.option('--swallow', '-s',
               default='class,instance',
-              help='The swallow criteria to use',
+              help=('The swallow criteria to use.'
+                    'Options: class,instance,title,window_role'),
               show_default=True)
 def save_workspace(workspace, directory, swallow):
     """
@@ -63,36 +66,41 @@ def save_workspace(workspace, directory, swallow):
                 raise
 
     # Save workspace layout to file.
-    save_layout(workspace, directory)
+    swallow_criteria = swallow.split(',')
+    save_layout(workspace, directory, swallow_criteria)
 
     # Save commands to file.
     save_commands(workspace, directory)
 
 
-def save_layout(workspace, directory):
+def save_layout(workspace, directory, swallow_criteria):
     """
     Saves an i3 workspace layout to a file.
     """
-    # Sanitise inputs properly.
     layout_file = os.path.join(directory, f'workspace_{workspace}_layout.json')
-    workspace = shlex.quote(workspace)
 
-    json_tree = subprocess.getoutput(f'i3-save-tree --workspace {workspace}')
+    i3 = i3ipc.Connection()
 
-    json_lines = iter(json_tree.splitlines())
+    # Get full workspace layout tree from i3.
+    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
+    workspace_tree = None
+    for output in root['nodes']:
+        for container in output['nodes']:
+            if container['type'] != 'con':
+                pass
+            for ws in container['nodes']:
+                if ws['name'] == workspace:
+                    workspace_tree = ws
+
     with open(layout_file, 'w') as file:
-        # Strip out the comments that i3-save-tree includes, and remove
-        # unwanted swallow criteria.
-        for line in json_lines:
-            if line.strip().startswith('// '):
-                if 'class' in line:
-                    processed_line = line.replace('// ', '   ', 1)
-                    file.write(f'{processed_line}\n')
-                elif 'instance' in line:
-                    processed_line = line.replace('// ', '   ', 1)[:-1]
-                    file.write(f'{processed_line}\n')
-            else:
-                file.write(f'{line}\n')
+        # Build new workspace tree suitable for restoring and write it to a
+        # file.
+        file.write(
+            json.dumps(
+                util.build_tree(workspace_tree, swallow_criteria),
+                indent=2,
+            )
+        )
 
 
 def save_commands(workspace, directory):
