@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setup(
     name='i3-resurrect',
-    version='1.0.4',
+    version='1.0.5-2',
     author='Jonathan Haylett',
     author_email='jonathan@haylett.dev',
-    py_modules=['i3_resurrect'],
+    py_modules=['i3_resurrect', 'util'],
     url='https://github.com/JonnyHaystack/i3-resurrect',
     license='GNU GPL Version 3',
     install_requires=[

@@ -50,8 +50,8 @@ def main():
               show_default=True)
 @click.option('--swallow', '-s',
               default='class,instance',
-              help=('The swallow criteria to use.'
-                    'Options: class,instance,title,window_role'),
+              help=('The swallow criteria to use. '
+                    'Options: class, instance, title, window_role'),
               show_default=True)
 def save_workspace(workspace, directory, swallow):
     """
