@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='i3-resurrect',
-    version='1.0.5-2',
+    version='1.1.0',
     author='Jonathan Haylett',
     author_email='jonathan@haylett.dev',
     py_modules=['i3_resurrect', 'util'],
