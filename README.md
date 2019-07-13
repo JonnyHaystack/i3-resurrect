@@ -57,8 +57,10 @@ yay -S i3-resurrect-git
 #### From PyPI (recommended for everyone else)
 
 ```
-pip3 install --user i3-resurrect
+pip3 install --user --upgrade i3-resurrect
 ```
+
+Make sure ~/.local/bin is in your PATH environment variable.
 
 #### Manual
 
