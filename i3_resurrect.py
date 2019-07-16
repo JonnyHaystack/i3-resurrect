@@ -1,4 +1,5 @@
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -219,7 +220,7 @@ def restore_programs(workspace, directory):
         # If the working directory does not exist, set working directory to
         # user's home directory.
         if not Path(working_directory).exists():
-            working_directory = str(Path.home())
+            working_directory = Path.home()
 
         # If command has multiple arguments, split them into an array.
         if isinstance(command, list):
@@ -228,9 +229,12 @@ def restore_programs(workspace, directory):
             cmdline = shlex.split(command)
 
         # Execute command as subprocess.
+        environment = os.environ.copy()
+        environment['PWD'] = working_directory
         subprocess.Popen(
             cmdline,
             cwd=working_directory,
+            env=environment,
             stdout=sys.stdout,
             stderr=sys.stderr,
         )
