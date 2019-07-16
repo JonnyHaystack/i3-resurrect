@@ -229,12 +229,10 @@ def restore_programs(workspace, directory):
             cmdline = shlex.split(command)
 
         # Execute command as subprocess.
-        environment = os.environ.copy()
-        environment['PWD'] = working_directory
         subprocess.Popen(
             cmdline,
             cwd=working_directory,
-            env=environment,
+            env={**os.environ, **{'PWD': working_directory}},
         )
 
 
