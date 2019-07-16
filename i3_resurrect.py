@@ -1,10 +1,8 @@
-import errno
 import json
-import os
 import shlex
-import string
 import subprocess
 import sys
+from pathlib import Path
 
 import click
 import i3ipc
@@ -24,9 +22,9 @@ def main():
     global TERMINALS
 
     # Load config
-    config_file = os.path.expanduser('~/.config/i3-resurrect/config.json')
+    config_file = Path('~/.config/i3-resurrect/config.json').expanduser()
     try:
-        CONFIG = json.loads(open(config_file).read())
+        CONFIG = json.loads(config_file.read_text())
     except json.decoder.JSONDecodeError as e:
         print(f'Error in config file: "{str(e)}"')
         exit(1)
@@ -45,7 +43,7 @@ def main():
 @click.option('--workspace', '-w', required=True, help='The workspace to save')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
-              default=os.path.expanduser('~/.i3/i3-resurrect/'),
+              default=Path('~/.i3/i3-resurrect/').expanduser(),
               help='The directory to save the workspace to',
               show_default=True)
 @click.option('--swallow', '-s',
@@ -58,12 +56,7 @@ def save_workspace(workspace, directory, swallow):
     Save an i3 workspace's layout and commands to a file.
     """
     # Create directory if non-existent.
-    if not os.path.exists(directory):
-        try:
-            os.makedirs(directory)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+    Path(directory).mkdir(parents=True, exist_ok=True)
 
     # Save workspace layout to file.
     swallow_criteria = swallow.split(',')
@@ -77,7 +70,7 @@ def save_layout(workspace, directory, swallow_criteria):
     """
     Saves an i3 workspace layout to a file.
     """
-    layout_file = os.path.join(directory, f'workspace_{workspace}_layout.json')
+    layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
 
     i3 = i3ipc.Connection()
 
@@ -92,10 +85,10 @@ def save_layout(workspace, directory, swallow_criteria):
                 if ws['name'] == workspace:
                     workspace_tree = ws
 
-    with open(layout_file, 'w') as file:
+    with layout_file.open('w') as f:
         # Build new workspace tree suitable for restoring and write it to a
         # file.
-        file.write(
+        f.write(
             json.dumps(
                 util.build_tree(workspace_tree, swallow_criteria),
                 indent=2,
@@ -110,14 +103,9 @@ def save_commands(workspace, directory):
     """
     i3 = i3ipc.Connection()
 
-    commands = []
+    commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
 
-    commands_file = os.path.join(
-        directory,
-        f'workspace_{workspace}_commands.json',
-    )
-
-    with open(commands_file, 'w') as file:
+    with commands_file.open('w') as f:
         # Loop through windows and save commands to launch programs on saved
         # workspace.
         commands = []
@@ -161,7 +149,7 @@ def save_commands(workspace, directory):
                 else:
                     working_directory = procinfo.cwd()
             except Exception:
-                working_directory = os.path.expanduser('~')
+                working_directory = str(Path.home())
 
             # Create command to launch program.
             # If there is a special command mapping for this program, use that.
@@ -181,7 +169,7 @@ def save_commands(workspace, directory):
             })
 
         # Write list of commands to file as JSON.
-        file.write(json.dumps(commands, indent=2))
+        f.write(json.dumps(commands, indent=2))
 
 
 @main.command('restore')
@@ -189,7 +177,7 @@ def save_commands(workspace, directory):
               help='The workspace to restore')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
-              default=os.path.expanduser('~/.i3/i3-resurrect/'),
+              default=Path('~/.i3/i3-resurrect/').expanduser(),
               help='The directory to restore the workspace from',
               show_default=True)
 def restore_workspace(workspace, directory):
@@ -208,7 +196,8 @@ def restore_layout(workspace, directory):
     Restores an i3 workspace layout.
     """
     layout_file = shlex.quote(
-        os.path.join(directory, f'workspace_{workspace}_layout.json'))
+        str(Path(directory) / f'workspace_{workspace}_layout.json')
+    )
 
     i3 = i3ipc.Connection()
     # Switch to the workspace which we are loading.
@@ -221,19 +210,16 @@ def restore_programs(workspace, directory):
     """
     Restores the running programs from an i3 workspace.
     """
-    commands_file = os.path.join(
-        directory,
-        f'workspace_{workspace}_commands.json',
-    )
-    commands = json.loads(open(commands_file).read())
+    commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
+    commands = json.loads(commands_file.read_text())
     for entry in commands:
         command = entry['command']
         working_directory = entry['working_directory']
 
         # If the working directory does not exist, set working directory to
         # user's home directory.
-        if not os.path.exists(working_directory):
-            working_directory = os.path.expanduser('~')
+        if not Path(working_directory).exists():
+            working_directory = str(Path.home())
 
         # If command has multiple arguments, split them into an array.
         if isinstance(command, list):
