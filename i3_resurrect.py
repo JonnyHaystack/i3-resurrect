@@ -235,8 +235,6 @@ def restore_programs(workspace, directory):
             cmdline,
             cwd=working_directory,
             env=environment,
-            stdout=sys.stdout,
-            stderr=sys.stderr,
         )
 
 
