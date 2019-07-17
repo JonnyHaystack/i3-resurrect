@@ -45,19 +45,23 @@ def main():
 @main.command('save')
 @click.option('--workspace', '-w',
               default=i3.get_tree().find_focused().workspace().name,
-              help='The workspace to save')
+              help='The workspace to save.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to save the workspace to',
+              help='The directory to save the workspace to.',
               show_default=True)
 @click.option('--swallow', '-s',
               default='class,instance',
               help=('The swallow criteria to use. '
                     'Options: class, instance, title, window_role'),
               show_default=True)
-@click.option('--layout-only', 'target', flag_value='layout_only')
-@click.option('--commands-only', 'target', flag_value='commands_only')
+@click.option('--layout-only', 'target',
+              flag_value='layout_only',
+              help='Only save layout.')
+@click.option('--commands-only', 'target',
+              flag_value='commands_only',
+              help='Only save commands.')
 def save_workspace(workspace, directory, swallow, target):
     """
     Save an i3 workspace's layout and commands to a file.
@@ -158,14 +162,18 @@ def save_commands(workspace, directory):
 @main.command('restore')
 @click.option('--workspace', '-w',
               default=i3.get_tree().find_focused().workspace().name,
-              help='The workspace to restore')
+              help='The workspace to restore.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to restore the workspace from',
+              help='The directory to restore the workspace from.',
               show_default=True)
-@click.option('--layout-only', 'target', flag_value='layout_only')
-@click.option('--commands-only', 'target', flag_value='commands_only')
+@click.option('--layout-only', 'target',
+              flag_value='layout_only',
+              help='Only save layout.')
+@click.option('--commands-only', 'target',
+              flag_value='commands_only',
+              help='Only save commands.')
 def restore_workspace(workspace, directory, target):
     """
     Restores an i3 workspace including running programs.
@@ -228,11 +236,11 @@ def restore_programs(workspace, directory):
 @main.command('force-swallow')
 @click.option('--workspace', '-w',
               default=i3.get_tree().find_focused().workspace().name,
-              help='Workspace on which to perform force swallow')
+              help='Workspace on which to perform force swallow.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to restore the workspace from',
+              help='The directory to restore the workspace from.',
               show_default=True)
 def force_swallow(workspace, directory):
     """
