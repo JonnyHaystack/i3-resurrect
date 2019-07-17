@@ -53,8 +53,12 @@ def main():
               help=('The swallow criteria to use. '
                     'Options: class, instance, title, window_role'),
               show_default=True)
-@click.option('--layout-only', 'target', flag_value='layout_only')
-@click.option('--commands-only', 'target', flag_value='commands_only')
+@click.option('--layout-only', 'target',
+              flag_value='layout_only',
+              help='Only save layout.')
+@click.option('--progams-only', 'target',
+              flag_value='programs_only',
+              help='Only save running programs.')
 def save_workspace(workspace, directory, swallow, target):
     """
     Save an i3 workspace's layout and commands to a file.
@@ -62,7 +66,7 @@ def save_workspace(workspace, directory, swallow, target):
     # Create directory if non-existent.
     Path(directory).mkdir(parents=True, exist_ok=True)
 
-    if target != 'commands_only':
+    if target != 'programs_only':
         # Save workspace layout to file.
         swallow_criteria = swallow.split(',')
         save_layout(workspace, directory, swallow_criteria)
@@ -164,8 +168,12 @@ def save_commands(workspace, directory):
               default=Path('~/.i3/i3-resurrect/').expanduser(),
               help='The directory to restore the workspace from',
               show_default=True)
-@click.option('--layout-only', 'target', flag_value='layout_only')
-@click.option('--commands-only', 'target', flag_value='commands_only')
+@click.option('--layout-only', 'target',
+              flag_value='layout_only',
+              help='Only restore layout.')
+@click.option('--programs-only', 'target',
+              flag_value='programs_only',
+              help='Only restore running programs.')
 def restore_workspace(workspace, directory, target):
     """
     Restores an i3 workspace including running programs.
@@ -174,7 +182,7 @@ def restore_workspace(workspace, directory, target):
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
-    if target != 'commands_only':
+    if target != 'programs_only':
         # Load workspace layout.
         restore_layout(workspace, directory)
 
