@@ -222,6 +222,8 @@ def restore_programs(workspace, directory):
             cmdline,
             cwd=working_directory,
             env={**os.environ, **{'PWD': working_directory}},
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
         )
 
 
@@ -242,15 +244,37 @@ def force_swallow(workspace):
         # If no workspace specified, just use currently focused workspace.
         workspace = i3.get_tree().find_focused().workspace().name
 
-    # Get ids of all windows on workspace.
+    # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
+    placeholder_window_ids = []
     for (con, window) in windows_in_workspace(workspace):
+        pid = window.pid
+
+        # If window has no process, add it to list of placeholder windows.
+        if pid == 0:
+            placeholder_window_ids.append(int(window.id, 16))
+            continue
+
+        # Otherwise, add it to the list of regular windows.
         window_ids.append(int(window.id, 16))
 
-    # Unmap then remap all windows on workspace.
+    # Unmap all windows in workspace.
     xdo = Xdo()
     for window_id in window_ids:
         xdo.unmap_window(window_id)
+    # Remove any remaining placeholder windows in workspace.
+    for window_id in placeholder_window_ids:
+        command = shlex.split(f'xdotool windowkill {window_id}')
+        subprocess.Popen(
+            command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+        )
+
+    # Create fresh placeholder windows.
+    restore_layout(workspace, Path('~/.i3/i3-resurrect').expanduser())
+
+    # Map all unmapped windows.
     for window_id in window_ids:
         xdo.map_window(window_id)
 
