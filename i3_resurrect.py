@@ -53,19 +53,23 @@ def main():
               help=('The swallow criteria to use. '
                     'Options: class, instance, title, window_role'),
               show_default=True)
-def save_workspace(workspace, directory, swallow):
+@click.option('--layout-only', 'target', flag_value='layout_only')
+@click.option('--commands-only', 'target', flag_value='commands_only')
+def save_workspace(workspace, directory, swallow, target):
     """
     Save an i3 workspace's layout and commands to a file.
     """
     # Create directory if non-existent.
     Path(directory).mkdir(parents=True, exist_ok=True)
 
-    # Save workspace layout to file.
-    swallow_criteria = swallow.split(',')
-    save_layout(workspace, directory, swallow_criteria)
+    if target != 'commands_only':
+        # Save workspace layout to file.
+        swallow_criteria = swallow.split(',')
+        save_layout(workspace, directory, swallow_criteria)
 
-    # Save commands to file.
-    save_commands(workspace, directory)
+    if target != 'layout_only':
+        # Save commands to file.
+        save_commands(workspace, directory)
 
 
 def save_layout(workspace, directory, swallow_criteria):
@@ -160,15 +164,23 @@ def save_commands(workspace, directory):
               default=Path('~/.i3/i3-resurrect/').expanduser(),
               help='The directory to restore the workspace from',
               show_default=True)
-def restore_workspace(workspace, directory):
+@click.option('--layout-only', 'target', flag_value='layout_only')
+@click.option('--commands-only', 'target', flag_value='commands_only')
+def restore_workspace(workspace, directory, target):
     """
     Restores an i3 workspace including running programs.
     """
-    # Load workspace layout.
-    restore_layout(workspace, directory)
+    i3 = i3ipc.Connection()
+    # Switch to the workspace which we are loading.
+    i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
-    # Restore programs.
-    restore_programs(workspace, directory)
+    if target != 'commands_only':
+        # Load workspace layout.
+        restore_layout(workspace, directory)
+
+    if target != 'layout_only':
+        # Restore programs.
+        restore_programs(workspace, directory)
 
 
 def restore_layout(workspace, directory):
@@ -180,8 +192,6 @@ def restore_layout(workspace, directory):
     )
 
     i3 = i3ipc.Connection()
-    # Switch to the workspace which we are loading.
-    i3.command(f'workspace --no-auto-back-and-forth {workspace}')
     # Load the layout into the workspace.
     i3.command(f'append_layout {layout_file}')
 
