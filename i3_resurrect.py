@@ -190,18 +190,6 @@ def restore_workspace(workspace, directory, target):
         restore_programs(workspace, directory)
 
 
-def restore_layout(workspace, directory):
-    """
-    Restores an i3 workspace layout.
-    """
-    layout_file = shlex.quote(
-        str(Path(directory) / f'workspace_{workspace}_layout.json')
-    )
-
-    # Load the layout into the workspace.
-    i3.command(f'append_layout {layout_file}')
-
-
 def restore_programs(workspace, directory):
     """
     Restores the running programs from an i3 workspace.
@@ -233,9 +221,9 @@ def restore_programs(workspace, directory):
         )
 
 
-def force_swallow(workspace, directory):
+def restore_layout(workspace, directory):
     """
-    Trigger a deferred swallow on all windows in workspace.
+    Restores an i3 workspace layout.
     """
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
@@ -261,8 +249,11 @@ def force_swallow(workspace, directory):
     for window_id in placeholder_window_ids:
         xdo_kill_window(window_id)
 
-    # Create fresh placeholder windows.
-    restore_layout(workspace, directory)
+    # Create fresh placeholder windows by appending layout to workspace.
+    layout_file = shlex.quote(
+        str(Path(directory) / f'workspace_{workspace}_layout.json')
+    )
+    i3.command(f'append_layout {layout_file}')
 
     # Map all unmapped windows.
     for window_id in window_ids:
