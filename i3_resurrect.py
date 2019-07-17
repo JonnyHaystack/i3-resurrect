@@ -16,6 +16,7 @@ import util
 TERMINALS = []
 CONFIG = {}
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+i3 = i3ipc.Connection()
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -80,8 +81,6 @@ def save_layout(workspace, directory, swallow_criteria):
     """
     layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
 
-    i3 = i3ipc.Connection()
-
     # Get full workspace layout tree from i3.
     root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
     workspace_tree = None
@@ -109,8 +108,6 @@ def save_commands(workspace, directory):
     Saves the commands to launch the programs open in the specified workspace
     to a file.
     """
-    i3 = i3ipc.Connection()
-
     commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
 
     with commands_file.open('w') as f:
@@ -173,7 +170,6 @@ def restore_workspace(workspace, directory, target):
     """
     Restores an i3 workspace including running programs.
     """
-    i3 = i3ipc.Connection()
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
@@ -194,7 +190,6 @@ def restore_layout(workspace, directory):
         str(Path(directory) / f'workspace_{workspace}_layout.json')
     )
 
-    i3 = i3ipc.Connection()
     # Load the layout into the workspace.
     i3.command(f'append_layout {layout_file}')
 
@@ -243,7 +238,6 @@ def force_swallow(workspace, directory):
     """
     Trigger a deferred swallow on all windows in workspace.
     """
-    i3 = i3ipc.Connection()
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
@@ -296,7 +290,6 @@ def windows_in_workspace(workspace):
     Args:
         workspace: The name of the workspace whose windows to iterate over.
     """
-    i3 = i3ipc.Connection()
     for con in i3.get_tree():
         if (not con.window
                 or con.parent.type == 'dockarea'
