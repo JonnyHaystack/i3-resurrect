@@ -16,6 +16,7 @@ setup(
         'wmctrl-python3',
         'i3ipc',
         'psutil',
+        'python-libxdo',
     ],
     entry_points={
         'console_scripts': ['i3-resurrect=i3_resurrect:main'],
