@@ -8,6 +8,9 @@ def build_tree(con, swallow_criteria):
     """
     tree = []
 
+    if con is None:
+        return tree
+
     nodes = con['nodes']
 
     # Base case.
