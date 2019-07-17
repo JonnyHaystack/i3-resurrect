@@ -64,7 +64,7 @@ def main():
               help='Only save running programs.')
 def save_workspace(workspace, directory, swallow, target):
     """
-    Save an i3 workspace's layout and commands to a file.
+    Save an i3 workspace's layout and running programs to a file.
     """
     # Create directory if non-existent.
     Path(directory).mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def save_workspace(workspace, directory, swallow, target):
         save_layout(workspace, directory, swallow_criteria)
 
     if target != 'layout_only':
-        # Save commands to file.
+        # Save running programs to file.
         save_commands(workspace, directory)
 
 
@@ -114,48 +114,47 @@ def save_commands(workspace, directory):
     """
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
 
-    with commands_file.open('w') as f:
-        # Loop through windows and save commands to launch programs on saved
-        # workspace.
-        commands = []
-        for (con, window) in windows_in_workspace(workspace):
-            pid = window.pid
+    # Loop through windows and save commands to launch programs on saved
+    # workspace.
+    commands = []
+    for (con, window) in windows_in_workspace(workspace):
+        pid = window.pid
 
-            if pid == 0:
-                continue
+        if pid == 0:
+            continue
 
-            # Get process info for the window.
-            procinfo = psutil.Process(pid)
+        # Get process info for the window.
+        procinfo = psutil.Process(pid)
 
-            try:
-                # Obtain working directory using psutil.
-                if con.window_class in TERMINALS:
-                    # If the program is a terminal emulator, get the working
-                    # directory from its first subprocess.
-                    working_directory = procinfo.children()[0].cwd()
-                else:
-                    working_directory = procinfo.cwd()
-            except Exception:
-                working_directory = str(Path.home())
-
-            # Create command to launch program.
-            # If there is a special command mapping for this program, use that.
-            window_command_mappings = CONFIG.get('window_command_mappings', {})
-            if con.window_class in window_command_mappings:
-                command = window_command_mappings[con.window_class]
+        try:
+            # Obtain working directory using psutil.
+            if con.window_class in TERMINALS:
+                # If the program is a terminal emulator, get the working
+                # directory from its first subprocess.
+                working_directory = procinfo.children()[0].cwd()
             else:
-                # If the program has no special mapping, launch it by executing
-                # the first index of the cmdline. This should work for almost
-                # all programs.
-                command = procinfo.cmdline()
+                working_directory = procinfo.cwd()
+        except Exception:
+            working_directory = str(Path.home())
 
-            # Add the command to the list.
-            commands.append({
-                'command': command,
-                'working_directory': working_directory
-            })
+        # Create command to launch program.
+        # If there is a special command mapping for this program, use that.
+        window_command_mappings = CONFIG.get('window_command_mappings', {})
+        if con.window_class in window_command_mappings:
+            command = window_command_mappings[con.window_class]
+        else:
+            # If the program has no special mapping, just use the process's
+            # cmdline.
+            command = procinfo.cmdline()
+
+        # Add the command to the list.
+        commands.append({
+            'command': command,
+            'working_directory': working_directory
+        })
 
         # Write list of commands to file as JSON.
+    with commands_file.open('w') as f:
         f.write(json.dumps(commands, indent=2))
 
 
