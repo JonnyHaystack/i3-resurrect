@@ -110,29 +110,7 @@ def save_commands(workspace, directory):
         # Loop through windows and save commands to launch programs on saved
         # workspace.
         commands = []
-        for con in i3.get_tree():
-            if (not con.window
-                    or con.parent.type == 'dockarea'
-                    or con.workspace().name != workspace):
-                continue
-
-            # Get information on the window.
-            try:
-                window = Window.by_id(con.window)[0]
-            except ValueError as e:
-                eprint(str(e))
-                continue
-
-            # Pre-emptively attempt to catch error
-            try:
-                window
-            except NameError as e:
-                eprint(str(e))
-                continue
-
-            if not window:
-                continue
-
+        for (con, window) in windows_in_workspace(workspace):
             pid = window.pid
 
             if pid == 0:
@@ -236,9 +214,45 @@ def restore_programs(workspace, directory):
         )
 
 
-# Function for printing to stderr.
 def eprint(*args, **kwargs):
+    """
+    Function for printing to stderr.
+    """
     print(*args, file=sys.stderr, **kwargs)
+
+
+def windows_in_workspace(workspace):
+    """
+    Generator to iterate over windows in a workspace.
+
+    Args:
+        workspace: The name of the workspace whose windows to iterate over.
+    """
+    i3 = i3ipc.Connection()
+    for con in i3.get_tree():
+        if (not con.window
+                or con.parent.type == 'dockarea'
+                or con.workspace().name != workspace):
+            continue
+
+        # Get information on the window.
+        try:
+            window = Window.by_id(con.window)[0]
+        except ValueError as e:
+            eprint(str(e))
+            continue
+
+        # Pre-emptively attempt to catch error
+        try:
+            window
+        except NameError as e:
+            eprint(str(e))
+            continue
+
+        if not window:
+            continue
+
+        yield (con, window)
 
 
 if __name__ == '__main__':
