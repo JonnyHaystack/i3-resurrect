@@ -232,7 +232,12 @@ def restore_programs(workspace, directory):
     '--workspace', '-w',
     help='Optionally specify workspace on which to perform force swallow',
 )
-def force_swallow(workspace):
+@click.option('--directory', '-d',
+              type=click.Path(file_okay=False),
+              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              help='The directory to restore the workspace from',
+              show_default=True)
+def force_swallow(workspace, directory):
     """
     Trigger a deferred swallow on all windows in workspace.
     """
@@ -272,7 +277,7 @@ def force_swallow(workspace):
         )
 
     # Create fresh placeholder windows.
-    restore_layout(workspace, Path('~/.i3/i3-resurrect').expanduser())
+    restore_layout(workspace, directory)
 
     # Map all unmapped windows.
     for window_id in window_ids:
