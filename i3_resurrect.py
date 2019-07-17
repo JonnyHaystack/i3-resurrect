@@ -9,6 +9,7 @@ import click
 import i3ipc
 import psutil
 from wmctrl import Window
+from xdo import Xdo
 
 import util
 
@@ -212,6 +213,37 @@ def restore_programs(workspace, directory):
             cwd=working_directory,
             env={**os.environ, **{'PWD': working_directory}},
         )
+
+
+@main.command('force-swallow')
+@click.option(
+    '--workspace', '-w',
+    help='Optionally specify workspace on which to perform force swallow',
+)
+def force_swallow(workspace):
+    """
+    Unmap and remap all windows in a workspace so that they will be swallowed
+    by any matching placeholder windows.
+    """
+    i3 = i3ipc.Connection()
+    if workspace is not None:
+        # If workspace is specified, switch to it first.
+        i3.command(f'workspace --no-auto-back-and-forth {workspace}')
+    else:
+        # If no workspace specified, just use currently focused workspace.
+        workspace = i3.get_tree().find_focused().workspace().name
+
+    # Get ids of all windows on workspace.
+    window_ids = []
+    for (con, window) in windows_in_workspace(workspace):
+        window_ids.append(int(window.id, 16))
+
+    # Unmap then remap all windows on workspace.
+    xdo = Xdo()
+    for window_id in window_ids:
+        xdo.unmap_window(window_id)
+    for window_id in window_ids:
+        xdo.map_window(window_id)
 
 
 def eprint(*args, **kwargs):
