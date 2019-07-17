@@ -244,6 +244,7 @@ def restore_layout(workspace, directory):
     # Unmap all windows in workspace.
     for window_id in window_ids:
         xdo_unmap_window(window_id)
+
     # Remove any remaining placeholder windows in workspace.
     for window_id in placeholder_window_ids:
         xdo_kill_window(window_id)
@@ -301,7 +302,7 @@ def windows_in_workspace(workspace):
 
 def xdo_unmap_window(window_id):
     command = shlex.split(f'xdotool windowunmap {window_id}')
-    subprocess.Popen(
+    subprocess.call(
         command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.STDOUT,
@@ -310,7 +311,7 @@ def xdo_unmap_window(window_id):
 
 def xdo_map_window(window_id):
     command = shlex.split(f'xdotool windowmap {window_id}')
-    subprocess.Popen(
+    subprocess.call(
         command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.STDOUT,
@@ -319,7 +320,7 @@ def xdo_map_window(window_id):
 
 def xdo_kill_window(window_id):
     command = shlex.split(f'xdotool windowkill {window_id}')
-    subprocess.Popen(
+    subprocess.call(
         command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.STDOUT,
