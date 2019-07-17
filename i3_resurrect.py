@@ -222,8 +222,7 @@ def restore_programs(workspace, directory):
 )
 def force_swallow(workspace):
     """
-    Unmap and remap all windows in a workspace so that they will be swallowed
-    by any matching placeholder windows.
+    Trigger a deferred swallow on all windows in workspace.
     """
     i3 = i3ipc.Connection()
     if workspace is not None:
