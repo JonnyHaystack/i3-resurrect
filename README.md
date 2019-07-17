@@ -108,7 +108,7 @@ mode "save" {
   bindsym 7 exec i3-resurrect save -w 7
   bindsym 8 exec i3-resurrect save -w 8
   bindsym 9 exec i3-resurrect save -w 9
-  bindsym 0 exec i3-resurrect save -w 0
+  bindsym 0 exec i3-resurrect save -w 10
 
   # Back to normal: Enter, Escape, or s
   bindsym Return mode "default"
@@ -130,7 +130,7 @@ mode "restore" {
   bindsym 7 exec i3-resurrect restore -w 7
   bindsym 8 exec i3-resurrect restore -w 8
   bindsym 9 exec i3-resurrect restore -w 9
-  bindsym 0 exec i3-resurrect restore -w 0
+  bindsym 0 exec i3-resurrect restore -w 10
 
   # Back to normal: Enter, Escape, or n
   bindsym Return mode "default"
