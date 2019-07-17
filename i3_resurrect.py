@@ -42,7 +42,9 @@ def main():
 
 
 @main.command('save')
-@click.option('--workspace', '-w', required=True, help='The workspace to save')
+@click.option('--workspace', '-w',
+              default=i3.get_tree().find_focused().workspace().name,
+              help='The workspace to save')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
@@ -157,7 +159,8 @@ def save_commands(workspace, directory):
 
 
 @main.command('restore')
-@click.option('--workspace', '-w', required=True,
+@click.option('--workspace', '-w',
+              default=i3.get_tree().find_focused().workspace().name,
               help='The workspace to restore')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
@@ -228,10 +231,9 @@ def restore_programs(workspace, directory):
 
 
 @main.command('force-swallow')
-@click.option(
-    '--workspace', '-w',
-    help='Optionally specify workspace on which to perform force swallow',
-)
+@click.option('--workspace', '-w',
+              default=i3.get_tree().find_focused().workspace().name,
+              help='Workspace on which to perform force swallow')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
@@ -242,12 +244,8 @@ def force_swallow(workspace, directory):
     Trigger a deferred swallow on all windows in workspace.
     """
     i3 = i3ipc.Connection()
-    if workspace is not None:
-        # If workspace is specified, switch to it first.
-        i3.command(f'workspace --no-auto-back-and-forth {workspace}')
-    else:
-        # If no workspace specified, just use currently focused workspace.
-        workspace = i3.get_tree().find_focused().workspace().name
+    # Switch to the workspace which we are loading.
+    i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
     # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
