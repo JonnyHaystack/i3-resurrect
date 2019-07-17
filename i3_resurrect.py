@@ -3,13 +3,13 @@ import os
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import click
 import i3ipc
 import psutil
 from wmctrl import Window
-from xdo import Xdo
 
 import util
 
@@ -112,7 +112,7 @@ def save_commands(workspace, directory):
     Saves the commands to launch the programs open in the specified workspace
     to a file.
     """
-    commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
+    commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
 
     with commands_file.open('w') as f:
         # Loop through windows and save commands to launch programs on saved
@@ -206,7 +206,7 @@ def restore_programs(workspace, directory):
     """
     Restores the running programs from an i3 workspace.
     """
-    commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
+    commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
     commands = json.loads(commands_file.read_text())
     for entry in commands:
         command = entry['command']
@@ -233,15 +233,6 @@ def restore_programs(workspace, directory):
         )
 
 
-@main.command('force-swallow')
-@click.option('--workspace', '-w',
-              default=i3.get_tree().find_focused().workspace().name,
-              help='Workspace on which to perform force swallow.')
-@click.option('--directory', '-d',
-              type=click.Path(file_okay=False),
-              default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to restore the workspace from.',
-              show_default=True)
 def force_swallow(workspace, directory):
     """
     Trigger a deferred swallow on all windows in workspace.
@@ -264,24 +255,18 @@ def force_swallow(workspace, directory):
         window_ids.append(int(window.id, 16))
 
     # Unmap all windows in workspace.
-    xdo = Xdo()
     for window_id in window_ids:
-        xdo.unmap_window(window_id)
+        xdo_unmap_window(window_id)
     # Remove any remaining placeholder windows in workspace.
     for window_id in placeholder_window_ids:
-        command = shlex.split(f'xdotool windowkill {window_id}')
-        subprocess.Popen(
-            command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
+        xdo_kill_window(window_id)
 
     # Create fresh placeholder windows.
     restore_layout(workspace, directory)
 
     # Map all unmapped windows.
     for window_id in window_ids:
-        xdo.map_window(window_id)
+        xdo_map_window(window_id)
 
 
 def eprint(*args, **kwargs):
@@ -322,6 +307,33 @@ def windows_in_workspace(workspace):
             continue
 
         yield (con, window)
+
+
+def xdo_unmap_window(window_id):
+    command = shlex.split(f'xdotool windowunmap {window_id}')
+    subprocess.Popen(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def xdo_map_window(window_id):
+    command = shlex.split(f'xdotool windowmap {window_id}')
+    subprocess.Popen(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def xdo_kill_window(window_id):
+    command = shlex.split(f'xdotool windowkill {window_id}')
+    subprocess.Popen(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
 
 
 if __name__ == '__main__':
