@@ -5,6 +5,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
 ## Table of Contents
 
 * [Introduction](#introduction)
+* [Background](#background)
 * [Getting Started](#getting-started)
    * [Requirements](#requirements)
    * [Installation](#installation)
@@ -15,6 +16,29 @@ A simple but flexible solution to saving and restoring i3 workspaces
 * [License](#license)
 
 ## Introduction
+
+i3-resurrect is a program which can save and restore the layout and running
+programs in your i3 workspaces.
+
+Layouts are saved by using i3ipc to save the necessary information from the
+workspace tree as a JSON file.
+
+Programs are saved by looking up each process in the workspace and saving their
+`cmdline` (the command used to launch the program) and `cwd` (current working
+directory) to a JSON file.
+
+Programs are restored by simply running the programs in the JSON file with the
+working directory set appropriately.
+
+Layouts are restored by using i3's built-in layout restoring functionality to
+create placeholder windows which will swallow windows matching certain criteria.
+
+xdotool is also used to make i3 see existing windows as new windows.
+This is necessary for matching by window title because the title must match
+when the window first appears and programs usually change the title after the
+window is created.
+
+## Background
 
 i3-resurrect originated as a mixture of hacked together Python and bash scripts that I
 wrote in order to be able to quickly save and load workspaces on the fly.
@@ -37,7 +61,8 @@ to launch the programs in a saved workspace.
 
 Since I decided to release this publicly, I have improved the standard of the code a great deal
 and gotten rid of the hacky bash parts.
-The code is all Python now, and i3-save-tree is no longer needed.
+The code is all Python now, and i3-save-tree is no longer needed as I have
+reimplemented it in Python.
 
 ## Getting Started
 
