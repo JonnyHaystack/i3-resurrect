@@ -3,13 +3,13 @@ import os
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import click
 import i3ipc
 import psutil
 from wmctrl import Window
-from xdo import Xdo
 
 import util
 
@@ -59,12 +59,12 @@ def main():
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only save layout.')
-@click.option('--progams-only', 'target',
+@click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only save running programs.')
 def save_workspace(workspace, directory, swallow, target):
     """
-    Save an i3 workspace's layout and commands to a file.
+    Save an i3 workspace's layout and running programs to a file.
     """
     # Create directory if non-existent.
     Path(directory).mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def save_workspace(workspace, directory, swallow, target):
         save_layout(workspace, directory, swallow_criteria)
 
     if target != 'layout_only':
-        # Save commands to file.
+        # Save running programs to file.
         save_commands(workspace, directory)
 
 
@@ -85,16 +85,7 @@ def save_layout(workspace, directory, swallow_criteria):
     """
     layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
 
-    # Get full workspace layout tree from i3.
-    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
-    workspace_tree = None
-    for output in root['nodes']:
-        for container in output['nodes']:
-            if container['type'] != 'con':
-                pass
-            for ws in container['nodes']:
-                if ws['name'] == workspace:
-                    workspace_tree = ws
+    workspace_tree = get_workspace_tree(workspace)
 
     with layout_file.open('w') as f:
         # Build new workspace tree suitable for restoring and write it to a
@@ -112,50 +103,50 @@ def save_commands(workspace, directory):
     Saves the commands to launch the programs open in the specified workspace
     to a file.
     """
-    commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
+    commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
 
-    with commands_file.open('w') as f:
-        # Loop through windows and save commands to launch programs on saved
-        # workspace.
-        commands = []
-        for (con, window) in windows_in_workspace(workspace):
-            pid = window.pid
+    # Loop through windows and save commands to launch programs on saved
+    # workspace.
+    commands = []
+    for (con, window) in windows_in_workspace(workspace):
+        pid = window.pid
 
-            if pid == 0:
-                continue
+        if pid == 0:
+            continue
 
-            # Get process info for the window.
-            procinfo = psutil.Process(pid)
+        # Get process info for the window.
+        procinfo = psutil.Process(pid)
 
-            try:
-                # Obtain working directory using psutil.
-                if con.window_class in TERMINALS:
-                    # If the program is a terminal emulator, get the working
-                    # directory from its first subprocess.
-                    working_directory = procinfo.children()[0].cwd()
-                else:
-                    working_directory = procinfo.cwd()
-            except Exception:
-                working_directory = str(Path.home())
-
-            # Create command to launch program.
-            # If there is a special command mapping for this program, use that.
-            window_command_mappings = CONFIG.get('window_command_mappings', {})
-            if con.window_class in window_command_mappings:
-                command = window_command_mappings[con.window_class]
+        window_class = con['window_properties']['class']
+        try:
+            # Obtain working directory using psutil.
+            if window_class in TERMINALS:
+                # If the program is a terminal emulator, get the working
+                # directory from its first subprocess.
+                working_directory = procinfo.children()[0].cwd()
             else:
-                # If the program has no special mapping, launch it by executing
-                # the first index of the cmdline. This should work for almost
-                # all programs.
-                command = procinfo.cmdline()
+                working_directory = procinfo.cwd()
+        except Exception:
+            working_directory = str(Path.home())
 
-            # Add the command to the list.
-            commands.append({
-                'command': command,
-                'working_directory': working_directory
-            })
+        # Create command to launch program.
+        # If there is a special command mapping for this program, use that.
+        window_command_mappings = CONFIG.get('window_command_mappings', {})
+        if window_class in window_command_mappings:
+            command = window_command_mappings[window_class]
+        else:
+            # If the program has no special mapping, just use the process's
+            # cmdline.
+            command = procinfo.cmdline()
+
+        # Add the command to the list.
+        commands.append({
+            'command': command,
+            'working_directory': working_directory
+        })
 
         # Write list of commands to file as JSON.
+    with commands_file.open('w') as f:
         f.write(json.dumps(commands, indent=2))
 
 
@@ -190,23 +181,11 @@ def restore_workspace(workspace, directory, target):
         restore_programs(workspace, directory)
 
 
-def restore_layout(workspace, directory):
-    """
-    Restores an i3 workspace layout.
-    """
-    layout_file = shlex.quote(
-        str(Path(directory) / f'workspace_{workspace}_layout.json')
-    )
-
-    # Load the layout into the workspace.
-    i3.command(f'append_layout {layout_file}')
-
-
 def restore_programs(workspace, directory):
     """
     Restores the running programs from an i3 workspace.
     """
-    commands_file = Path(directory) / f'workspace_{workspace}_commands.json'
+    commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
     commands = json.loads(commands_file.read_text())
     for entry in commands:
         command = entry['command']
@@ -233,18 +212,9 @@ def restore_programs(workspace, directory):
         )
 
 
-@main.command('force-swallow')
-@click.option('--workspace', '-w',
-              default=i3.get_tree().find_focused().workspace().name,
-              help='Workspace on which to perform force swallow.')
-@click.option('--directory', '-d',
-              type=click.Path(file_okay=False),
-              default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to restore the workspace from.',
-              show_default=True)
-def force_swallow(workspace, directory):
+def restore_layout(workspace, directory):
     """
-    Trigger a deferred swallow on all windows in workspace.
+    Restores an i3 workspace layout.
     """
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
@@ -264,24 +234,22 @@ def force_swallow(workspace, directory):
         window_ids.append(int(window.id, 16))
 
     # Unmap all windows in workspace.
-    xdo = Xdo()
     for window_id in window_ids:
-        xdo.unmap_window(window_id)
+        xdo_unmap_window(window_id)
+
     # Remove any remaining placeholder windows in workspace.
     for window_id in placeholder_window_ids:
-        command = shlex.split(f'xdotool windowkill {window_id}')
-        subprocess.Popen(
-            command,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
+        xdo_kill_window(window_id)
 
-    # Create fresh placeholder windows.
-    restore_layout(workspace, directory)
+    # Create fresh placeholder windows by appending layout to workspace.
+    layout_file = shlex.quote(
+        str(Path(directory) / f'workspace_{workspace}_layout.json')
+    )
+    i3.command(f'append_layout {layout_file}')
 
     # Map all unmapped windows.
     for window_id in window_ids:
-        xdo.map_window(window_id)
+        xdo_map_window(window_id)
 
 
 def eprint(*args, **kwargs):
@@ -291,6 +259,41 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+def get_workspace_tree(workspace):
+    # Get full workspace layout tree from i3.
+    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
+    for output in root['nodes']:
+        for container in output['nodes']:
+            if container['type'] != 'con':
+                pass
+            for ws in container['nodes']:
+                if ws['name'] == workspace:
+                    return ws
+
+
+def windows_in_container(container):
+    """
+    Generator to iterate over windows in a container.
+
+    Args:
+        container: The container to traverse.
+    """
+    # Base case.
+    if container is None:
+        return
+
+    nodes = container['nodes']
+
+    if nodes == []:
+        return
+
+    # Step case.
+    for node in nodes:
+        if 'window_properties' in node:
+            yield node
+        yield from windows_in_container(node)
+
+
 def windows_in_workspace(workspace):
     """
     Generator to iterate over windows in a workspace.
@@ -298,15 +301,11 @@ def windows_in_workspace(workspace):
     Args:
         workspace: The name of the workspace whose windows to iterate over.
     """
-    for con in i3.get_tree():
-        if (not con.window
-                or con.parent.type == 'dockarea'
-                or con.workspace().name != workspace):
-            continue
-
+    ws = get_workspace_tree(workspace)
+    for con in windows_in_container(ws):
         # Get information on the window.
         try:
-            window = Window.by_id(con.window)[0]
+            window = Window.by_id(con['window'])[0]
         except ValueError as e:
             eprint(str(e))
             continue
@@ -322,6 +321,33 @@ def windows_in_workspace(workspace):
             continue
 
         yield (con, window)
+
+
+def xdo_unmap_window(window_id):
+    command = shlex.split(f'xdotool windowunmap {window_id}')
+    subprocess.call(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def xdo_map_window(window_id):
+    command = shlex.split(f'xdotool windowmap {window_id}')
+    subprocess.call(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def xdo_kill_window(window_id):
+    command = shlex.split(f'xdotool windowkill {window_id}')
+    subprocess.call(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
 
 
 if __name__ == '__main__':

@@ -44,6 +44,7 @@ and gotten rid of the hacky bash parts.
 
 - Python 3
 - i3
+- xdotool
 
 ### Installation
 
@@ -96,19 +97,22 @@ i3-resurrect restore -w 1
 
 #### Example configuration in i3
 
+A very basic setup without window title matching:
 ```
+set $i3_resurrect i3-resurrect
+
 # Save workspace mode.
 mode "save" {
-  bindsym 1 exec i3-resurrect save -w 1
-  bindsym 2 exec i3-resurrect save -w 2
-  bindsym 3 exec i3-resurrect save -w 3
-  bindsym 4 exec i3-resurrect save -w 4
-  bindsym 5 exec i3-resurrect save -w 5
-  bindsym 6 exec i3-resurrect save -w 6
-  bindsym 7 exec i3-resurrect save -w 7
-  bindsym 8 exec i3-resurrect save -w 8
-  bindsym 9 exec i3-resurrect save -w 9
-  bindsym 0 exec i3-resurrect save -w 10
+  bindsym 1 exec $i3_resurrect save -w 1
+  bindsym 2 exec $i3_resurrect save -w 2
+  bindsym 3 exec $i3_resurrect save -w 3
+  bindsym 4 exec $i3_resurrect save -w 4
+  bindsym 5 exec $i3_resurrect save -w 5
+  bindsym 6 exec $i3_resurrect save -w 6
+  bindsym 7 exec $i3_resurrect save -w 7
+  bindsym 8 exec $i3_resurrect save -w 8
+  bindsym 9 exec $i3_resurrect save -w 9
+  bindsym 0 exec $i3_resurrect save -w 0
 
   # Back to normal: Enter, Escape, or s
   bindsym Return mode "default"
@@ -121,16 +125,16 @@ bindsym $mod+s mode "save"
 
 # Restore workspace mode.
 mode "restore" {
-  bindsym 1 exec i3-resurrect restore -w 1
-  bindsym 2 exec i3-resurrect restore -w 2
-  bindsym 3 exec i3-resurrect restore -w 3
-  bindsym 4 exec i3-resurrect restore -w 4
-  bindsym 5 exec i3-resurrect restore -w 5
-  bindsym 6 exec i3-resurrect restore -w 6
-  bindsym 7 exec i3-resurrect restore -w 7
-  bindsym 8 exec i3-resurrect restore -w 8
-  bindsym 9 exec i3-resurrect restore -w 9
-  bindsym 0 exec i3-resurrect restore -w 10
+  bindsym 1 exec $i3_resurrect restore -w 1
+  bindsym 2 exec $i3_resurrect restore -w 2
+  bindsym 3 exec $i3_resurrect restore -w 3
+  bindsym 4 exec $i3_resurrect restore -w 4
+  bindsym 5 exec $i3_resurrect restore -w 5
+  bindsym 6 exec $i3_resurrect restore -w 6
+  bindsym 7 exec $i3_resurrect restore -w 7
+  bindsym 8 exec $i3_resurrect restore -w 8
+  bindsym 9 exec $i3_resurrect restore -w 9
+  bindsym 0 exec $i3_resurrect restore -w 0
 
   # Back to normal: Enter, Escape, or n
   bindsym Return mode "default"
@@ -141,6 +145,68 @@ mode "restore" {
 
 bindsym $mod+n mode "restore"
 ```
+
+A more advanced setup where windows are matched by title:
+```
+set $i3_resurrect i3-resurrect
+
+# Save workspace mode.
+mode "save" {
+  bindsym 1 exec "$i3_resurrect save -w 1 --swallow=class,instance,title"
+  bindsym 2 exec "$i3_resurrect save -w 2 --swallow=class,instance,title"
+  bindsym 3 exec "$i3_resurrect save -w 3 --swallow=class,instance,title"
+  bindsym 4 exec "$i3_resurrect save -w 4 --swallow=class,instance,title"
+  bindsym 5 exec "$i3_resurrect save -w 5 --swallow=class,instance,title"
+  bindsym 6 exec "$i3_resurrect save -w 6 --swallow=class,instance,title"
+  bindsym 7 exec "$i3_resurrect save -w 7 --swallow=class,instance,title"
+  bindsym 8 exec "$i3_resurrect save -w 8 --swallow=class,instance,title"
+  bindsym 9 exec "$i3_resurrect save -w 9 --swallow=class,instance,title"
+  bindsym 0 exec "$i3_resurrect save -w 10 --swallow=class,instance,title"
+
+  # Back to normal: Enter, Escape, or s
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+  bindsym s mode "default"
+  bindsym $mod+s mode "default"
+}
+
+bindsym $mod+s mode "save"
+
+# Restore workspace mode.
+mode "restore" {
+  bindsym 1 exec "$i3_resurrect restore -w 1 --programs-only"
+  bindsym 2 exec "$i3_resurrect restore -w 2 --programs-only"
+  bindsym 3 exec "$i3_resurrect restore -w 3 --programs-only"
+  bindsym 4 exec "$i3_resurrect restore -w 4 --programs-only"
+  bindsym 5 exec "$i3_resurrect restore -w 5 --programs-only"
+  bindsym 6 exec "$i3_resurrect restore -w 6 --programs-only"
+  bindsym 7 exec "$i3_resurrect restore -w 7 --programs-only"
+  bindsym 8 exec "$i3_resurrect restore -w 8 --programs-only"
+  bindsym 9 exec "$i3_resurrect restore -w 9 --programs-only"
+  bindsym 0 exec "$i3_resurrect restore -w 10 --programs-only"
+
+  bindsym $mod+1 exec "$i3_resurrect restore -w 1 --layout-only"
+  bindsym $mod+2 exec "$i3_resurrect restore -w 2 --layout-only"
+  bindsym $mod+3 exec "$i3_resurrect restore -w 3 --layout-only"
+  bindsym $mod+4 exec "$i3_resurrect restore -w 4 --layout-only"
+  bindsym $mod+5 exec "$i3_resurrect restore -w 5 --layout-only"
+  bindsym $mod+6 exec "$i3_resurrect restore -w 6 --layout-only"
+  bindsym $mod+7 exec "$i3_resurrect restore -w 7 --layout-only"
+  bindsym $mod+8 exec "$i3_resurrect restore -w 8 --layout-only"
+  bindsym $mod+9 exec "$i3_resurrect restore -w 9 --layout-only"
+  bindsym $mod+0 exec "$i3_resurrect restore -w 10 --layout-only"
+
+  # Back to normal: Enter, Escape, or n
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+  bindsym n mode "default"
+  bindsym $mod+n mode "default"
+}
+
+bindsym $mod+n mode "restore"
+```
+
+[Example of usage with the second configuration](https://gfycat.com/favorablefrightenedbantamrooster)
 
 ### Configuration
 
