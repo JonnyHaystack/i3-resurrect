@@ -240,7 +240,8 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Built With
 
-* [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get the list of windows in a specified workspace
+* [Click](https://github.com/pallets/click) - Used to create the command line interface
+* [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get/build the workspace tree
 * [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
 * [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
 
@@ -252,6 +253,7 @@ See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrec
 
 ### Acknowledgments
 
+* [@pallets](https://github.com/pallets) - for Click
 * [@acrisci](https://github.com/acrisci) - for the i3ipc Python library
 * [@antocuni](https://bitbucket.org/antocuni) - for the wmctrl Python library
 * [@giampaolo](https://github.com/giampaolo) - for the psutil Python library
