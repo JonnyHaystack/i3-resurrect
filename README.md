@@ -37,6 +37,7 @@ to launch the programs in a saved workspace.
 
 Since I decided to release this publicly, I have improved the standard of the code a great deal
 and gotten rid of the hacky bash parts.
+The code is all Python now, and i3-save-tree is no longer needed.
 
 ## Getting Started
 
