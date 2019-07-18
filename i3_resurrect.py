@@ -85,16 +85,7 @@ def save_layout(workspace, directory, swallow_criteria):
     """
     layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
 
-    # Get full workspace layout tree from i3.
-    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
-    workspace_tree = None
-    for output in root['nodes']:
-        for container in output['nodes']:
-            if container['type'] != 'con':
-                pass
-            for ws in container['nodes']:
-                if ws['name'] == workspace:
-                    workspace_tree = ws
+    workspace_tree = get_workspace_tree(workspace)
 
     with layout_file.open('w') as f:
         # Build new workspace tree suitable for restoring and write it to a
@@ -126,9 +117,10 @@ def save_commands(workspace, directory):
         # Get process info for the window.
         procinfo = psutil.Process(pid)
 
+        window_class = con['window_properties']['class']
         try:
             # Obtain working directory using psutil.
-            if con.window_class in TERMINALS:
+            if window_class in TERMINALS:
                 # If the program is a terminal emulator, get the working
                 # directory from its first subprocess.
                 working_directory = procinfo.children()[0].cwd()
@@ -140,8 +132,8 @@ def save_commands(workspace, directory):
         # Create command to launch program.
         # If there is a special command mapping for this program, use that.
         window_command_mappings = CONFIG.get('window_command_mappings', {})
-        if con.window_class in window_command_mappings:
-            command = window_command_mappings[con.window_class]
+        if window_class in window_command_mappings:
+            command = window_command_mappings[window_class]
         else:
             # If the program has no special mapping, just use the process's
             # cmdline.
@@ -267,6 +259,41 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+def get_workspace_tree(workspace):
+    # Get full workspace layout tree from i3.
+    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
+    for output in root['nodes']:
+        for container in output['nodes']:
+            if container['type'] != 'con':
+                pass
+            for ws in container['nodes']:
+                if ws['name'] == workspace:
+                    return ws
+
+
+def windows_in_container(container):
+    """
+    Generator to iterate over windows in a container.
+
+    Args:
+        container: The container to traverse.
+    """
+    # Base case.
+    if container is None:
+        return
+
+    nodes = container['nodes']
+
+    if nodes == []:
+        return
+
+    # Step case.
+    for node in nodes:
+        if 'window_properties' in node:
+            yield node
+        yield from windows_in_container(node)
+
+
 def windows_in_workspace(workspace):
     """
     Generator to iterate over windows in a workspace.
@@ -274,15 +301,11 @@ def windows_in_workspace(workspace):
     Args:
         workspace: The name of the workspace whose windows to iterate over.
     """
-    for con in i3.get_tree():
-        if (not con.window
-                or con.parent.type == 'dockarea'
-                or con.workspace().name != workspace):
-            continue
-
+    ws = get_workspace_tree(workspace)
+    for con in windows_in_container(ws):
         # Get information on the window.
         try:
-            window = Window.by_id(con.window)[0]
+            window = Window.by_id(con['window'])[0]
         except ValueError as e:
             eprint(str(e))
             continue
