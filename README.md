@@ -20,8 +20,8 @@ A simple but flexible solution to saving and restoring i3 workspaces
 i3-resurrect is a program which can save and restore the layout and running
 programs in your i3 workspaces.
 
-Layouts are saved by using i3ipc to write the necessary information from the
-workspace tree to a JSON file.
+Layouts are saved by using i3ipc to take necessary information from the
+workspace tree and write it to a JSON file.
 
 Programs are saved by looking up each process in the workspace and writing their
 `cmdline` (the command used to launch the program) and `cwd` (current working
