@@ -236,7 +236,7 @@ In the case of a window where the process cmdline is not the same as the command
 launch that program, you can add an explicit window class to command mapping in the config file.
 
 For example, gnome-terminal's process is gnome-terminal-server, but we need to launch it with the
-command gnome-terminal. To get this working, you would put the following in your config file:
+command `gnome-terminal`. To get this working, you would put the following in your config file:
 
 ```
 {
