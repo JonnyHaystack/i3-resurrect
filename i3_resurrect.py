@@ -59,7 +59,7 @@ def main():
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only save layout.')
-@click.option('--progams-only', 'target',
+@click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only save running programs.')
 def save_workspace(workspace, directory, swallow, target):
