@@ -87,7 +87,7 @@ pip3 install --user .
 
 #### Command line
 
-Basic usage, matching only window class:
+Basic usage, matching only window class/instance:
 ```
 # Save workspace '1'
 i3-resurrect save -w 1
