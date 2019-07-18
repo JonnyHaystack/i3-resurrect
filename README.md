@@ -263,6 +263,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 * [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get/build the workspace tree
 * [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
 * [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
+* [xdotool](https://www.semicomplete.com/projects/xdotool/) - Used to unmap and remap windows
 
 ## Contributors
 
@@ -276,6 +277,7 @@ See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrec
 * [@acrisci](https://github.com/acrisci) - for the i3ipc Python library
 * [@antocuni](https://bitbucket.org/antocuni) - for the wmctrl Python library
 * [@giampaolo](https://github.com/giampaolo) - for the psutil Python library
+* [@jordansissel](https://github.com/jordansissel) - for xdotool
 * Everyone who has worked on i3
 
 ## Related projects
