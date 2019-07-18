@@ -206,8 +206,8 @@ mode "restore" {
 bindsym $mod+n mode "restore"
 ```
 
-Example of usage with the second configuration:
-![UsageGif1](https://gfycat.com/favorablefrightenedbantamrooster)
+[Example of usage with the second configuration]
+(https://gfycat.com/favorablefrightenedbantamrooster)
 
 ### Configuration
 
