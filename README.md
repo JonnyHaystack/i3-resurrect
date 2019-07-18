@@ -2,6 +2,20 @@
 
 A simple but flexible solution to saving and restoring i3 workspaces
 
+## Table of Contents
+
+* [Introduction](#introduction)
+* [Background](#background)
+* [Getting Started](#getting-started)
+   * [Requirements](#requirements)
+   * [Installation](#installation)
+   * [Usage](#usage)
+   * [Configuration](#configuration)
+* [Contributing](#contributing)
+* [Contributors](#contributors)
+* [License](#license)
+
+## Introduction
 
 i3-resurrect is a program which can save and restore the layout and running
 programs in your i3 workspaces.
@@ -26,18 +40,6 @@ when the window first appears and programs usually only update the title after
 the window is created
 (see [here](https://i3wm.org/docs/layout-saving.html#_placeholders_using_window_title_matches_don_8217_t_swallow_the_window)
 for more details).
-
-## Table of Contents
-
-* [Background](#background)
-* [Getting Started](#getting-started)
-   * [Requirements](#requirements)
-   * [Installation](#installation)
-   * [Usage](#usage)
-   * [Configuration](#configuration)
-* [Contributing](#contributing)
-* [Contributors](#contributors)
-* [License](#license)
 
 ## Background
 
