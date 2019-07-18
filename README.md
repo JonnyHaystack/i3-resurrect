@@ -44,6 +44,7 @@ and gotten rid of the hacky bash parts.
 
 - Python 3
 - i3
+- xdotool
 
 ### Installation
 
