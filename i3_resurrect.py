@@ -3,7 +3,6 @@ import os
 import shlex
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 import click
