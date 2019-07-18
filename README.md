@@ -87,6 +87,7 @@ pip3 install --user .
 
 #### Command line
 
+Basic usage, matching only window class:
 ```
 # Save workspace '1'
 i3-resurrect save -w 1
@@ -94,6 +95,24 @@ i3-resurrect save -w 1
 # Restore workspace '1'
 i3-resurrect restore -w 1
 ```
+
+More accurate layout restoring by matching title:
+```
+# Save workspace '1'
+i3-resurrect save -w 1 --swallow=class,instance,title
+
+# Restore workspace '1' programs
+i3-resurrect restore -w 1 --programs-only
+
+# Apply workspace '1' layout
+i3-resurrect restore -w 1 --layout-only
+```
+When matching windows by title, the programs must be restored before the layout,
+because the title often won't match when the window first appears.
+
+When restoring a layout, i3-resurrect uses xdotool to unmap and remap every
+window on the workspace which causes i3 to see them as new windows so they will
+be swallowed by the placeholder windows.
 
 #### Example configuration in i3
 
