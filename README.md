@@ -135,7 +135,7 @@ Options:
 
 Usage: i3_resurrect.py restore [OPTIONS]
 
-  Restores i3 workspace layout and programs.
+  Restore i3 workspace layout and programs.
 
 Options:
   -w, --workspace TEXT       The workspace to restore.
