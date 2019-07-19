@@ -10,35 +10,15 @@ import i3ipc
 import psutil
 from wmctrl import Window
 
+import config
 import util
 
-TERMINALS = []
-CONFIG = {}
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 i3 = i3ipc.Connection()
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def main():
-    global CONFIG
-    global TERMINALS
-
-    # Load config
-    config_file = Path('~/.config/i3-resurrect/config.json').expanduser()
-    try:
-        CONFIG = json.loads(config_file.read_text())
-    except json.decoder.JSONDecodeError as e:
-        print(f'Error in config file: "{str(e)}"')
-        exit(1)
-    except PermissionError as e:
-        print(f'Could not read config file: {str(e)}')
-        exit(1)
-    except FileNotFoundError:
-        CONFIG = {}
-
-    # Specify which window classes are terminals so that we know to extract the
-    # working directory from the window title.
-    TERMINALS = ['Gnome-terminal', 'Alacritty']
+    pass
 
 
 @main.command('save')
@@ -104,6 +84,9 @@ def save_commands(workspace, directory):
     """
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
 
+    window_command_mappings = config.get('window_command_mappings', {})
+    terminals = config.get('terminals', [])
+
     # Loop through windows and save commands to launch programs on saved
     # workspace.
     commands = []
@@ -119,7 +102,7 @@ def save_commands(workspace, directory):
         window_class = con['window_properties']['class']
         try:
             # Obtain working directory using psutil.
-            if window_class in TERMINALS:
+            if window_class in terminals:
                 # If the program is a terminal emulator, get the working
                 # directory from its first subprocess.
                 working_directory = procinfo.children()[0].cwd()
@@ -130,7 +113,6 @@ def save_commands(workspace, directory):
 
         # Create command to launch program.
         # If there is a special command mapping for this program, use that.
-        window_command_mappings = CONFIG.get('window_command_mappings', {})
         if window_class in window_command_mappings:
             command = window_command_mappings[window_class]
         else:
@@ -259,7 +241,9 @@ def eprint(*args, **kwargs):
 
 
 def get_workspace_tree(workspace):
-    # Get full workspace layout tree from i3.
+    """
+    Get full workspace layout tree from i3.
+    """
     root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
     for output in root['nodes']:
         for container in output['nodes']:
@@ -268,6 +252,7 @@ def get_workspace_tree(workspace):
             for ws in container['nodes']:
                 if ws['name'] == workspace:
                     return ws
+    return {}
 
 
 def windows_in_container(container):

@@ -8,7 +8,7 @@ setup(
     version='1.2.0',
     author='Jonathan Haylett',
     author_email='jonathan@haylett.dev',
-    py_modules=['i3_resurrect', 'util'],
+    py_modules=['i3_resurrect', 'util', 'config'],
     url='https://github.com/JonnyHaystack/i3-resurrect',
     license='GNU GPL Version 3',
     install_requires=[
