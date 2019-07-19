@@ -116,6 +116,35 @@ pip3 install --user .
 
 #### Command line
 
+Full command line documentation:
+```
+Usage: i3_resurrect.py save [OPTIONS]
+
+  Save an i3 workspace's layout and running programs to a file.
+
+Options:
+  -w, --workspace TEXT       The workspace to save.
+  -d, --directory DIRECTORY  The directory to save the workspace to.
+                             [default: ~/.i3/i3-resurrect]
+  -s, --swallow TEXT         The swallow criteria to use.
+                             Options: class, instance, title, window_role
+                             [default: class,instance]
+  --layout-only              Only save layout.
+  --programs-only            Only save running programs.
+
+
+Usage: i3_resurrect.py restore [OPTIONS]
+
+  Restores i3 workspace layout and programs.
+
+Options:
+  -w, --workspace TEXT       The workspace to restore.
+  -d, --directory DIRECTORY  The directory to restore the workspace from.
+                             [default: ~/.i3/i3-resurrect]
+  --layout-only              Only restore layout.
+  --programs-only            Only restore running programs.
+```
+
 Basic usage, matching only window class/instance:
 ```
 # Save workspace '1'
@@ -142,33 +171,6 @@ because the title often won't match when the window first appears.
 When restoring a layout, i3-resurrect uses xdotool to unmap and remap every
 window on the workspace which causes i3 to see them as new windows so they will
 be swallowed by the placeholder windows.
-
-Full command line documentation:
-```
-Usage: i3-resurrect save [OPTIONS]
-
-  Save an i3 workspace's layout and commands to a file.
-
-Options:
-  -w, --workspace TEXT       The workspace to save  [required]
-  -d, --directory DIRECTORY  The directory to save the workspace to
-                             [default: ~/.i3/i3-resurrect/]
-  -s, --swallow TEXT         The swallow criteria to use.
-                             Options: class, instance, title, window_role
-                             [default: class,instance]
-  -h, --help                 Show this message and exit.
-
-
-Usage: i3-resurrect restore [OPTIONS]
-
-  Restores an i3 workspace including running programs.
-
-Options:
-  -w, --workspace TEXT       The workspace to restore  [required]
-  -d, --directory DIRECTORY  The directory to restore the workspace from
-                             [default: ~/.i3/i3-resurrect/]
-  -h, --help                 Show this message and exit.
-```
 
 #### Example configuration in i3
 
