@@ -145,17 +145,6 @@ be swallowed by the placeholder windows.
 
 Full command line documentation:
 ```
-❯ i3-resurrect -h
-Usage: i3-resurrect [OPTIONS] COMMAND [ARGS]...
-
-Options:
-  -h, --help  Show this message and exit.
-
-Commands:
-  restore  Restores an i3 workspace including running programs.
-  save     Save an i3 workspace's layout and commands to a file.
-
-❯ i3-resurrect save -h
 Usage: i3-resurrect save [OPTIONS]
 
   Save an i3 workspace's layout and commands to a file.
@@ -164,20 +153,20 @@ Options:
   -w, --workspace TEXT       The workspace to save  [required]
   -d, --directory DIRECTORY  The directory to save the workspace to
                              [default: ~/.i3/i3-resurrect/]
-  -s, --swallow TEXT         The swallow criteria to use. Options:
-                             class, instance, title, window_role
+  -s, --swallow TEXT         The swallow criteria to use.
+                             Options: class, instance, title, window_role
                              [default: class,instance]
   -h, --help                 Show this message and exit.
 
-❯ i3-resurrect restore -h
+
 Usage: i3-resurrect restore [OPTIONS]
 
   Restores an i3 workspace including running programs.
 
 Options:
   -w, --workspace TEXT       The workspace to restore  [required]
-  -d, --directory DIRECTORY  The directory to restore the workspace
-                             from  [default: ~/.i3/i3-resurrect/]
+  -d, --directory DIRECTORY  The directory to restore the workspace from
+                             [default: ~/.i3/i3-resurrect/]
   -h, --help                 Show this message and exit.
 ```
 
