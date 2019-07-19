@@ -43,8 +43,8 @@ for more details).
 
 ## Background
 
-i3-resurrect originated as a mixture of hacked together Python and bash scripts that I
-wrote in order to be able to quickly save and load workspaces on the fly.
+This project originated as a mixture of hacked together Python and bash scripts
+that I wrote in order to be able to quickly save and load workspaces on the fly.
 
 I hate having to reboot my computer because it disrupts everything I have open
 (which tends to be a lot).
