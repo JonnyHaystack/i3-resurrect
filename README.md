@@ -287,10 +287,10 @@ bindsym $mod+n mode "restore"
 
 ### Configuration
 
-The config file should be located at `~/.config/i3-resurrect/config.json`. You will have to create
-it yourself if you want to use it.
+The config file should be located at `~/.config/i3-resurrect/config.json`.
+A default config file will be created when you first run i3-resurrect.
 
-In the case of a window where the process cmdline is not the same as the command you must run to
+In the case of a window where the process `cmdline` is not the same as the command you must run to
 launch that program, you can add an explicit window class to command mapping in the config file.
 
 For example, gnome-terminal's process is gnome-terminal-server, but we need to launch it with the
@@ -298,14 +298,43 @@ command `gnome-terminal`. To get this working, you would put the following in yo
 
 ```
 {
+  ...
   "window_command_mappings": {
     "Gnome-terminal": "gnome-terminal"
   }
+  ...
 }
 ```
 
-If you need to find out a window's class, type `xprop | grep WM_CLASS` in a terminal and then click
-on the desired window.
+Hint:
+If you need to find out a window's class, type `xprop | grep WM_CLASS` in a
+terminal and then click on the desired window.
+
+For terminal emulator windows, we must get the working directory from the
+first subprocess (usually this will be your shell) instead of the window's root
+process (the terminal emulator).
+
+i3-resurrect deals with this by allowing you to specify a list of terminal
+emulator window classes in your config file.
+
+For example, if you use both Alacritty and gnome-terminal and you want their
+working directories to be restored correctly, you would put the following in
+your config file:
+
+```
+{
+  ...
+  "terminals": [
+    "Gnome-terminal",
+    "Alacritty"
+  ]
+  ...
+}
+```
+
+These examples are included in the default config. If you would like me to add
+more command mappings or terminals to the default config, please open an issue
+for it.
 
 ## Contributing
 
