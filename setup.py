@@ -1,4 +1,5 @@
 from setuptools import setup
+from setuptools import find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -6,9 +7,9 @@ with open("README.md", "r") as fh:
 setup(
     name='i3-resurrect',
     version='1.2.0',
+    packages=find_packages(),
     author='Jonathan Haylett',
     author_email='jonathan@haylett.dev',
-    py_modules=['i3_resurrect', 'util', 'config'],
     url='https://github.com/JonnyHaystack/i3-resurrect',
     license='GNU GPL Version 3',
     install_requires=[
@@ -18,7 +19,7 @@ setup(
         'psutil',
     ],
     entry_points={
-        'console_scripts': ['i3-resurrect=i3_resurrect:main'],
+        'console_scripts': ['i3-resurrect=i3_resurrect.main:main'],
     },
     description=('A simple but flexible solution to saving and restoring i3 '
                  'workspace layouts'),

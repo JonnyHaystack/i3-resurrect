@@ -10,8 +10,8 @@ import i3ipc
 import psutil
 from wmctrl import Window
 
-import config
-import util
+from . import config
+from . import util
 
 i3 = i3ipc.Connection()
 
