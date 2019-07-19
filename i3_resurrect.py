@@ -80,7 +80,7 @@ def save_workspace(workspace, directory, swallow, target):
 
 def save_layout(workspace, directory, swallow_criteria):
     """
-    Saves an i3 workspace layout to a file.
+    Save an i3 workspace layout to a file.
     """
     layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
 
@@ -99,7 +99,7 @@ def save_layout(workspace, directory, swallow_criteria):
 
 def save_commands(workspace, directory):
     """
-    Saves the commands to launch the programs open in the specified workspace
+    Save the commands to launch the programs open in the specified workspace
     to a file.
     """
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
@@ -166,7 +166,7 @@ def save_commands(workspace, directory):
               help='Only restore running programs.')
 def restore_workspace(workspace, directory, target):
     """
-    Restores an i3 workspace including running programs.
+    Restore i3 workspace layout and programs.
     """
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
@@ -182,7 +182,7 @@ def restore_workspace(workspace, directory, target):
 
 def restore_programs(workspace, directory):
     """
-    Restores the running programs from an i3 workspace.
+    Restore the running programs from an i3 workspace.
     """
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
     commands = json.loads(commands_file.read_text())
@@ -213,7 +213,7 @@ def restore_programs(workspace, directory):
 
 def restore_layout(workspace, directory):
     """
-    Restores an i3 workspace layout.
+    Restore an i3 workspace layout.
     """
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
