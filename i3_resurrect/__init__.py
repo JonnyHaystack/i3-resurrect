@@ -1,5 +1,5 @@
 __all__ = ['config', 'main', 'util']
 
-from .config import *
-from .main import *
-from .util import *
+from . import config
+from . import main
+from . import util
