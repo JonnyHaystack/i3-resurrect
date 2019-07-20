@@ -97,18 +97,9 @@ Obtain source code
 git clone git@github.com:JonnyHaystack/i3-resurrect.git
 ```
 
-Install dependencies then run script directly
+Install locally using pip
 ```
-# Install dependencies
 cd i3-resurrect
-pip3 install --user -r requirements.txt
-
-# Run script directly
-python3 i3-resurrect.py
-```
-
-Or just install locally using pip
-```
 pip3 install --user .
 ```
 
