@@ -8,6 +8,9 @@ def build_tree(con, swallow_criteria):
     """
     tree = []
 
+    if con is None:
+        return tree
+
     nodes = con['nodes']
 
     # Base case.
@@ -21,16 +24,13 @@ def build_tree(con, swallow_criteria):
             'border',
             'current_border_width',
             'floating',
-            'focused',
             'fullscreen_mode',
             'geometry',
-            'last_split_layout',
             'layout',
             'name',
             'orientation',
             'percent',
             'scratchpad_state',
-            'sticky',
             'type',
             'workspace_layout',
         ]

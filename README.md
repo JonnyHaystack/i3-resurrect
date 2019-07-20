@@ -5,6 +5,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
 ## Table of Contents
 
 * [Introduction](#introduction)
+* [Background](#background)
 * [Getting Started](#getting-started)
    * [Requirements](#requirements)
    * [Installation](#installation)
@@ -16,8 +17,34 @@ A simple but flexible solution to saving and restoring i3 workspaces
 
 ## Introduction
 
-i3-resurrect originated as a mixture of hacked together Python and bash scripts that I
-wrote in order to be able to quickly save and load workspaces on the fly.
+i3-resurrect is a program which can save and restore the layout and running
+programs in your i3 workspaces.
+
+Layouts are saved by using i3ipc to take necessary information from the
+workspace tree and write it to a JSON file.
+
+Programs are saved by looking up each process in the workspace and writing their
+`cmdline` (the command used to launch the program) and `cwd` (current working
+directory) to a JSON file.
+
+When restoring programs, Python's subprocess module is used to launch the saved
+programs with the correct working directory.
+
+When restoring layouts, i3's built-in ability layout restoring functionality is
+used. This creates placeholder windows where each one will "swallow" any window
+that appears and matches specified criteria (window class, instance, title etc).
+
+xdotool is used to make i3 see existing windows as new windows.
+This is necessary for matching by window title because the title must match
+when the window first appears and programs usually only update the title after
+the window is created
+(see [here](https://i3wm.org/docs/layout-saving.html#_placeholders_using_window_title_matches_don_8217_t_swallow_the_window)
+for more details).
+
+## Background
+
+This project originated as a mixture of hacked together Python and bash scripts
+that I wrote in order to be able to quickly save and load workspaces on the fly.
 
 I hate having to reboot my computer because it disrupts everything I have open
 (which tends to be a lot).
@@ -37,6 +64,8 @@ to launch the programs in a saved workspace.
 
 Since I decided to release this publicly, I have improved the standard of the code a great deal
 and gotten rid of the hacky bash parts.
+The code is all Python now, and i3-save-tree is no longer needed as I have
+reimplemented it in Python.
 
 ## Getting Started
 
@@ -44,6 +73,7 @@ and gotten rid of the hacky bash parts.
 
 - Python 3
 - i3
+- xdotool
 
 ### Installation
 
@@ -67,18 +97,9 @@ Obtain source code
 git clone git@github.com:JonnyHaystack/i3-resurrect.git
 ```
 
-Install dependencies then run script directly
+Install locally using pip
 ```
-# Install dependencies
 cd i3-resurrect
-pip3 install --user -r requirements.txt
-
-# Run script directly
-python3 i3-resurrect.py
-```
-
-Or just install locally using pip
-```
 pip3 install --user .
 ```
 
@@ -86,6 +107,36 @@ pip3 install --user .
 
 #### Command line
 
+Full command line documentation:
+```
+Usage: i3_resurrect.py save [OPTIONS]
+
+  Save an i3 workspace's layout and running programs to a file.
+
+Options:
+  -w, --workspace TEXT       The workspace to save.
+  -d, --directory DIRECTORY  The directory to save the workspace to.
+                             [default: ~/.i3/i3-resurrect]
+  -s, --swallow TEXT         The swallow criteria to use.
+                             Options: class, instance, title, window_role
+                             [default: class,instance]
+  --layout-only              Only save layout.
+  --programs-only            Only save running programs.
+
+
+Usage: i3_resurrect.py restore [OPTIONS]
+
+  Restore i3 workspace layout and programs.
+
+Options:
+  -w, --workspace TEXT       The workspace to restore.
+  -d, --directory DIRECTORY  The directory to restore the workspace from.
+                             [default: ~/.i3/i3-resurrect]
+  --layout-only              Only restore layout.
+  --programs-only            Only restore running programs.
+```
+
+Basic usage, matching only window class/instance:
 ```
 # Save workspace '1'
 i3-resurrect save -w 1
@@ -94,21 +145,42 @@ i3-resurrect save -w 1
 i3-resurrect restore -w 1
 ```
 
+More accurate layout restoring by matching title:
+```
+# Save workspace '1'
+i3-resurrect save -w 1 --swallow=class,instance,title
+
+# Restore workspace '1' programs
+i3-resurrect restore -w 1 --programs-only
+
+# Apply workspace '1' layout
+i3-resurrect restore -w 1 --layout-only
+```
+When matching windows by title, the programs must be restored before the layout,
+because the title often won't match when the window first appears.
+
+When restoring a layout, i3-resurrect uses xdotool to unmap and remap every
+window on the workspace which causes i3 to see them as new windows so they will
+be swallowed by the placeholder windows.
+
 #### Example configuration in i3
 
+A very basic setup without window title matching:
 ```
+set $i3_resurrect i3-resurrect
+
 # Save workspace mode.
 mode "save" {
-  bindsym 1 exec i3-resurrect save -w 1
-  bindsym 2 exec i3-resurrect save -w 2
-  bindsym 3 exec i3-resurrect save -w 3
-  bindsym 4 exec i3-resurrect save -w 4
-  bindsym 5 exec i3-resurrect save -w 5
-  bindsym 6 exec i3-resurrect save -w 6
-  bindsym 7 exec i3-resurrect save -w 7
-  bindsym 8 exec i3-resurrect save -w 8
-  bindsym 9 exec i3-resurrect save -w 9
-  bindsym 0 exec i3-resurrect save -w 0
+  bindsym 1 exec $i3_resurrect save -w 1
+  bindsym 2 exec $i3_resurrect save -w 2
+  bindsym 3 exec $i3_resurrect save -w 3
+  bindsym 4 exec $i3_resurrect save -w 4
+  bindsym 5 exec $i3_resurrect save -w 5
+  bindsym 6 exec $i3_resurrect save -w 6
+  bindsym 7 exec $i3_resurrect save -w 7
+  bindsym 8 exec $i3_resurrect save -w 8
+  bindsym 9 exec $i3_resurrect save -w 9
+  bindsym 0 exec $i3_resurrect save -w 0
 
   # Back to normal: Enter, Escape, or s
   bindsym Return mode "default"
@@ -121,16 +193,16 @@ bindsym $mod+s mode "save"
 
 # Restore workspace mode.
 mode "restore" {
-  bindsym 1 exec i3-resurrect restore -w 1
-  bindsym 2 exec i3-resurrect restore -w 2
-  bindsym 3 exec i3-resurrect restore -w 3
-  bindsym 4 exec i3-resurrect restore -w 4
-  bindsym 5 exec i3-resurrect restore -w 5
-  bindsym 6 exec i3-resurrect restore -w 6
-  bindsym 7 exec i3-resurrect restore -w 7
-  bindsym 8 exec i3-resurrect restore -w 8
-  bindsym 9 exec i3-resurrect restore -w 9
-  bindsym 0 exec i3-resurrect restore -w 0
+  bindsym 1 exec $i3_resurrect restore -w 1
+  bindsym 2 exec $i3_resurrect restore -w 2
+  bindsym 3 exec $i3_resurrect restore -w 3
+  bindsym 4 exec $i3_resurrect restore -w 4
+  bindsym 5 exec $i3_resurrect restore -w 5
+  bindsym 6 exec $i3_resurrect restore -w 6
+  bindsym 7 exec $i3_resurrect restore -w 7
+  bindsym 8 exec $i3_resurrect restore -w 8
+  bindsym 9 exec $i3_resurrect restore -w 9
+  bindsym 0 exec $i3_resurrect restore -w 0
 
   # Back to normal: Enter, Escape, or n
   bindsym Return mode "default"
@@ -142,27 +214,118 @@ mode "restore" {
 bindsym $mod+n mode "restore"
 ```
 
+A more advanced setup where windows are matched by title:
+```
+set $i3_resurrect i3-resurrect
+
+# Save workspace mode.
+mode "save" {
+  bindsym 1 exec "$i3_resurrect save -w 1 --swallow=class,instance,title"
+  bindsym 2 exec "$i3_resurrect save -w 2 --swallow=class,instance,title"
+  bindsym 3 exec "$i3_resurrect save -w 3 --swallow=class,instance,title"
+  bindsym 4 exec "$i3_resurrect save -w 4 --swallow=class,instance,title"
+  bindsym 5 exec "$i3_resurrect save -w 5 --swallow=class,instance,title"
+  bindsym 6 exec "$i3_resurrect save -w 6 --swallow=class,instance,title"
+  bindsym 7 exec "$i3_resurrect save -w 7 --swallow=class,instance,title"
+  bindsym 8 exec "$i3_resurrect save -w 8 --swallow=class,instance,title"
+  bindsym 9 exec "$i3_resurrect save -w 9 --swallow=class,instance,title"
+  bindsym 0 exec "$i3_resurrect save -w 10 --swallow=class,instance,title"
+
+  # Back to normal: Enter, Escape, or s
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+  bindsym s mode "default"
+  bindsym $mod+s mode "default"
+}
+
+bindsym $mod+s mode "save"
+
+# Restore workspace mode.
+mode "restore" {
+  bindsym 1 exec "$i3_resurrect restore -w 1 --programs-only"
+  bindsym 2 exec "$i3_resurrect restore -w 2 --programs-only"
+  bindsym 3 exec "$i3_resurrect restore -w 3 --programs-only"
+  bindsym 4 exec "$i3_resurrect restore -w 4 --programs-only"
+  bindsym 5 exec "$i3_resurrect restore -w 5 --programs-only"
+  bindsym 6 exec "$i3_resurrect restore -w 6 --programs-only"
+  bindsym 7 exec "$i3_resurrect restore -w 7 --programs-only"
+  bindsym 8 exec "$i3_resurrect restore -w 8 --programs-only"
+  bindsym 9 exec "$i3_resurrect restore -w 9 --programs-only"
+  bindsym 0 exec "$i3_resurrect restore -w 10 --programs-only"
+
+  bindsym $mod+1 exec "$i3_resurrect restore -w 1 --layout-only"
+  bindsym $mod+2 exec "$i3_resurrect restore -w 2 --layout-only"
+  bindsym $mod+3 exec "$i3_resurrect restore -w 3 --layout-only"
+  bindsym $mod+4 exec "$i3_resurrect restore -w 4 --layout-only"
+  bindsym $mod+5 exec "$i3_resurrect restore -w 5 --layout-only"
+  bindsym $mod+6 exec "$i3_resurrect restore -w 6 --layout-only"
+  bindsym $mod+7 exec "$i3_resurrect restore -w 7 --layout-only"
+  bindsym $mod+8 exec "$i3_resurrect restore -w 8 --layout-only"
+  bindsym $mod+9 exec "$i3_resurrect restore -w 9 --layout-only"
+  bindsym $mod+0 exec "$i3_resurrect restore -w 10 --layout-only"
+
+  # Back to normal: Enter, Escape, or n
+  bindsym Return mode "default"
+  bindsym Escape mode "default"
+  bindsym n mode "default"
+  bindsym $mod+n mode "default"
+}
+
+bindsym $mod+n mode "restore"
+```
+
+[Example of usage with the second configuration](https://gfycat.com/blankinsidiousgopher)
+
 ### Configuration
 
-The config file should be located at `~/.config/i3-resurrect/config.json`. You will have to create
-it yourself if you want to use it.
+The config file should be located at `~/.config/i3-resurrect/config.json`.
+A default config file will be created when you first run i3-resurrect.
 
-In the case of a window where the process cmdline is not the same as the command you must run to
+In the case of a window where the process `cmdline` is not the same as the command you must run to
 launch that program, you can add an explicit window class to command mapping in the config file.
 
 For example, gnome-terminal's process is gnome-terminal-server, but we need to launch it with the
-command gnome-terminal. To get this working, you would put the following in your config file:
+command `gnome-terminal`. To get this working, you would put the following in your config file:
 
 ```
 {
+  ...
   "window_command_mappings": {
     "Gnome-terminal": "gnome-terminal"
   }
+  ...
 }
 ```
 
-If you need to find out a window's class, type `xprop | grep WM_CLASS` in a terminal and then click
-on the desired window.
+Hint:
+If you need to find out a window's class, type `xprop | grep WM_CLASS` in a
+terminal and then click on the desired window.
+
+For terminal emulator windows, we must get the working directory from the
+first subprocess (usually this will be your shell) instead of the window's root
+process (the terminal emulator).
+
+i3-resurrect deals with this by allowing you to specify a list of terminal
+emulator window classes in your config file.
+
+For example, if you use both Alacritty and gnome-terminal and you want their
+working directories to be restored correctly, you would put the following in
+your config file:
+
+```
+{
+  ...
+  "terminals": [
+    "Gnome-terminal",
+    "Alacritty"
+  ]
+  ...
+}
+```
+
+These examples are included in the default config. If you would like me to add
+more command mappings or terminals to the default config, please open an issue
+for it.
 
 ## Contributing
 
@@ -178,6 +341,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 * [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get/build the workspace tree
 * [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
 * [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
+* [xdotool](https://www.semicomplete.com/projects/xdotool/) - Used to unmap and remap windows
 
 ## Contributors
 
@@ -191,6 +355,7 @@ See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrec
 * [@acrisci](https://github.com/acrisci) - for the i3ipc Python library
 * [@antocuni](https://bitbucket.org/antocuni) - for the wmctrl Python library
 * [@giampaolo](https://github.com/giampaolo) - for the psutil Python library
+* [@jordansissel](https://github.com/jordansissel) - for xdotool
 * Everyone who has worked on i3
 
 ## Related projects
