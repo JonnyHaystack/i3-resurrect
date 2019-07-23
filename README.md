@@ -115,10 +115,11 @@ Usage: i3_resurrect.py save [OPTIONS]
 
 Options:
   -w, --workspace TEXT       The workspace to save.
+                             [default: current workspace]
   -d, --directory DIRECTORY  The directory to save the workspace to.
                              [default: ~/.i3/i3-resurrect]
   -s, --swallow TEXT         The swallow criteria to use.
-                             Options: class, instance, title, window_role
+                             [options: class,instance,title,window_role]
                              [default: class,instance]
   --layout-only              Only save layout.
   --programs-only            Only save running programs.
@@ -130,6 +131,7 @@ Usage: i3_resurrect.py restore [OPTIONS]
 
 Options:
   -w, --workspace TEXT       The workspace to restore.
+                             [default: current workspace]
   -d, --directory DIRECTORY  The directory to restore the workspace from.
                              [default: ~/.i3/i3-resurrect]
   --layout-only              Only restore layout.
