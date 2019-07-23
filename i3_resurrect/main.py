@@ -16,7 +16,7 @@ from . import util
 i3 = i3ipc.Connection()
 
 
-@click.group(context_settings=dict(help_option_names=['-h', '--help']))
+@click.group(context_settings=dict(help_option_names=['-h', '--help'], max_content_width=150))
 @click.version_option()
 def main():
     pass
@@ -25,17 +25,17 @@ def main():
 @main.command('save')
 @click.option('--workspace', '-w',
               default=i3.get_tree().find_focused().workspace().name,
-              help='The workspace to save.')
+              help='The workspace to save.\n[default: current workspace]')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to save the workspace to.',
-              show_default=True)
+              help=('The directory to save the workspace to.\n'
+                    '[default: ~/.i3/i3-resurrect]'))
 @click.option('--swallow', '-s',
               default='class,instance',
-              help=('The swallow criteria to use. '
-                    'Options: class, instance, title, window_role'),
-              show_default=True)
+              help=('The swallow criteria to use.\n'
+                    '[options: class,instance,title,window_role]\n'
+                    '[default: class,instance]'))
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only save layout.')
@@ -135,12 +135,12 @@ def save_commands(workspace, directory):
 @main.command('restore')
 @click.option('--workspace', '-w',
               default=i3.get_tree().find_focused().workspace().name,
-              help='The workspace to restore.')
+              help='The workspace to restore.\n[default: current workspace]')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
-              help='The directory to restore the workspace from.',
-              show_default=True)
+              help=('The directory to restore the workspace from.\n'
+                    '[default: ~/.i3/i3-resurrect]'))
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only restore layout.')
