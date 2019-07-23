@@ -17,6 +17,7 @@ i3 = i3ipc.Connection()
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
+@click.version_option()
 def main():
     pass
 
