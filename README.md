@@ -274,7 +274,9 @@ mode "restore" {
 bindsym $mod+n mode "restore"
 ```
 
-[Example of usage with the second configuration](https://gfycat.com/blankinsidiousgopher)
+Example of usage with the second configuration:
+
+[![Example of usage with the second configuration](https://i.imgur.com/mi9Uml8.gif)](https://gfycat.com/selfreliantdarkkoodoo)
 
 ### Configuration
 
