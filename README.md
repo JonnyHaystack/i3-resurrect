@@ -71,7 +71,7 @@ reimplemented it in Python.
 
 ### Requirements
 
-- Python 3
+- Python 3.6
 - i3
 - xdotool
 
@@ -283,11 +283,15 @@ bindsym $mod+n mode "restore"
 The config file should be located at `~/.config/i3-resurrect/config.json`.
 A default config file will be created when you first run i3-resurrect.
 
-In the case of a window where the process `cmdline` is not the same as the command you must run to
-launch that program, you can add an explicit window class to command mapping in the config file.
+#### Window command mappings
 
-For example, gnome-terminal's process is gnome-terminal-server, but we need to launch it with the
-command `gnome-terminal`. To get this working, you would put the following in your config file:
+In the case of a window where the process `cmdline` is not the same as the
+command you must run to launch that program, you can add an explicit window
+class to command mapping in the config file.
+
+For example, gnome-terminal's process is gnome-terminal-server, but we need to
+launch it with the command `gnome-terminal`. To get this working, you would put
+the following in your config file:
 
 ```
 {
@@ -302,6 +306,8 @@ command `gnome-terminal`. To get this working, you would put the following in yo
 Hint:
 If you need to find out a window's class, type `xprop | grep WM_CLASS` in a
 terminal and then click on the desired window.
+
+#### Terminals
 
 For terminal emulator windows, we must get the working directory from the
 first subprocess (usually this will be your shell) instead of the window's root
@@ -328,6 +334,31 @@ your config file:
 These examples are included in the default config. If you would like me to add
 more command mappings or terminals to the default config, please open an issue
 for it.
+
+#### Per window swallow criteria
+
+It is also possible to configure swallow criteria on a per window basis, which
+will override the criteria set by the `--swallow` command line parameter.
+
+Example use case:
+- I usually want to include the window title in the swallow criteria to more
+accurately restore layouts
+- Among other programs that I use, Ario (an mpd client) always has the currently
+playing song in the window title
+- This makes matching the layout by window title inconvenient, so I want to have
+Ario always be matched by only the window class/instance
+
+This can be achieved by putting the following in your config file:
+
+```
+{
+  ...
+  "window_swallow_criteria": {
+    "Ario": ["class", "instance"]
+  }
+  ...
+}
+```
 
 ## Contributing
 
