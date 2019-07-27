@@ -342,7 +342,7 @@ will override the criteria set by the `--swallow` command line parameter.
 
 Example use case:
 - I usually want to include the window title in the swallow criteria to more
-accurately restore my layouts
+accurately restore layouts
 - Among other programs that I use, Ario (an mpd client) always has the currently
 playing song in the window title
 - This makes matching the layout by window title inconvenient, so I want to have
