@@ -71,7 +71,7 @@ reimplemented it in Python.
 
 ### Requirements
 
-- Python 3
+- Python 3.6
 - i3
 - xdotool
 
