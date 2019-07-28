@@ -2,13 +2,11 @@ import json
 import os
 import shlex
 import subprocess
-import sys
 from pathlib import Path
 
 import click
 import i3ipc
 import psutil
-from wmctrl import Window
 
 from . import config
 from . import util
@@ -65,7 +63,7 @@ def save_layout(workspace, directory, swallow_criteria):
     """
     layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
 
-    workspace_tree = get_workspace_tree(workspace)
+    workspace_tree = util.get_workspace_tree(workspace)
 
     with layout_file.open('w') as f:
         # Build new workspace tree suitable for restoring and write it to a
@@ -91,7 +89,7 @@ def save_commands(workspace, directory):
     # Loop through windows and save commands to launch programs on saved
     # workspace.
     commands = []
-    for (con, window) in windows_in_workspace(workspace):
+    for (con, window) in util.windows_in_workspace(workspace):
         pid = window.pid
 
         if pid == 0:
@@ -204,7 +202,7 @@ def restore_layout(workspace, directory):
     # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
     placeholder_window_ids = []
-    for (con, window) in windows_in_workspace(workspace):
+    for (con, window) in util.windows_in_workspace(workspace):
         pid = window.pid
 
         # If window has no process, add it to list of placeholder windows.
@@ -217,11 +215,11 @@ def restore_layout(workspace, directory):
 
     # Unmap all windows in workspace.
     for window_id in window_ids:
-        xdo_unmap_window(window_id)
+        util.xdo_unmap_window(window_id)
 
     # Remove any remaining placeholder windows in workspace.
     for window_id in placeholder_window_ids:
-        xdo_kill_window(window_id)
+        util.xdo_kill_window(window_id)
 
     # Create fresh placeholder windows by appending layout to workspace.
     layout_file = shlex.quote(
@@ -231,108 +229,7 @@ def restore_layout(workspace, directory):
 
     # Map all unmapped windows.
     for window_id in window_ids:
-        xdo_map_window(window_id)
-
-
-def eprint(*args, **kwargs):
-    """
-    Function for printing to stderr.
-    """
-    print(*args, file=sys.stderr, **kwargs)
-
-
-def get_workspace_tree(workspace):
-    """
-    Get full workspace layout tree from i3.
-    """
-    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
-    for output in root['nodes']:
-        for container in output['nodes']:
-            if container['type'] != 'con':
-                pass
-            for ws in container['nodes']:
-                if ws['name'] == workspace:
-                    return ws
-    return {}
-
-
-def windows_in_container(container):
-    """
-    Generator to iterate over windows in a container.
-
-    Args:
-        container: The container to traverse.
-    """
-    # Base case.
-    if container is None:
-        return
-
-    nodes = container['nodes']
-
-    if nodes == []:
-        return
-
-    # Step case.
-    for node in nodes:
-        if 'window_properties' in node:
-            yield node
-        yield from windows_in_container(node)
-
-
-def windows_in_workspace(workspace):
-    """
-    Generator to iterate over windows in a workspace.
-
-    Args:
-        workspace: The name of the workspace whose windows to iterate over.
-    """
-    ws = get_workspace_tree(workspace)
-    for con in windows_in_container(ws):
-        # Get information on the window.
-        try:
-            window = Window.by_id(con['window'])[0]
-        except ValueError as e:
-            eprint(str(e))
-            continue
-
-        # Pre-emptively attempt to catch error
-        try:
-            window
-        except NameError as e:
-            eprint(str(e))
-            continue
-
-        if not window:
-            continue
-
-        yield (con, window)
-
-
-def xdo_unmap_window(window_id):
-    command = shlex.split(f'xdotool windowunmap {window_id}')
-    subprocess.call(
-        command,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-    )
-
-
-def xdo_map_window(window_id):
-    command = shlex.split(f'xdotool windowmap {window_id}')
-    subprocess.call(
-        command,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-    )
-
-
-def xdo_kill_window(window_id):
-    command = shlex.split(f'xdotool windowkill {window_id}')
-    subprocess.call(
-        command,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT,
-    )
+        util.xdo_map_window(window_id)
 
 
 if __name__ == '__main__':
