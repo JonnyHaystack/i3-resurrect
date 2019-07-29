@@ -151,6 +151,67 @@ def windows_in_workspace(workspace):
         yield (con, window)
 
 
+def get_window_command(window_properties, procinfo):
+    """
+    Gets a window command.
+
+    This function starts with the process's cmdline, then loops through the
+    window mappings and scores each matching rule. The command mapping with the
+    highest score is then returned.
+    """
+    window_command_mappings = config.get('window_command_mappings', [])
+    command = procinfo.cmdline()
+
+    # If window command mappings is a dictionary in the config file, use the
+    # old way.
+    # TODO: Remove in 2.0.0
+    if isinstance(window_command_mappings, dict):
+        window_class = window_properties['class']
+        if window_class in window_command_mappings:
+            command = window_command_mappings[window_class]
+        return command
+
+    # Find the mapping that gets the highest score.
+    current_score = 0
+    for rule in window_command_mappings:
+        # Calculate score.
+        score = calc_rule_match_score(rule, window_properties)
+
+        if score > current_score:
+            current_score = score
+            if 'command' not in rule:
+                command = []
+            elif isinstance(rule['command'], list):
+                command = rule['command']
+            else:
+                command = shlex.split(rule['command'])
+    return command
+
+
+def calc_rule_match_score(rule, window_properties):
+    """
+    Score window command mapping match based on which criteria match.
+
+    Scoring is done based on which criteria are considered "more specific".
+    """
+    # Window properties and value to add to score when match is found.
+    criteria = {
+        'window_role': 1,
+        'class': 2,
+        'instance': 3,
+        'title': 10,
+    }
+
+    score = 0
+    for criterion in criteria:
+        if criterion in rule:
+            # Score is zero if there are any non-matching criteria.
+            if rule[criterion] != window_properties[criterion]:
+                return 0
+            score += criteria[criterion]
+    return score
+
+
 def xdo_unmap_window(window_id):
     command = shlex.split(f'xdotool windowunmap {window_id}')
     subprocess.call(
