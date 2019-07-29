@@ -108,7 +108,10 @@ def save_commands(workspace, directory):
         procinfo = psutil.Process(pid)
 
         # Create command to launch program.
-        command = util.get_window_command(con['window_properties'], procinfo)
+        command = util.get_window_command(
+            con['window_properties'],
+            procinfo.cmdline(),
+        )
         if command in ([], ''):
             continue
 

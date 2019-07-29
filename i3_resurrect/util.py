@@ -151,7 +151,7 @@ def windows_in_workspace(workspace):
         yield (con, window)
 
 
-def get_window_command(window_properties, procinfo):
+def get_window_command(window_properties, cmdline):
     """
     Gets a window command.
 
@@ -160,7 +160,7 @@ def get_window_command(window_properties, procinfo):
     highest score is then returned.
     """
     window_command_mappings = config.get('window_command_mappings', [])
-    command = procinfo.cmdline()
+    command = cmdline
 
     # If window command mappings is a dictionary in the config file, use the
     # old way.
