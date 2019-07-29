@@ -83,12 +83,16 @@ def save_commands(workspace, directory):
     """
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
 
-    window_command_mappings = config.get('window_command_mappings', {})
-    window_title_command_mappings = config.get(
-        'window_title_command_mappings',
-        {},
-    )
     terminals = config.get('terminals', [])
+
+    # Print deprecation warning if using old dictionary method of writing
+    # window command mappings.
+    # TODO: Remove in 2.0.0
+    window_command_mappings = config.get('window_command_mappings', [])
+    if isinstance(window_command_mappings, dict):
+        print('Warning: Defining window command mappings using a dictionary '
+              'is deprecated and will be removed in favour of the list method '
+              'in the next major version.')
 
     # Loop through windows and save commands to launch programs on saved
     # workspace.
@@ -102,12 +106,14 @@ def save_commands(workspace, directory):
         # Get process info for the window.
         procinfo = psutil.Process(pid)
 
-        window_class = con['window_properties']['class']
-        window_title = con['window_properties']['title']
+        # Create command to launch program.
+        command = get_window_command(con['window_properties'], procinfo)
+        if command in ([], ''):
+            continue
 
         try:
             # Obtain working directory using psutil.
-            if window_class in terminals:
+            if con['window_class'] in terminals:
                 # If the program is a terminal emulator, get the working
                 # directory from its first subprocess.
                 working_directory = procinfo.children()[0].cwd()
@@ -115,17 +121,6 @@ def save_commands(workspace, directory):
                 working_directory = procinfo.cwd()
         except Exception:
             working_directory = str(Path.home())
-
-        # Create command to launch program.
-        # If there is a special command mapping for this program, use that.
-        if window_class in window_command_mappings:
-            command = window_command_mappings[window_class]
-        elif window_title in window_title_command_mappings:
-            command = window_title_command_mappings[window_title]
-        else:
-            # If the program has no special mapping, just use the process's
-            # cmdline.
-            command = procinfo.cmdline()
 
         # Add the command to the list.
         commands.append({
@@ -136,6 +131,69 @@ def save_commands(workspace, directory):
         # Write list of commands to file as JSON.
     with commands_file.open('w') as f:
         f.write(json.dumps(commands, indent=2))
+
+
+def get_window_command(window_properties, procinfo):
+    """
+    Gets a window command.
+
+    This function starts with the process's cmdline, then loops through the
+    window mappings and scores each matching rule. The command mapping with the
+    highest score is then returned.
+    """
+    window_command_mappings = config.get('window_command_mappings', [])
+    command = procinfo.cmdline()
+
+    # If window command mappings is a dictionary in the config file, use the
+    # old way.
+    # TODO: Remove in 2.0.0
+    if isinstance(window_command_mappings, dict):
+        window_class = window_properties['class']
+        if window_class in window_command_mappings:
+            command = window_command_mappings[window_class]
+        return command
+
+    # Find the mapping that gets the highest score.
+    current_score = 0
+    for rule in window_command_mappings:
+        # Calculate score.
+        score = calc_rule_match_score(rule, window_properties)
+        print(rule)
+        print(score)
+
+        if score > current_score:
+            current_score = score
+            if 'command' not in rule:
+                command = []
+            elif isinstance(rule['command'], list):
+                command = rule['command']
+            else:
+                command = shlex.split(rule['command'])
+    return command
+
+
+def calc_rule_match_score(rule, window_properties):
+    """
+    Score window command mapping match based on which criteria match.
+
+    Scoring is done based on which criteria are considered "more specific".
+    """
+    # Window properties and value to add to score when match is found.
+    criteria = {
+        'window_role': 1,
+        'class': 2,
+        'instance': 3,
+        'title': 10,
+    }
+
+    score = 0
+    for criterion in criteria:
+        if criterion in rule:
+            # Score is zero if there are any non-matching criteria.
+            if rule[criterion] != window_properties[criterion]:
+                return 0
+            score += criteria[criterion]
+    return score
 
 
 @main.command('restore')
@@ -210,7 +268,7 @@ def restore_layout(workspace, directory):
     # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
     placeholder_window_ids = []
-    for (con, window) in util.windows_in_workspace(workspace):
+    for (_, window) in util.windows_in_workspace(workspace):
         pid = window.pid
 
         # If window has no process, add it to list of placeholder windows.
