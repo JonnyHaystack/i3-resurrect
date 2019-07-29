@@ -84,6 +84,10 @@ def save_commands(workspace, directory):
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
 
     window_command_mappings = config.get('window_command_mappings', {})
+    window_title_command_mappings = config.get(
+        'window_title_command_mappings',
+        {},
+    )
     terminals = config.get('terminals', [])
 
     # Loop through windows and save commands to launch programs on saved
@@ -99,6 +103,8 @@ def save_commands(workspace, directory):
         procinfo = psutil.Process(pid)
 
         window_class = con['window_properties']['class']
+        window_title = con['window_properties']['title']
+
         try:
             # Obtain working directory using psutil.
             if window_class in terminals:
@@ -114,6 +120,8 @@ def save_commands(workspace, directory):
         # If there is a special command mapping for this program, use that.
         if window_class in window_command_mappings:
             command = window_command_mappings[window_class]
+        elif window_title in window_title_command_mappings:
+            command = window_title_command_mappings[window_title]
         else:
             # If the program has no special mapping, just use the process's
             # cmdline.

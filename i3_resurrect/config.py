@@ -17,6 +17,7 @@ def create_default():
         'window_command_mappings': {
             'Gnome-terminal': 'gnome-terminal'
         },
+        'window_title_command_mappings': {},
         'window_swallow_criteria': {},
         'terminals': ['Gnome-terminal', 'Alacritty'],
     }
