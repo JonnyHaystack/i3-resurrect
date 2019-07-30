@@ -49,21 +49,23 @@ that I wrote in order to be able to quickly save and load workspaces on the fly.
 I hate having to reboot my computer because it disrupts everything I have open
 (which tends to be a lot).
 
-To cope with this problem, I try to make it as easy as possible for myself to get everything
-back to its pre-reboot state.
+To cope with this problem, I try to make it as easy as possible for myself to
+get everything back to its pre-reboot state.
 
-I quickly found out about the `i3-save-tree` utility and i3's `append-layout` command, but these
-weren't much use to me on their own, as you are expected to customise a layout manually after
-saving it and relaunch all your programs manually when you restore the layout.
+I quickly found out about the `i3-save-tree` utility and i3's `append-layout`
+command, but these weren't much use to me on their own, as you are expected to
+customise a layout manually after saving it and relaunch all your programs
+manually when you restore the layout.
 
-My solution was to create a script that would extract just the bits from i3-save-tree that are
-needed, and use the [i3ipc](https://github.com/acrisci/i3ipc-python),
+My solution was to create a script that would extract just the bits from
+i3-save-tree that are needed, and use the
+[i3ipc](https://github.com/acrisci/i3ipc-python),
 [wmctrl](https://bitbucket.org/antocuni/wmctrl), and
-[psutil](https://github.com/giampaolo/psutil) Python libraries to obtain the commands necessary
-to launch the programs in a saved workspace.
+[psutil](https://github.com/giampaolo/psutil) Python libraries to obtain the
+commands necessary to launch the programs in a saved workspace.
 
-Since I decided to release this publicly, I have improved the standard of the code a great deal
-and gotten rid of the hacky bash parts.
+Since I decided to release this publicly, I have improved the standard of the
+code a great deal and gotten rid of the hacky bash parts.
 The code is all Python now, and i3-save-tree is no longer needed as I have
 reimplemented it in Python.
 
@@ -287,7 +289,7 @@ A default config file will be created when you first run i3-resurrect.
 
 In the case of a window where the process `cmdline` is not the same as the
 command you must run to launch that program, you can add an explicit window
-class to command mapping in the config file.
+command mapping in the config file.
 
 For example, gnome-terminal's process is gnome-terminal-server, but we need to
 launch it with the command `gnome-terminal`. To get this working, you would put
@@ -296,16 +298,46 @@ the following in your config file:
 ```
 {
   ...
-  "window_command_mappings": {
-    "Gnome-terminal": "gnome-terminal"
-  }
+  "window_command_mappings": [
+    {
+      "class": "Gnome-terminal",
+      "command": "gnome-terminal"
+    }
+  ]
+  ...
+}
+```
+
+Another example use case is where:
+- You have multiple windows for a single instance of an application
+- When restoring, you only want one instance of the program to be launched for
+each instance of the application's main window
+
+In this scenario, you could create one rule that by default maps the
+application's window class to have no command, and another that sets the command
+if it also matches a certain title:
+
+```
+{
+  ...
+    "window_command_mappings": [
+      ...
+      {
+        "class": "Some-program",
+      },
+      {
+        "class": "Some-program",
+        "title": "Main window's title"
+      }
+      ...
+    ]
   ...
 }
 ```
 
 Hint:
-If you need to find out a window's class, type `xprop | grep WM_CLASS` in a
-terminal and then click on the desired window.
+If you need to find out a window's class/instance, type `xprop | grep WM_CLASS`
+in a terminal and then click on the desired window.
 
 #### Terminals
 
