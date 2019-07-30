@@ -11,3 +11,4 @@ typed-ast==1.4.0
 wmctrl-python3==0.3
 wrapt==1.11.2
 pytest==5.0.1
+tox==3.13.2
