@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setup(
     name='i3-resurrect',
     version='1.3.0',
-    packages=find_packages(),
+    packages=['i3_resurrect'],
     author='Jonathan Haylett',
     author_email='jonathan@haylett.dev',
     url='https://github.com/JonnyHaystack/i3-resurrect',
