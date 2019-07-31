@@ -31,8 +31,8 @@ When restoring programs, Python's subprocess module is used to launch the saved
 programs with the correct working directory.
 
 When restoring layouts, i3's built-in ability layout restoring functionality is
-used. This creates placeholder windows where each one will "swallow" any window
-that appears and matches specified criteria (window class, instance, title etc).
+used. This creates placeholder windows where each one will "swallow" any new
+window that matches specified criteria (window class, instance, title etc).
 
 xdotool is used to make i3 see existing windows as new windows.
 This is necessary for matching by window title because the title must match
@@ -90,7 +90,7 @@ yay -S i3-resurrect-git
 pip3 install --user --upgrade i3-resurrect
 ```
 
-Make sure ~/.local/bin is in your PATH environment variable.
+Make sure `~/.local/bin` is in your PATH environment variable.
 
 #### Manual
 
