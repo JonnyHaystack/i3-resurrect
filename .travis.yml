@@ -5,11 +5,11 @@ dist: disco
 services:
   - xvfb
 before_install:
-  - sudo apt-get install -y i3
+  - sudo apt-get install -y i3 i3status
 install:
   - pip install -r requirements.txt
 before_script:
-  - bash i3
+  - i3
   - sleep 3
 script:
   - pytest
