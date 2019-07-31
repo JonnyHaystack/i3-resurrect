@@ -4,7 +4,7 @@ python:
   - "3.6-dev"
   - "3.7"
   - "3.7-dev"
-dist: xenial
+dist: disco
 services:
   - xvfb
 before_install:
