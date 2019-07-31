@@ -2,7 +2,18 @@ from i3_resurrect import config
 from i3_resurrect import util
 
 
-def test_build_tree():
+def test_build_tree(monkeypatch):
+    # Monkeypatch config.
+    monkeypatch.setattr(
+        config,
+        '_config',
+        {
+            'window_swallow_criteria': {
+                'Ario': ['class', 'instance'],
+            },
+        },
+    )
+
     workspace_container = {
         "id": 94067986102992,
         "type": "workspace",
@@ -388,20 +399,22 @@ def test_get_window_command(monkeypatch):
     # Monkeypatch config.
     monkeypatch.setattr(
         config,
-        'get',
-        lambda a, b: [
-            {
-                'class': 'Program1'
-            },
-            {
-                'class': 'Program1',
-                'title': 'Main window title',
-                'command': 'run_program1'
-            },
-            {
-                'title': 'Some arbitrary title'
-            }
-        ],
+        '_config',
+        {
+            'window_command_mappings': [
+                {
+                    'class': 'Program1'
+                },
+                {
+                    'class': 'Program1',
+                    'title': 'Main window title',
+                    'command': 'run_program1'
+                },
+                {
+                    'title': 'Some arbitrary title'
+                }
+            ],
+        },
     )
 
     # Test class + title mapping.
