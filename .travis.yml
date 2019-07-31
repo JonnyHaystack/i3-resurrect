@@ -16,16 +16,4 @@ before_script:
   - sleep 3
 script:
   - pytest -vv
-  - i3-resurrect -h
-  - i3-resurrect --help
-  - i3-resurrect --version
-  - i3-resurrect save -h
-  - i3-resurrect save --help
-  - i3-resurrect restore -h
-  - i3-resurrect restore --help
-  - i3-resurrect save -d /tmp/i3-resurrect
-  - i3-resurrect save -d /tmp/i3-resurrect --swallow=class,instance,title
-  - i3-resurrect save -d /tmp/i3-resurrect --swallow=class,instance,title --layout-only
-  - i3-resurrect save -d /tmp/i3-resurrect --swallow=class,instance,title --programs-only
-  - i3-resurrect restore -d /tmp/i3-resurrect --programs-only
-  - i3-resurrect restore -d /tmp/i3-resurrect --layout-only
+  - tox
