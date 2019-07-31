@@ -5,8 +5,6 @@ python:
   - "3.7"
   - "3.7-dev"
 dist: xenial
-services:
-  - xvfb
 before_install:
   - sudo apt-get install -y i3
 install:
