@@ -14,9 +14,12 @@ def create_default():
     global _config_file
 
     _config = {
-        'window_command_mappings': {
-            'Gnome-terminal': 'gnome-terminal'
-        },
+        'window_command_mappings': [
+            {
+                'class': 'Gnome-terminal',
+                'command': 'gnome-terminal',
+            },
+        ],
         'window_title_command_mappings': {},
         'window_swallow_criteria': {},
         'terminals': ['Gnome-terminal', 'Alacritty'],
