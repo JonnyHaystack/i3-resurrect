@@ -2,6 +2,8 @@
 
 A simple but flexible solution to saving and restoring i3 workspaces
 
+[![Build Status](https://travis-ci.org/JonnyHaystack/i3-resurrect.svg?branch=master)](https://travis-ci.org/JonnyHaystack/i3-resurrect)
+
 ## Table of Contents
 
 * [Introduction](#introduction)

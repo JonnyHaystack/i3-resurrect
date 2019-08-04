@@ -203,9 +203,6 @@ def restore_layout(workspace, directory):
     """
     Restore an i3 workspace layout.
     """
-    # Switch to the workspace which we are loading.
-    i3.command(f'workspace --no-auto-back-and-forth {workspace}')
-
     # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
     placeholder_window_ids = []
@@ -229,9 +226,7 @@ def restore_layout(workspace, directory):
         util.xdo_kill_window(window_id)
 
     # Create fresh placeholder windows by appending layout to workspace.
-    layout_file = shlex.quote(
-        str(Path(directory) / f'workspace_{workspace}_layout.json')
-    )
+    layout_file = str(Path(directory) / f'workspace_{workspace}_layout.json')
     i3.command(f'append_layout {layout_file}')
 
     # Map all unmapped windows.

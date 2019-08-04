@@ -24,14 +24,11 @@ def build_tree(con, swallow):
     """
     tree = []
 
-    if con is None:
+    # Base cases.
+    if con is None or 'nodes' not in con or con['nodes'] == []:
         return tree
 
     nodes = con['nodes']
-
-    # Base case.
-    if nodes == []:
-        return tree
 
     # Step case.
     for node in nodes:
@@ -106,14 +103,13 @@ def windows_in_container(container):
     Args:
         container: The container to traverse.
     """
-    # Base case.
-    if container is None:
+    # Base cases.
+    if (container is None
+            or 'nodes' not in container
+            or container['nodes'] == []):
         return
 
     nodes = container['nodes']
-
-    if nodes == []:
-        return
 
     # Step case.
     for node in nodes:

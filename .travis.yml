@@ -1,0 +1,19 @@
+language: python
+python:
+  - "3.6"
+  - "3.6-dev"
+  - "3.7"
+  - "3.7-dev"
+dist: disco
+services:
+  - xvfb
+before_install:
+  - sudo apt-get install -y i3 i3status
+install:
+  - pip install -r requirements.txt
+before_script:
+  - "i3 &"
+  - sleep 3
+script:
+  - pytest -vv
+  - tox
