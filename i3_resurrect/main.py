@@ -226,9 +226,7 @@ def restore_layout(workspace, directory):
         util.xdo_kill_window(window_id)
 
     # Create fresh placeholder windows by appending layout to workspace.
-    layout_file = shlex.quote(
-        str(Path(directory) / f'workspace_{workspace}_layout.json')
-    )
+    layout_file = str(Path(directory) / f'workspace_{workspace}_layout.json')
     i3.command(f'append_layout {layout_file}')
 
     # Map all unmapped windows.
