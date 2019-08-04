@@ -203,9 +203,6 @@ def restore_layout(workspace, directory):
     """
     Restore an i3 workspace layout.
     """
-    # Switch to the workspace which we are loading.
-    i3.command(f'workspace --no-auto-back-and-forth {workspace}')
-
     # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
     placeholder_window_ids = []
