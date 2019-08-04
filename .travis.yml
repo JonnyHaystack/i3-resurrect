@@ -15,5 +15,7 @@ before_script:
   - "i3 &"
   - sleep 3
 script:
-  - pytest -vv
+  - pytest -vv --cov=i3_resurrect tests/
   - tox
+after_success:
+  - coveralls
