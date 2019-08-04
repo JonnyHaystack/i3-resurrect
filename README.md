@@ -3,6 +3,7 @@
 A simple but flexible solution to saving and restoring i3 workspaces
 
 [![Build Status](https://travis-ci.org/JonnyHaystack/i3-resurrect.svg?branch=master)](https://travis-ci.org/JonnyHaystack/i3-resurrect)
+[![GitHub issues](https://img.shields.io/github/issues/JonnyHaystack/i3-resurrect)](https://github.com/JonnyHaystack/i3-resurrect/issues)
 
 ## Table of Contents
 
