@@ -368,7 +368,7 @@ your config file:
 }
 ```
 
-These examples are included in the default config. If you would like me to add
+Some examples are included in the default config. If you would like me to add
 more command mappings or terminals to the default config, please open an issue
 for it.
 
