@@ -117,7 +117,7 @@ def save_commands(workspace, directory):
 
         try:
             # Obtain working directory using psutil.
-            if con['window_class'] in terminals:
+            if con['window_properties']['class'] in terminals:
                 # If the program is a terminal emulator, get the working
                 # directory from its first subprocess.
                 working_directory = procinfo.children()[0].cwd()
