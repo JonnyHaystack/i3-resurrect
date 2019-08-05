@@ -2,6 +2,12 @@
 
 A simple but flexible solution to saving and restoring i3 workspaces
 
+[![Build Status](https://travis-ci.org/JonnyHaystack/i3-resurrect.svg?branch=master)](https://travis-ci.org/JonnyHaystack/i3-resurrect)
+[![Coverage Status](https://coveralls.io/repos/github/JonnyHaystack/i3-resurrect/badge.svg)](https://coveralls.io/github/JonnyHaystack/i3-resurrect)
+[![GitHub issues](https://img.shields.io/github/issues/JonnyHaystack/i3-resurrect)](https://github.com/JonnyHaystack/i3-resurrect/issues)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/JonnyHaystack/i3-resurrect)
+![PyPI - Version](https://img.shields.io/pypi/v/i3-resurrect)
+
 ## Table of Contents
 
 * [Introduction](#introduction)
@@ -31,8 +37,8 @@ When restoring programs, Python's subprocess module is used to launch the saved
 programs with the correct working directory.
 
 When restoring layouts, i3's built-in ability layout restoring functionality is
-used. This creates placeholder windows where each one will "swallow" any window
-that appears and matches specified criteria (window class, instance, title etc).
+used. This creates placeholder windows where each one will "swallow" any new
+window that matches specified criteria (window class, instance, title etc).
 
 xdotool is used to make i3 see existing windows as new windows.
 This is necessary for matching by window title because the title must match
@@ -49,21 +55,23 @@ that I wrote in order to be able to quickly save and load workspaces on the fly.
 I hate having to reboot my computer because it disrupts everything I have open
 (which tends to be a lot).
 
-To cope with this problem, I try to make it as easy as possible for myself to get everything
-back to its pre-reboot state.
+To cope with this problem, I try to make it as easy as possible for myself to
+get everything back to its pre-reboot state.
 
-I quickly found out about the `i3-save-tree` utility and i3's `append-layout` command, but these
-weren't much use to me on their own, as you are expected to customise a layout manually after
-saving it and relaunch all your programs manually when you restore the layout.
+I quickly found out about the `i3-save-tree` utility and i3's `append-layout`
+command, but these weren't much use to me on their own, as you are expected to
+customise a layout manually after saving it and relaunch all your programs
+manually when you restore the layout.
 
-My solution was to create a script that would extract just the bits from i3-save-tree that are
-needed, and use the [i3ipc](https://github.com/acrisci/i3ipc-python),
+My solution was to create a script that would extract just the bits from
+i3-save-tree that are needed, and use the
+[i3ipc](https://github.com/acrisci/i3ipc-python),
 [wmctrl](https://bitbucket.org/antocuni/wmctrl), and
-[psutil](https://github.com/giampaolo/psutil) Python libraries to obtain the commands necessary
-to launch the programs in a saved workspace.
+[psutil](https://github.com/giampaolo/psutil) Python libraries to obtain the
+commands necessary to launch the programs in a saved workspace.
 
-Since I decided to release this publicly, I have improved the standard of the code a great deal
-and gotten rid of the hacky bash parts.
+Since I decided to release this publicly, I have improved the standard of the
+code a great deal and gotten rid of the hacky bash parts.
 The code is all Python now, and i3-save-tree is no longer needed as I have
 reimplemented it in Python.
 
@@ -71,7 +79,7 @@ reimplemented it in Python.
 
 ### Requirements
 
-- Python 3
+- Python 3.6
 - i3
 - xdotool
 
@@ -88,7 +96,7 @@ yay -S i3-resurrect-git
 pip3 install --user --upgrade i3-resurrect
 ```
 
-Make sure ~/.local/bin is in your PATH environment variable.
+Make sure `~/.local/bin` is in your PATH environment variable.
 
 #### Manual
 
@@ -115,10 +123,11 @@ Usage: i3_resurrect.py save [OPTIONS]
 
 Options:
   -w, --workspace TEXT       The workspace to save.
+                             [default: current workspace]
   -d, --directory DIRECTORY  The directory to save the workspace to.
                              [default: ~/.i3/i3-resurrect]
   -s, --swallow TEXT         The swallow criteria to use.
-                             Options: class, instance, title, window_role
+                             [options: class,instance,title,window_role]
                              [default: class,instance]
   --layout-only              Only save layout.
   --programs-only            Only save running programs.
@@ -130,6 +139,7 @@ Usage: i3_resurrect.py restore [OPTIONS]
 
 Options:
   -w, --workspace TEXT       The workspace to restore.
+                             [default: current workspace]
   -d, --directory DIRECTORY  The directory to restore the workspace from.
                              [default: ~/.i3/i3-resurrect]
   --layout-only              Only restore layout.
@@ -283,25 +293,61 @@ Example of usage with the second configuration:
 The config file should be located at `~/.config/i3-resurrect/config.json`.
 A default config file will be created when you first run i3-resurrect.
 
-In the case of a window where the process `cmdline` is not the same as the command you must run to
-launch that program, you can add an explicit window class to command mapping in the config file.
+#### Window command mappings
 
-For example, gnome-terminal's process is gnome-terminal-server, but we need to launch it with the
-command `gnome-terminal`. To get this working, you would put the following in your config file:
+In the case of a window where the process `cmdline` is not the same as the
+command you must run to launch that program, you can add an explicit window
+command mapping in the config file.
+
+For example, gnome-terminal's process is gnome-terminal-server, but we need to
+launch it with the command `gnome-terminal`. To get this working, you would put
+the following in your config file:
 
 ```
 {
   ...
-  "window_command_mappings": {
-    "Gnome-terminal": "gnome-terminal"
-  }
+  "window_command_mappings": [
+    {
+      "class": "Gnome-terminal",
+      "command": "gnome-terminal"
+    }
+  ]
+  ...
+}
+```
+
+Another example use case is where:
+- You have multiple windows for a single instance of an application
+- When restoring, you only want one instance of the program to be launched for
+each instance of the application's main window
+
+In this scenario, you could create one rule that by default maps the
+application's window class to have no command, and another that sets the command
+if it also matches a certain title:
+
+```
+{
+  ...
+    "window_command_mappings": [
+      ...
+      {
+        "class": "Some-program",
+      },
+      {
+        "class": "Some-program",
+        "title": "Main window's title"
+      }
+      ...
+    ]
   ...
 }
 ```
 
 Hint:
-If you need to find out a window's class, type `xprop | grep WM_CLASS` in a
-terminal and then click on the desired window.
+If you need to find out a window's class/instance, type `xprop | grep WM_CLASS`
+in a terminal and then click on the desired window.
+
+#### Terminals
 
 For terminal emulator windows, we must get the working directory from the
 first subprocess (usually this will be your shell) instead of the window's root
@@ -325,9 +371,34 @@ your config file:
 }
 ```
 
-These examples are included in the default config. If you would like me to add
+Some examples are included in the default config. If you would like me to add
 more command mappings or terminals to the default config, please open an issue
 for it.
+
+#### Per window swallow criteria
+
+It is also possible to configure swallow criteria on a per window basis, which
+will override the criteria set by the `--swallow` command line parameter.
+
+Example use case:
+- I usually want to include the window title in the swallow criteria to more
+accurately restore layouts
+- Among other programs that I use, Ario (an mpd client) always has the currently
+playing song in the window title
+- This makes matching the layout by window title inconvenient, so I want to have
+Ario always be matched by only the window class/instance
+
+This can be achieved by putting the following in your config file:
+
+```
+{
+  ...
+  "window_swallow_criteria": {
+    "Ario": ["class", "instance"]
+  }
+  ...
+}
+```
 
 ## Contributing
 

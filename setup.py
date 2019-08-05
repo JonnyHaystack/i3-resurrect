@@ -6,12 +6,13 @@ with open("README.md", "r") as fh:
 
 setup(
     name='i3-resurrect',
-    version='1.2.0',
-    packages=find_packages(),
+    version='1.3.0',
+    packages=['i3_resurrect'],
     author='Jonathan Haylett',
     author_email='jonathan@haylett.dev',
     url='https://github.com/JonnyHaystack/i3-resurrect',
     license='GNU GPL Version 3',
+    python_requires='>=3.6',
     install_requires=[
         'Click',
         'wmctrl-python3',
