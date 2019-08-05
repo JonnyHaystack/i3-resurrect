@@ -7,7 +7,6 @@ A simple but flexible solution to saving and restoring i3 workspaces
 [![GitHub issues](https://img.shields.io/github/issues/JonnyHaystack/i3-resurrect)](https://github.com/JonnyHaystack/i3-resurrect/issues)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/JonnyHaystack/i3-resurrect)
 ![PyPI - Version](https://img.shields.io/pypi/v/i3-resurrect)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/i3-resurrect)
 
 ## Table of Contents
 
