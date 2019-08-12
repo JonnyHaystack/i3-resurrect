@@ -81,6 +81,7 @@ reimplemented it in Python.
 
 - Python 3.6
 - i3
+- wmctrl
 - xdotool
 
 ### Installation
