@@ -1,7 +1,7 @@
 astroid==2.2.5
 Click==7.0
 enum-compat==0.0.2
-i3ipc==1.7.1
+i3ipc==2.1.1
 isort==4.3.20
 lazy-object-proxy==1.4.1
 mccabe==0.6.1

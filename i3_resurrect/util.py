@@ -4,7 +4,6 @@ import shlex
 import subprocess
 import sys
 
-import i3ipc
 from wmctrl import Window
 
 from . import config
@@ -83,9 +82,9 @@ def get_workspace_tree(workspace):
     """
     Get full workspace layout tree from i3.
     """
-    i3 = i3ipc.Connection()
-
-    root = json.loads(i3.message(i3ipc.MessageType.GET_TREE, ''))
+    root = json.loads(
+        subprocess.check_output(shlex.split('i3-msg -t get_tree'))
+    )
     for output in root['nodes']:
         for container in output['nodes']:
             if container['type'] != 'con':
