@@ -1,21 +1,27 @@
 language: python
 python:
-  - "3.6"
-  - "3.6-dev"
-  - "3.7"
-  - "3.7-dev"
+- '3.6'
+- 3.6-dev
+- '3.7'
+- 3.7-dev
 dist: disco
 services:
-  - xvfb
+- xvfb
 before_install:
-  - sudo apt-get install -y i3 i3status
+- sudo apt-get install -y i3 i3status
 install:
-  - pip install -r requirements.txt
+- pip install -r requirements.txt
 before_script:
-  - "i3 &"
-  - sleep 3
+- i3 &
+- sleep 3
 script:
-  - pytest -vv --cov=i3_resurrect tests/
-  - tox
+- pytest -vv --cov=i3_resurrect tests/
+- tox
 after_success:
-  - coveralls
+- coveralls
+notifications:
+  pushover:
+    api_key:
+      secure: UidUZv7HZ2BAXrKpNWXPGOQyQg7SREktVo14lNvbKMpKMavaQ+y0KMRRUb3K6JL7ylNSVGYXwro3kRa1HV0La5PDnDk2ancnGkZ91ti7BO/Vync5pZwzTWhRZr+vDhysW7ZFbW8H2gISytWinV68nnCn3Xra+wYLRLr0CqwsLmxmeykl4Fz/zSjV0R5rYojSp0KUnhyGAGht64Rym/IGQzD9FZk6mNHFjM9jU+K6gigWod7XmbOzaN8MLi03+33PWJBRwbyF7lf8hnDPkmVOkBd5aweRnr11gxkngTBlcZm8MgubqSLXhhclbws0Fgc4wt4NA6KE4gCBDFe3KKnOoLBaNYKVeHlCpQ/7fZq9Ed4/acrNHyGX/fgd+hfiPCae4w9IQvGXpYqvTxOHblSseyzJiIb0QbKIhPJK8VrNU/BhP/j1UwBbgIUlXV8IJ7uR2+x6+ZcR27+DFaA391PE57QMaOFCZQIOpoQRVI6GgAt7eEJ6FCnXMs/rNuVuQlYo7z+rWYjSDcgOWzOtg1DDsjjlziu+d7wWR1ENwcbn1tJXpHX8mpR8HO9ortDKDXYToCLJTOn2MsMhHhNoPIK86knuoqIQ415M23l1Os+iVIVd33+LTXJYmLxmwc35TreBM/wOz4XZSGdHSQZfOCoyuaNiAFmEYiQWr9O0OK+bvOU=
+    users:
+      secure: VoiqQxvfYMJFqpwVAu9kcRI6M1GXnj/u9ewE/cBNYIUcFnC1WtHFUZEiOAJtzZ0uT2IYYe71zuH7GNIxxpIC4OBPatRCMbm+wXtjz6TPdc3rHZEbMzMATD/EIx4IbyzXLZVTFOs6ytUQLiUuFDw3QqY+2IoCtX1qv2TIfrlrPCMJMdOpUJH5tGXPjAEdTirqW8Ef7cjZvKOta04RU59kV4Gh3nPCO2lCkfRtLSxnF+CZ1ZHjpNmFt0aP+GsHhuC1sZtsFlzJPe2s2XNVbwB8as5/BV7q64v+vrCdrk8CYiVIsOSzlZBcsV6vO1Mc2CmNb9lpSSbUMuklIxQCB00orrSmqewv711KLx4bksa1KvOvqAg38QUejfB7cqs76mrcW479oJ/EXTZMQhS27xzbVyk+Z03mewq6Xfwaqfchdq3Tq7VLfCDA6w4lTk9b0KuZLJKuV7u1tcmLHccTSxT4UJ6RvcW1RwfMuaxiIMwnuan/K0dY11ernvnccyU55COE4Ha3o8BQkSc3DKmvEze++8/IBml1CItoVG3N+7N29W4Dkw1TzZfnMRLXDDLpAEwstCBXW8hgH5maUXhUlaXclYuTRdhuDtZ2xY35DSJM5nPiHolJgPaM/DLJZXJ8Yy9VBtTR0K5KpqLsvytTNfTxeuBcqrP0I1+MTcGRT2T6aHg=
