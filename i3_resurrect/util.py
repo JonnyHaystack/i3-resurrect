@@ -45,6 +45,7 @@ def build_tree(con, swallow):
             'scratchpad_state',
             'type',
             'workspace_layout',
+            'marks',
         ]
 
         # Set attributes.
