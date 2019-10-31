@@ -2,7 +2,7 @@ from i3_resurrect import config
 from i3_resurrect import util
 
 
-def test_build_tree(monkeypatch):
+def test_build_layout(monkeypatch):
     # Monkeypatch config.
     monkeypatch.setattr(
         config,
@@ -313,7 +313,7 @@ def test_build_tree(monkeypatch):
                     "instance": "^ario$"
                 }
             ],
-            "nodes": []
+            "sticky": False
         },
         {
             "border": "normal",
@@ -331,6 +331,7 @@ def test_build_tree(monkeypatch):
             "orientation": "vertical",
             "percent": 0.5,
             "scratchpad_state": "none",
+            "sticky": False,
             "type": "con",
             "workspace_layout": "default",
             "nodes": [
@@ -350,6 +351,7 @@ def test_build_tree(monkeypatch):
                     "orientation": "none",
                     "percent": 0.5,
                     "scratchpad_state": "none",
+                    "sticky": False,
                     "type": "con",
                     "workspace_layout": "default",
                     "swallows": [
@@ -358,8 +360,7 @@ def test_build_tree(monkeypatch):
                             "instance": "^dolphin\\-emu$",
                             "title": "^Faster\\ Melee\\ \\-\\ Slippi\\ \\(r18\\)$"
                         }
-                    ],
-                    "nodes": []
+                    ]
                 },
                 {
                     "border": "pixel",
@@ -377,6 +378,7 @@ def test_build_tree(monkeypatch):
                     "orientation": "none",
                     "percent": 0.5,
                     "scratchpad_state": "none",
+                    "sticky": False,
                     "type": "con",
                     "workspace_layout": "default",
                     "swallows": [
@@ -385,13 +387,12 @@ def test_build_tree(monkeypatch):
                             "instance": "^dolphin\\-emu$",
                             "title": "^Dolphin\\ NetPlay\\ Setup$"
                         }
-                    ],
-                    "nodes": []
+                    ]
                 }
             ]
         }
     ]
-    tree = util.build_tree(workspace_container, ['class', 'instance', 'title'])
+    tree = util.build_layout(workspace_container, ['class', 'instance', 'title'])
     assert tree == expected_tree
 
 
