@@ -20,6 +20,7 @@ REQUIRED_ATTRIBUTES = [
     'orientation',
     'percent',
     'scratchpad_state',
+    'string',
     'type',
     'workspace_layout',
 ]
