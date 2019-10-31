@@ -32,50 +32,62 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def build_tree(con, swallow):
+def build_layout(tree, swallow):
     """
-    Recursive function to build a restorable window layout tree using basic
-    Python data structures.
+    Builds a restorable layout tree with basic Python data structures which are
+    JSON serialisable.
     """
-    node = {}
+    processed_tree = process_node(tree, swallow)
+    if 'nodes' in processed_tree:
+        return processed_tree['nodes']
+    return []
+
+
+def process_node(original_node, swallow):
+    """
+    Recursive function which traverses a layout tree and builds a new tree from
+    it which can be restored using append_layout and only contains attributes
+    necessary for accurately restoring the layout.
+    """
+    processed_node = {}
 
     # Base case.
-    if con is None:
-        return node
+    if original_node is None or original_node == {}:
+        return processed_node
 
     # Set attributes.
     for attribute in REQUIRED_ATTRIBUTES:
-        if attribute in con:
-            node[attribute] = con[attribute]
+        if attribute in original_node:
+            processed_node[attribute] = original_node[attribute]
 
     # Set swallow criteria if the node is a window.
-    if 'window_properties' in node:
-        node['swallows'] = [{}]
+    if 'window_properties' in original_node:
+        processed_node['swallows'] = [{}]
         # Local variable for swallow criteria.
         swallow_criteria = swallow
         # Get swallow criteria from config.
         window_swallow_mappings = config.get('window_swallow_criteria', {})
-        window_class = node['window_properties']['class']
+        window_class = original_node['window_properties']['class']
         # Swallow criteria from config override the command line parameters
         # if present.
         if window_class in window_swallow_mappings:
             swallow_criteria = window_swallow_mappings[window_class]
         for criterion in swallow_criteria:
-            if criterion in node['window_properties']:
+            if criterion in original_node['window_properties']:
                 # Escape special characters in swallow criteria.
-                escaped = re.escape(node['window_properties'][criterion])
+                escaped = re.escape(original_node['window_properties'][criterion])
                 # Regex formatting.
                 value = f'^{escaped}$'
-                node['swallows'][0][criterion] = value
+                processed_node['swallows'][0][criterion] = value
 
     # Recurse over child nodes.
-    if 'nodes' in con and con['nodes'] != []:
-        node['nodes'] = []
-        for child in con['nodes']:
+    if 'nodes' in original_node and original_node['nodes'] != []:
+        processed_node['nodes'] = []
+        for child in original_node['nodes']:
             # Step case.
-            node['nodes'].append(build_tree(child, swallow))
+            processed_node['nodes'].append(process_node(child, swallow))
 
-    return node
+    return processed_node
 
 
 def get_workspace_tree(workspace):

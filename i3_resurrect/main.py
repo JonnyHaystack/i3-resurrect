@@ -71,7 +71,7 @@ def save_layout(workspace, directory, swallow_criteria):
         # file.
         f.write(
             json.dumps(
-                util.build_tree(workspace_tree, swallow_criteria),
+                util.build_layout(workspace_tree, swallow_criteria),
                 indent=2,
             )
         )
