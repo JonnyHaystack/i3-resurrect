@@ -16,6 +16,7 @@ REQUIRED_ATTRIBUTES = [
     'fullscreen_mode',
     'geometry',
     'layout',
+    'marks',
     'name',
     'orientation',
     'percent',
