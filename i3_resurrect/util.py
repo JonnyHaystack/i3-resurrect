@@ -8,6 +8,23 @@ from wmctrl import Window
 
 from . import config
 
+# The tree node attributes that we want to save.
+REQUIRED_ATTRIBUTES = [
+    'border',
+    'current_border_width',
+    'floating',
+    'fullscreen_mode',
+    'geometry',
+    'layout',
+    'name',
+    'orientation',
+    'percent',
+    'scratchpad_state',
+    'sticky',
+    'type',
+    'workspace_layout',
+]
+
 
 def eprint(*args, **kwargs):
     """
@@ -16,66 +33,65 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def build_tree(con, swallow):
+def build_layout(tree, swallow):
     """
-    Recursive function to build a restorable window layout tree using basic
-    Python data structures.
+    Builds a restorable layout tree with basic Python data structures which are
+    JSON serialisable.
     """
-    tree = []
+    processed = process_node(tree, swallow)
+    return processed.get('nodes', []) + processed.get('floating_nodes', [])
 
-    # Base cases.
-    if con is None or 'nodes' not in con or con['nodes'] == []:
-        return tree
 
-    nodes = con['nodes']
+def process_node(original, swallow):
+    """
+    Recursive function which traverses a layout tree and builds a new tree from
+    it which can be restored using append_layout and only contains attributes
+    necessary for accurately restoring the layout.
+    """
+    processed = {}
 
-    # Step case.
-    for node in nodes:
-        container = {}
-        attributes = [
-            'border',
-            'current_border_width',
-            'floating',
-            'fullscreen_mode',
-            'geometry',
-            'layout',
-            'name',
-            'orientation',
-            'percent',
-            'scratchpad_state',
-            'type',
-            'workspace_layout',
-        ]
+    # Base case.
+    if original is None or original == {}:
+        return processed
 
-        # Set attributes.
-        for attribute in attributes:
-            if attribute in node:
-                container[attribute] = node[attribute]
+    # Set attributes.
+    for attribute in REQUIRED_ATTRIBUTES:
+        if attribute in original:
+            processed[attribute] = original[attribute]
 
-        # Set swallow criteria.
-        if 'window_properties' in node:
-            container['swallows'] = [{}]
-            # Local variable for swallow criteria.
-            swallow_criteria = swallow
-            # Get swallow criteria from config.
-            window_swallow_mappings = config.get('window_swallow_criteria', {})
-            window_class = node['window_properties']['class']
-            # Swallow criteria from config override the command line parameters
-            # if present.
-            if window_class in window_swallow_mappings:
-                swallow_criteria = window_swallow_mappings[window_class]
-            for criterion in swallow_criteria:
-                if criterion in node['window_properties']:
-                    # Escape special characters in swallow criteria.
-                    escaped = re.escape(node['window_properties'][criterion])
-                    # Regex formatting.
-                    value = f'^{escaped}$'
-                    container['swallows'][0][criterion] = value
-        container['nodes'] = build_tree(node, swallow)
+    # Keep rect attribute for floating nodes.
+    if 'type' in original and original['type'] == 'floating_con':
+        processed['rect'] = original['rect']
 
-        tree.append(container)
+    # Set swallow criteria if the node is a window.
+    if 'window_properties' in original:
+        processed['swallows'] = [{}]
+        # Local variable for swallow criteria.
+        swallow_criteria = swallow
+        # Get swallow criteria from config.
+        window_swallow_mappings = config.get('window_swallow_criteria', {})
+        window_class = original['window_properties'].get('class', '')
+        # Swallow criteria from config override the command line parameters
+        # if present.
+        if window_class in window_swallow_mappings:
+            swallow_criteria = window_swallow_mappings[window_class]
+        for criterion in swallow_criteria:
+            if criterion in original['window_properties']:
+                # Escape special characters in swallow criteria.
+                escaped = re.escape(original['window_properties'][criterion])
+                # Regex formatting.
+                value = f'^{escaped}$'
+                processed['swallows'][0][criterion] = value
 
-    return tree
+    # Recurse over child nodes (normal and floating).
+    for node_type in ['nodes', 'floating_nodes']:
+        if node_type in original and original[node_type] != []:
+            processed[node_type] = []
+            for child in original[node_type]:
+                # Step case.
+                processed[node_type].append(process_node(child, swallow))
+
+    return processed
 
 
 def get_workspace_tree(workspace):
@@ -103,12 +119,10 @@ def windows_in_container(container):
         container: The container to traverse.
     """
     # Base cases.
-    if (container is None
-            or 'nodes' not in container
-            or container['nodes'] == []):
+    if container is None:
         return
 
-    nodes = container['nodes']
+    nodes = container.get('nodes', []) + container.get('floating_nodes', [])
 
     # Step case.
     for node in nodes:
