@@ -88,6 +88,10 @@ def get_workspace_tree(workspace):
             if container['type'] != 'con':
                 pass
             for ws in container['nodes']:
+                # Select workspace and trigger name and num field
+                if workspace.isdigit() and 'num' in ws:
+                    if ws['num'] == int(workspace):
+                        return ws
                 if ws['name'] == workspace:
                     return ws
     return {}

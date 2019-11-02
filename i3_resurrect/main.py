@@ -93,7 +93,10 @@ def restore_workspace(workspace, directory, profile, target):
         directory = Path(directory) / 'profiles'
 
     # Switch to the workspace which we are loading.
-    i3.command(f'workspace --no-auto-back-and-forth {workspace}')
+    if workspace.isdigit():
+        i3.command(f'workspace --no-auto-back-and-forth number {workspace}')
+    else:
+        i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
     if target != 'programs_only':
         # Load workspace layout.
