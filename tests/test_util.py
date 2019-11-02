@@ -288,110 +288,130 @@ def test_build_layout(monkeypatch):
         "floating": "auto_off",
         "swallows": []
     }
-    expected_tree = [
-        {
-            "border": "pixel",
-            "current_border_width": 2,
-            "floating": "auto_off",
-            "fullscreen_mode": 0,
-            "geometry": {
-                "x": 2049,
-                "y": 486,
-                "width": 553,
-                "height": 107
-            },
-            "layout": "splith",
-            "name": "Ario",
-            "orientation": "none",
-            "percent": 0.5,
-            "scratchpad_state": "none",
-            "type": "con",
-            "workspace_layout": "default",
-            "swallows": [
-                {
-                    "class": "^Ario$",
-                    "instance": "^ario$"
-                }
-            ],
-            "sticky": False
+    expected_tree = {
+        "type": "workspace",
+        "orientation": "horizontal",
+        "scratchpad_state": "none",
+        "percent": None,
+        "layout": "splith",
+        "workspace_layout": "default",
+        "sticky": False,
+        "border": "normal",
+        "current_border_width": -1,
+        "floating": "auto_off",
+        "fullscreen_mode": 0,
+        "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
         },
-        {
-            "border": "normal",
-            "current_border_width": -1,
-            "floating": "auto_off",
-            "fullscreen_mode": 0,
-            "geometry": {
-                "x": 0,
-                "y": 0,
-                "width": 0,
-                "height": 0
-            },
-            "layout": "splitv",
-            "name": None,
-            "orientation": "vertical",
-            "percent": 0.5,
-            "scratchpad_state": "none",
-            "sticky": False,
-            "type": "con",
-            "workspace_layout": "default",
-            "nodes": [
-                {
-                    "border": "pixel",
-                    "current_border_width": 2,
-                    "floating": "auto_off",
-                    "fullscreen_mode": 0,
-                    "geometry": {
-                        "x": 2331,
-                        "y": 10,
-                        "width": 941,
-                        "height": 1024
-                    },
-                    "layout": "splith",
-                    "name": "Faster Melee - Slippi (r18)",
-                    "orientation": "none",
-                    "percent": 0.5,
-                    "scratchpad_state": "none",
-                    "sticky": False,
-                    "type": "con",
-                    "workspace_layout": "default",
-                    "swallows": [
-                        {
-                            "class": "^Dolphin\\-emu$",
-                            "instance": "^dolphin\\-emu$",
-                            "title": "^Faster\\ Melee\\ \\-\\ Slippi\\ \\(r18\\)$"
-                        }
-                    ]
+        "name": "8",
+        "nodes": [
+            {
+                "border": "pixel",
+                "current_border_width": 2,
+                "floating": "auto_off",
+                "fullscreen_mode": 0,
+                "geometry": {
+                    "x": 2049,
+                    "y": 486,
+                    "width": 553,
+                    "height": 107
                 },
-                {
-                    "border": "pixel",
-                    "current_border_width": 2,
-                    "floating": "auto_off",
-                    "fullscreen_mode": 0,
-                    "geometry": {
-                        "x": 2542,
-                        "y": 344,
-                        "width": 518,
-                        "height": 356
+                "layout": "splith",
+                "name": "Ario",
+                "orientation": "none",
+                "percent": 0.5,
+                "scratchpad_state": "none",
+                "type": "con",
+                "workspace_layout": "default",
+                "swallows": [
+                    {
+                        "class": "^Ario$",
+                        "instance": "^ario$"
+                    }
+                ],
+                "sticky": False
+            },
+            {
+                "border": "normal",
+                "current_border_width": -1,
+                "floating": "auto_off",
+                "fullscreen_mode": 0,
+                "geometry": {
+                    "x": 0,
+                    "y": 0,
+                    "width": 0,
+                    "height": 0
+                },
+                "layout": "splitv",
+                "name": None,
+                "orientation": "vertical",
+                "percent": 0.5,
+                "scratchpad_state": "none",
+                "sticky": False,
+                "type": "con",
+                "workspace_layout": "default",
+                "nodes": [
+                    {
+                        "border": "pixel",
+                        "current_border_width": 2,
+                        "floating": "auto_off",
+                        "fullscreen_mode": 0,
+                        "geometry": {
+                            "x": 2331,
+                            "y": 10,
+                            "width": 941,
+                            "height": 1024
+                        },
+                        "layout": "splith",
+                        "name": "Faster Melee - Slippi (r18)",
+                        "orientation": "none",
+                        "percent": 0.5,
+                        "scratchpad_state": "none",
+                        "sticky": False,
+                        "type": "con",
+                        "workspace_layout": "default",
+                        "swallows": [
+                            {
+                                "class": "^Dolphin\\-emu$",
+                                "instance": "^dolphin\\-emu$",
+                                "title": "^Faster\\ Melee\\ \\-\\ Slippi\\ \\(r18\\)$"
+                            }
+                        ]
                     },
-                    "layout": "splith",
-                    "name": "Dolphin NetPlay Setup",
-                    "orientation": "none",
-                    "percent": 0.5,
-                    "scratchpad_state": "none",
-                    "sticky": False,
-                    "type": "con",
-                    "workspace_layout": "default",
-                    "swallows": [
-                        {
-                            "class": "^Dolphin\\-emu$",
-                            "instance": "^dolphin\\-emu$",
-                            "title": "^Dolphin\\ NetPlay\\ Setup$"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+                    {
+                        "border": "pixel",
+                        "current_border_width": 2,
+                        "floating": "auto_off",
+                        "fullscreen_mode": 0,
+                        "geometry": {
+                            "x": 2542,
+                            "y": 344,
+                            "width": 518,
+                            "height": 356
+                        },
+                        "layout": "splith",
+                        "name": "Dolphin NetPlay Setup",
+                        "orientation": "none",
+                        "percent": 0.5,
+                        "scratchpad_state": "none",
+                        "sticky": False,
+                        "type": "con",
+                        "workspace_layout": "default",
+                        "swallows": [
+                            {
+                                "class": "^Dolphin\\-emu$",
+                                "instance": "^dolphin\\-emu$",
+                                "title": "^Dolphin\\ NetPlay\\ Setup$"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
     tree = util.build_layout(workspace_container, ['class', 'instance', 'title'])
     assert tree == expected_tree
 
