@@ -202,17 +202,20 @@ def restore_layout(workspace, directory):
     """
     Restore an i3 workspace layout.
     """
-    # Get ids of all placeholder or normal windows in workspace.
     window_ids = []
     placeholder_window_ids = []
-    for (_, window) in util.windows_in_workspace(workspace):
-        pid = window.pid
-        if pid == 0:
-            # If window has no process, add it to list of placeholder windows.
-            placeholder_window_ids.append(int(window.id, 16))
+
+    # Get ids of all placeholder or normal windows in workspace.
+    ws = util.get_workspace_tree(workspace)
+    windows = util.get_leaves(ws)
+    for con in windows:
+        if util.is_placeholder(con):
+            # If window is a placeholder, add it to list of placeholder
+            # windows.
+            placeholder_window_ids.append(con['window'])
         else:
             # Otherwise, add it to the list of regular windows.
-            window_ids.append(int(window.id, 16))
+            window_ids.append(con['window'])
 
     # Unmap all non-placeholder windows in workspace.
     for window_id in window_ids:

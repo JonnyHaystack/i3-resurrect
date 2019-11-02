@@ -1,3 +1,4 @@
+import i3ipc
 import json
 import re
 import shlex
@@ -112,9 +113,9 @@ def get_workspace_tree(workspace):
     return {}
 
 
-def windows_in_container(container):
+def get_leaves(container):
     """
-    Recursive generator for iterating over windows in a container.
+    Recursive generator for retrieving a list of a container's leaf nodes.
 
     Args:
         container: The container to traverse.
@@ -129,7 +130,7 @@ def windows_in_container(container):
     for node in nodes:
         if 'window_properties' in node:
             yield node
-        yield from windows_in_container(node)
+        yield from get_leaves(node)
 
 
 def windows_in_workspace(workspace):
@@ -140,25 +141,29 @@ def windows_in_workspace(workspace):
         workspace: The name of the workspace whose windows to iterate over.
     """
     ws = get_workspace_tree(workspace)
-    for con in windows_in_container(ws):
-        # Get information on the window.
+    for con in get_leaves(ws):
+        # Get window information from wmctrl.
+        window = None
         try:
             window = Window.by_id(con['window'])[0]
         except ValueError as e:
             eprint(str(e))
             continue
 
-        # Pre-emptively attempt to catch error
-        try:
-            window
-        except NameError as e:
-            eprint(str(e))
-            continue
-
-        if not window:
+        if window is None:
             continue
 
         yield (con, window)
+
+
+def is_placeholder(container):
+    """
+    Check if a container is a placeholder window.
+
+    Args:
+        container: The container to check.
+    """
+    return container['swallows'] not in [[], None]
 
 
 def get_window_command(window_properties, cmdline):
