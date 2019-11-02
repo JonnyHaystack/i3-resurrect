@@ -40,7 +40,7 @@ def build_layout(tree, swallow):
     JSON serialisable.
     """
     processed = process_node(tree, swallow)
-    return processed.get('nodes', []) + processed.get('floating_nodes', [])
+    return processed
 
 
 def process_node(original, swallow):
