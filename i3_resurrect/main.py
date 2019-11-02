@@ -175,7 +175,7 @@ def restore_programs(workspace, directory):
     commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
     commands = json.loads(commands_file.read_text())
     for entry in commands:
-        command = entry['command']
+        cmdline = entry['command']
         working_directory = entry['working_directory']
 
         # If the working directory does not exist, set working directory to
@@ -183,20 +183,19 @@ def restore_programs(workspace, directory):
         if not Path(working_directory).exists():
             working_directory = Path.home()
 
-        # If command has multiple arguments, split them into an array.
-        if isinstance(command, list):
-            cmdline = command
+        # If cmdline is array, join it into one string for use with i3's exec
+        # command.
+        if isinstance(cmdline, list):
+            # Quote each argument of the command in case some of them contain
+            # spaces.
+            for i in range(0, len(cmdline)):
+                cmdline[i] = f'"{cmdline[i]}"'
+            command = ' '.join(cmdline)
         else:
-            cmdline = shlex.split(command)
+            command = cmdline
 
         # Execute command as subprocess.
-        subprocess.Popen(
-            cmdline,
-            cwd=working_directory,
-            env={**os.environ, **{'PWD': working_directory}},
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
+        i3.command(f'exec cd "{working_directory}" && {command}')
 
 
 def restore_layout(workspace, directory):
