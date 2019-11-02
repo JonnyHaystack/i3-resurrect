@@ -233,8 +233,8 @@ def restore_layout(workspace, directory):
     ws_layout_mode = layout.get('layout', 'default')
     tree = i3.get_tree()
     focused = tree.find_focused()
-    workspace = focused.workspace()
-    workspace.command(f'layout {ws_layout_mode}')
+    workspace_node = focused.workspace()
+    workspace_node.command(f'layout {ws_layout_mode}')
 
     # We don't want to pass the whole layout file because we don't want to
     # append a new workspace, but append_layout requires a file path so we must
