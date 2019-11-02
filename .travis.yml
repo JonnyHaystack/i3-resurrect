@@ -8,7 +8,7 @@ dist: disco
 services:
 - xvfb
 before_install:
-- sudo apt-get install -y i3 i3status
+- sudo apt-get install -y i3 i3status wmctrl
 install:
 - pip install -r requirements.txt
 before_script:
