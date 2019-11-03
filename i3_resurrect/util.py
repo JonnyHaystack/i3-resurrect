@@ -162,7 +162,7 @@ def get_window_pid(con):
         con: The window container node whose PID to look up.
     """
     window_id = con['window']
-    if window_id in [[], None]:
+    if window_id is None:
         return 0
 
     try:
@@ -171,7 +171,7 @@ def get_window_pid(con):
             stderr=subprocess.DEVNULL,
         ).decode('utf-8').split(' ')
         pid = int(xprop_output[len(xprop_output) - 1])
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, ValueError, IndexError):
         return 0
 
     return pid
