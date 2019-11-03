@@ -1,10 +1,9 @@
+import i3ipc
 import json
 import re
 import shlex
 import subprocess
 import sys
-
-from wmctrl import Window
 
 from . import config
 
@@ -112,9 +111,9 @@ def get_workspace_tree(workspace):
     return {}
 
 
-def windows_in_container(container):
+def get_leaves(container):
     """
-    Recursive generator for iterating over windows in a container.
+    Recursive generator for retrieving a list of a container's leaf nodes.
 
     Args:
         container: The container to traverse.
@@ -129,7 +128,7 @@ def windows_in_container(container):
     for node in nodes:
         if 'window_properties' in node:
             yield node
-        yield from windows_in_container(node)
+        yield from get_leaves(node)
 
 
 def windows_in_workspace(workspace):
@@ -140,25 +139,42 @@ def windows_in_workspace(workspace):
         workspace: The name of the workspace whose windows to iterate over.
     """
     ws = get_workspace_tree(workspace)
-    for con in windows_in_container(ws):
-        # Get information on the window.
-        try:
-            window = Window.by_id(con['window'])[0]
-        except ValueError as e:
-            eprint(str(e))
-            continue
+    for con in get_leaves(ws):
+        pid = get_window_pid(con)
+        yield (con, pid)
 
-        # Pre-emptively attempt to catch error
-        try:
-            window
-        except NameError as e:
-            eprint(str(e))
-            continue
 
-        if not window:
-            continue
+def is_placeholder(container):
+    """
+    Check if a container is a placeholder window.
 
-        yield (con, window)
+    Args:
+        container: The container to check.
+    """
+    return container['swallows'] not in [[], None]
+
+
+def get_window_pid(con):
+    """
+    Get window PID using xprop.
+
+    Args:
+        con: The window container node whose PID to look up.
+    """
+    window_id = con['window']
+    if window_id is None:
+        return 0
+
+    try:
+        xprop_output = subprocess.check_output(
+            shlex.split(f'xprop _NET_WM_PID -id {window_id}'),
+            stderr=subprocess.DEVNULL,
+        ).decode('utf-8').split(' ')
+        pid = int(xprop_output[len(xprop_output) - 1])
+    except (subprocess.CalledProcessError, ValueError, IndexError):
+        return 0
+
+    return pid
 
 
 def get_window_command(window_properties, cmdline):
