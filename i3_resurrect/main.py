@@ -98,9 +98,7 @@ def save_commands(workspace, directory):
     # Loop through windows and save commands to launch programs on saved
     # workspace.
     commands = []
-    for (con, window) in util.windows_in_workspace(workspace):
-        pid = window.pid
-
+    for (con, pid) in util.windows_in_workspace(workspace):
         if pid == 0:
             continue
 

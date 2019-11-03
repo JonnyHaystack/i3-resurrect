@@ -5,8 +5,6 @@ import shlex
 import subprocess
 import sys
 
-from wmctrl import Window
-
 from . import config
 
 # The tree node attributes that we want to save.
@@ -142,18 +140,8 @@ def windows_in_workspace(workspace):
     """
     ws = get_workspace_tree(workspace)
     for con in get_leaves(ws):
-        # Get window information from wmctrl.
-        window = None
-        try:
-            window = Window.by_id(con['window'])[0]
-        except ValueError as e:
-            eprint(str(e))
-            continue
-
-        if window is None:
-            continue
-
-        yield (con, window)
+        pid = get_window_pid(con)
+        yield (con, pid)
 
 
 def is_placeholder(container):
@@ -164,6 +152,26 @@ def is_placeholder(container):
         container: The container to check.
     """
     return container['swallows'] not in [[], None]
+
+
+def get_window_pid(con):
+    """
+    Get window PID using xprop.
+
+    Args:
+        con: The window container node whose PID to look up.
+    """
+    window_id = con['window']
+    if window_id in [[], None]:
+        return 0
+
+    xprop_output = subprocess.check_output(
+        shlex.split(f'xprop _NET_WM_PID -id {window_id}')
+    ).decode('utf-8').split(' ')
+
+    pid = int(xprop_output[len(xprop_output) - 1])
+
+    return pid
 
 
 def get_window_command(window_properties, cmdline):
