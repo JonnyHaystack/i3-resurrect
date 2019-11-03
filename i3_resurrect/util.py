@@ -165,11 +165,14 @@ def get_window_pid(con):
     if window_id in [[], None]:
         return 0
 
-    xprop_output = subprocess.check_output(
-        shlex.split(f'xprop _NET_WM_PID -id {window_id}')
-    ).decode('utf-8').split(' ')
-
-    pid = int(xprop_output[len(xprop_output) - 1])
+    try:
+        xprop_output = subprocess.check_output(
+            shlex.split(f'xprop _NET_WM_PID -id {window_id}'),
+            stderr=subprocess.DEVNULL,
+        ).decode('utf-8').split(' ')
+        pid = int(xprop_output[len(xprop_output) - 1])
+    except subprocess.CalledProcessError:
+        return 0
 
     return pid
 
