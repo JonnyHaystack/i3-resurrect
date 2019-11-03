@@ -759,7 +759,7 @@ def test_windows_in_container(monkeypatch):
         'floating': 'auto_off',
         'swallows': []
     }
-    windows = util.windows_in_container(workspace_tree)
+    windows = util.get_leaves(workspace_tree)
     assert windows != None
 
 
