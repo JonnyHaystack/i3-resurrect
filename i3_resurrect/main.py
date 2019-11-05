@@ -2,6 +2,7 @@ import json
 import os
 import shlex
 import subprocess
+import tempfile
 from pathlib import Path
 
 import click
@@ -239,25 +240,23 @@ def restore_layout(workspace, directory):
         workspace_node.command(f'layout {ws_layout_mode}')
 
         # We don't want to pass the whole layout file because we don't want to
-        # append a new workspace, but append_layout requires a file path so we
-        # must extract the part of the json that we want and store it in a
-        # temporary file.
+        # append a new workspace. append_layout requires a file path so we must
+        # extract the part of the json that we want and store it in a tempfile.
         restorable_layout = (
-            layout.get('nodes', []) + layout.get('floating_nodes', [])
+            layout.get('nodes', []) + layout.get('floating_nodes', []),
         )
-        restorable_layout_file = Path(
-            f'/tmp/i3-resurrect/workspace_{workspace}_layout.json'
+        restorable_layout_file = tempfile.NamedTemporaryFile(
+            mode='w',
+            prefix='i3-resurrect',
         )
-        # Create tempfile directory if non-existent.
-        restorable_layout_file.parent.mkdir(parents=True, exist_ok=True)
-        with restorable_layout_file.open('w') as f:
-            f.write(json.dumps(restorable_layout))
+        restorable_layout_file.write(json.dumps(restorable_layout))
+        restorable_layout_file.flush()
 
         # Create fresh placeholder windows by appending layout to workspace.
-        i3.command(f'append_layout {str(restorable_layout_file)}')
+        i3.command(f'append_layout {restorable_layout_file.name}')
 
         # Delete tempfile.
-        restorable_layout_file.unlink()
+        restorable_layout_file.close()
     except Exception as e:
         util.eprint('Error occurred restoring workspace layout. Note that if '
                     'the layout was saved by a version prior to 1.4.0 it must '
