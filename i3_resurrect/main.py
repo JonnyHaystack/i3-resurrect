@@ -247,7 +247,7 @@ def restore_layout(workspace, directory):
         )
         restorable_layout_file = tempfile.NamedTemporaryFile(
             mode='w',
-            prefix='i3-resurrect',
+            prefix='i3-resurrect_',
         )
         restorable_layout_file.write(json.dumps(restorable_layout))
         restorable_layout_file.flush()
