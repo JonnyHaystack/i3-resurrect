@@ -224,43 +224,50 @@ def restore_layout(workspace, directory):
     for window_id in placeholder_window_ids:
         util.xdo_kill_window(window_id)
 
-    # Read saved layout file.
-    layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
-    with layout_file.open('r') as f:
-        layout = json.load(f)
+    try:
+        # Read saved layout file.
+        layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
+        with layout_file.open('r') as f:
+            layout = json.load(f)
 
-    # append_layout can only insert nodes so we must separately change the
-    # layout mode of the workspace node.
-    ws_layout_mode = layout.get('layout', 'default')
-    tree = i3.get_tree()
-    focused = tree.find_focused()
-    workspace_node = focused.workspace()
-    workspace_node.command(f'layout {ws_layout_mode}')
+        # append_layout can only insert nodes so we must separately change the
+        # layout mode of the workspace node.
+        ws_layout_mode = layout.get('layout', 'default')
+        tree = i3.get_tree()
+        focused = tree.find_focused()
+        workspace_node = focused.workspace()
+        workspace_node.command(f'layout {ws_layout_mode}')
 
-    # We don't want to pass the whole layout file because we don't want to
-    # append a new workspace, but append_layout requires a file path so we must
-    # extract the part of the json that we want and store it in a temporary
-    # file.
-    restorable_layout = (
-        layout.get('nodes', []) + layout.get('floating_nodes', [])
-    )
-    restorable_layout_file = Path(
-        f'/tmp/i3-resurrect/workspace_{workspace}_layout.json'
-    )
-    # Create tempfile directory if non-existent.
-    restorable_layout_file.parent.mkdir(parents=True, exist_ok=True)
-    with restorable_layout_file.open('w') as f:
-        f.write(json.dumps(restorable_layout))
+        # We don't want to pass the whole layout file because we don't want to
+        # append a new workspace, but append_layout requires a file path so we
+        # must extract the part of the json that we want and store it in a
+        # temporary file.
+        restorable_layout = (
+            layout.get('nodes', []) + layout.get('floating_nodes', [])
+        )
+        restorable_layout_file = Path(
+            f'/tmp/i3-resurrect/workspace_{workspace}_layout.json'
+        )
+        # Create tempfile directory if non-existent.
+        restorable_layout_file.parent.mkdir(parents=True, exist_ok=True)
+        with restorable_layout_file.open('w') as f:
+            f.write(json.dumps(restorable_layout))
 
-    # Create fresh placeholder windows by appending layout to workspace.
-    i3.command(f'append_layout {str(restorable_layout_file)}')
+        # Create fresh placeholder windows by appending layout to workspace.
+        i3.command(f'append_layout {str(restorable_layout_file)}')
 
-    # Delete tempfile.
-    restorable_layout_file.unlink()
-
-    # Map all unmapped windows.
-    for window_id in window_ids:
-        util.xdo_map_window(window_id)
+        # Delete tempfile.
+        restorable_layout_file.unlink()
+    except Exception as e:
+        util.eprint('Error occurred restoring workspace layout. Note that if '
+                    'the layout was saved by a version prior to 1.4.0 it must '
+                    'be recreated.')
+        util.eprint(str(e))
+    finally:
+        # Map all unmapped windows. We use finally because we don't want the
+        # user to lose their windows no matter what.
+        for window_id in window_ids:
+            util.xdo_map_window(window_id)
 
 
 if __name__ == '__main__':
