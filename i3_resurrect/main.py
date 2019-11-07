@@ -33,7 +33,7 @@ def main():
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
               default=None,
-              help=('The profile to save the workspace as.\n'
+              help=('The profile to save the workspace to.\n'
                     '[default: default]'))
 @click.option('--swallow', '-s',
               default='class,instance',
@@ -160,7 +160,7 @@ def save_programs(workspace, directory, profile):
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
               default=None,
-              help=('The profile to save the workspace as.\n'
+              help=('The profile to restore the workspace from.\n'
                     '[default: default]'))
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
