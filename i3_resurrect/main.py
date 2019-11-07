@@ -350,16 +350,19 @@ def list_workspaces(directory, item):
     else:
         directory = Path(directory) / 'profiles'
         profiles = []
-        for entry in directory.iterdir():
-            if entry.is_file():
-                tokens = entry.name.split('_')
-                profile = tokens[0]
-                temp = tokens[1]
-                file_type = temp[:temp.index('.json')]
-                profiles.append(f'Profile {profile} {file_type}')
-        profiles = natsorted(profiles)
-        for profile in profiles:
-            print(profile)
+        try:
+            for entry in directory.iterdir():
+                if entry.is_file():
+                    tokens = entry.name.split('_')
+                    profile = tokens[0]
+                    temp = tokens[1]
+                    file_type = temp[:temp.index('.json')]
+                    profiles.append(f'Profile {profile} {file_type}')
+            profiles = natsorted(profiles)
+            for profile in profiles:
+                print(profile)
+        except FileNotFoundError:
+            print('No profiles found')
 
 
 if __name__ == '__main__':
