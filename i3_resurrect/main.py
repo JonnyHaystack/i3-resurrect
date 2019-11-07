@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 import i3ipc
+from natsort import natsorted
 import psutil
 
 from . import config
@@ -335,22 +336,30 @@ def list_workspaces(directory, item):
     List saved workspaces or profiles.
     """
     if item == 'workspaces':
+        workspaces = []
         for entry in directory.iterdir():
             if entry.is_file():
                 tokens = entry.name.split('_')
                 workspace = tokens[1]
                 temp = tokens[2]
                 file_type = temp[:temp.index('.json')]
-                print(f'Workspace {workspace} {file_type}')
+                workspaces.append(f'Workspace {workspace} {file_type}')
+        workspaces = natsorted(workspaces)
+        for workspace in workspaces:
+            print(workspace)
     else:
         directory = Path(directory) / 'profiles'
+        profiles = []
         for entry in directory.iterdir():
             if entry.is_file():
                 tokens = entry.name.split('_')
                 profile = tokens[0]
                 temp = tokens[1]
                 file_type = temp[:temp.index('.json')]
-                print(f'Profile {profile} {file_type}')
+                profiles.append(f'Profile {profile} {file_type}')
+        profiles = natsorted(profiles)
+        for profile in profiles:
+            print(profile)
 
 
 if __name__ == '__main__':

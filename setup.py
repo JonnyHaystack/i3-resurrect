@@ -16,6 +16,7 @@ setup(
     install_requires=[
         'Click',
         'i3ipc',
+        'natsort',
         'psutil',
     ],
     entry_points={
