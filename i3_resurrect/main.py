@@ -32,8 +32,7 @@ def main():
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
               default=None,
-              help=('The profile to save the workspace to.\n'
-                    '[default: default]'))
+              help=('The profile to save the workspace to.'))
 @click.option('--swallow', '-s',
               default='class,instance',
               help=('The swallow criteria to use.\n'
@@ -159,8 +158,7 @@ def save_programs(workspace, directory, profile):
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
               default=None,
-              help=('The profile to restore the workspace from.\n'
-                    '[default: default]'))
+              help=('The profile to restore the workspace from.'))
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only restore layout.')
@@ -366,6 +364,43 @@ def list_workspaces(directory, item):
                 print(profile)
         except FileNotFoundError:
             print('No profiles found')
+
+
+@main.command('rm')
+@click.option('--workspace', '-w',
+              default=None,
+              help='The saved workspace to delete.')
+@click.option('--directory', '-d',
+              type=click.Path(file_okay=False),
+              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              help=('The directory to delete from.\n'
+                    '[default: ~/.i3/i3-resurrect]'))
+@click.option('--profile', '-p', default=None, help=('The profile to delete.'))
+@click.option('--layout-only', 'target',
+              flag_value='layout_only',
+              help='Only delete saved layout.')
+@click.option('--programs-only', 'target',
+              flag_value='programs_only',
+              help='Only delete saved programs.')
+def remove(workspace, directory, profile, target):
+    """
+    Remove saved layout or programs.
+    """
+    programs_filename = f'workspace_{workspace}_programs.json'
+    layout_filename = f'workspace_{workspace}_layout.json'
+    if profile is not None:
+        programs_filename = f'{profile}_programs.json'
+        layout_filename = f'{profile}_layout.json'
+    programs_file = Path(directory) / programs_filename
+    layout_file = Path(directory) / layout_filename
+
+    if target != 'programs_only':
+        # Delete programs file.
+        programs_filename.unlink()
+
+    if target != 'layout_only':
+        # Delete layout file.
+        layout_file.unlink()
 
 
 if __name__ == '__main__':
