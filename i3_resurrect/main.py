@@ -387,6 +387,7 @@ def remove(workspace, directory, profile, target):
     Remove saved layout or programs.
     """
     if profile is not None:
+        directory = Path(directory) / 'profiles'
         programs_filename = f'{profile}_programs.json'
         layout_filename = f'{profile}_layout.json'
     elif workspace is not None:
