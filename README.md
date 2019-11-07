@@ -128,7 +128,6 @@ Options:
   -d, --directory DIRECTORY  The directory to save the workspace to.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to save the workspace to.
-                             [default: default]
   -s, --swallow TEXT         The swallow criteria to use.
                              [options: class,instance,title,window_role]
                              [default: class,instance]
@@ -146,9 +145,30 @@ Options:
   -d, --directory DIRECTORY  The directory to restore the workspace from.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to restore the workspace from.
-                             [default: default]
   --layout-only              Only restore layout.
   --programs-only            Only restore running programs.
+
+
+Usage: i3-resurrect ls [OPTIONS] [[workspaces|profiles]]
+
+  List saved workspaces or profiles.
+
+Options:
+  -d, --directory DIRECTORY  The directory to search in.
+                             [default: ~/.i3/i3-resurrect]
+
+
+Usage: i3-resurrect rm [OPTIONS]
+
+  Remove saved layout or programs.
+
+Options:
+  -w, --workspace TEXT       The saved workspace to delete.
+  -d, --directory DIRECTORY  The directory to delete from.
+                             [default: ~/.i3/i3-resurrect]
+  -p, --profile TEXT         The profile to delete.
+  --layout-only              Only delete saved layout.
+  --programs-only            Only delete saved programs.
 ```
 
 Basic usage, matching only window class/instance:
@@ -177,6 +197,14 @@ because the title often won't match when the window first appears.
 When restoring a layout, i3-resurrect uses xdotool to unmap and remap every
 window on the workspace which causes i3 to see them as new windows so they will
 be swallowed by the placeholder windows.
+
+#### Scratchpad
+
+The scratchpad can be saved and restored like so:
+```
+i3-resurrect save -w __i3_scratch
+i3-resurrect restore -w __i3_scratch
+```
 
 #### Example configuration in i3
 
