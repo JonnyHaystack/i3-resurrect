@@ -245,6 +245,8 @@ def restore_layout(workspace, directory, profile):
     layout = None
     try:
         layout = json.loads(layout_file.read_text())
+        if layout == {}:
+            return
     except FileNotFoundError:
         if profile is not None:
             util.eprint(f'Could not find saved layout for profile "{profile}"')
