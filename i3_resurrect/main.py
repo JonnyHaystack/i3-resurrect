@@ -31,6 +31,10 @@ def main():
               default=Path('~/.i3/i3-resurrect/').expanduser(),
               help=('The directory to save the workspace to.\n'
                     '[default: ~/.i3/i3-resurrect]'))
+@click.option('--profile', '-p',
+              default=None,
+              help=('The profile to save the workspace to.\n'
+                    '[default: default]'))
 @click.option('--swallow', '-s',
               default='class,instance',
               help=('The swallow criteria to use.\n'
@@ -42,28 +46,34 @@ def main():
 @click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only save running programs.')
-def save_workspace(workspace, directory, swallow, target):
+def save_workspace(workspace, directory, profile, swallow, target):
     """
     Save an i3 workspace's layout and running programs to a file.
     """
+    if profile is not None:
+        directory = Path(directory) / 'profiles'
+
     # Create directory if non-existent.
     Path(directory).mkdir(parents=True, exist_ok=True)
 
     if target != 'programs_only':
         # Save workspace layout to file.
         swallow_criteria = swallow.split(',')
-        save_layout(workspace, directory, swallow_criteria)
+        save_layout(workspace, directory, profile, swallow_criteria)
 
     if target != 'layout_only':
         # Save running programs to file.
-        save_commands(workspace, directory)
+        save_programs(workspace, directory, profile)
 
 
-def save_layout(workspace, directory, swallow_criteria):
+def save_layout(workspace, directory, profile, swallow_criteria):
     """
     Save an i3 workspace layout to a file.
     """
-    layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
+    filename = f'workspace_{workspace}_layout.json'
+    if profile is not None:
+        filename = f'{profile}_layout.json'
+    layout_file = Path(directory) / filename
 
     workspace_tree = util.get_workspace_tree(workspace)
 
@@ -78,12 +88,15 @@ def save_layout(workspace, directory, swallow_criteria):
         )
 
 
-def save_commands(workspace, directory):
+def save_programs(workspace, directory, profile):
     """
     Save the commands to launch the programs open in the specified workspace
     to a file.
     """
-    commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
+    filename = f'workspace_{workspace}_programs.json'
+    if profile is not None:
+        filename = f'{profile}_programs.json'
+    programs_file = Path(directory) / filename
 
     terminals = config.get('terminals', [])
 
@@ -98,7 +111,7 @@ def save_commands(workspace, directory):
 
     # Loop through windows and save commands to launch programs on saved
     # workspace.
-    commands = []
+    programs = []
     for (con, pid) in util.windows_in_workspace(workspace):
         if pid == 0:
             continue
@@ -126,14 +139,14 @@ def save_commands(workspace, directory):
             working_directory = str(Path.home())
 
         # Add the command to the list.
-        commands.append({
+        programs.append({
             'command': command,
             'working_directory': working_directory
         })
 
         # Write list of commands to file as JSON.
-    with commands_file.open('w') as f:
-        f.write(json.dumps(commands, indent=2))
+    with programs_file.open('w') as f:
+        f.write(json.dumps(programs, indent=2))
 
 
 @main.command('restore')
@@ -145,35 +158,58 @@ def save_commands(workspace, directory):
               default=Path('~/.i3/i3-resurrect/').expanduser(),
               help=('The directory to restore the workspace from.\n'
                     '[default: ~/.i3/i3-resurrect]'))
+@click.option('--profile', '-p',
+              default=None,
+              help=('The profile to restore the workspace from.\n'
+                    '[default: default]'))
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only restore layout.')
 @click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only restore running programs.')
-def restore_workspace(workspace, directory, target):
+def restore_workspace(workspace, directory, profile, target):
     """
     Restore i3 workspace layout and programs.
     """
+    if profile is not None:
+        directory = Path(directory) / 'profiles'
+
     # Switch to the workspace which we are loading.
     i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
     if target != 'programs_only':
         # Load workspace layout.
-        restore_layout(workspace, directory)
+        restore_layout(workspace, directory, profile)
 
     if target != 'layout_only':
         # Restore programs.
-        restore_programs(workspace, directory)
+        restore_programs(workspace, directory, profile)
 
 
-def restore_programs(workspace, directory):
+def restore_programs(workspace, directory, profile):
     """
     Restore the running programs from an i3 workspace.
     """
-    commands_file = Path(directory) / f'workspace_{workspace}_programs.json'
-    commands = json.loads(commands_file.read_text())
-    for entry in commands:
+    filename = f'workspace_{workspace}_programs.json'
+    if profile is not None:
+        filename = f'{profile}_programs.json'
+    programs_file = Path(directory) / filename
+
+    # Read saved programs file.
+    programs = None
+    try:
+        programs = json.loads(programs_file.read_text())
+    except FileNotFoundError:
+        if profile is not None:
+            util.eprint('Could not find saved programs for profile '
+                        f'"{profile}"')
+        else:
+            util.eprint('Could not find saved programs for workspace '
+                        f'"{workspace}"')
+        return
+
+    for entry in programs:
         cmdline = entry['command']
         working_directory = entry['working_directory']
 
@@ -197,10 +233,27 @@ def restore_programs(workspace, directory):
         i3.command(f'exec cd "{working_directory}" && {command}')
 
 
-def restore_layout(workspace, directory):
+def restore_layout(workspace, directory, profile):
     """
     Restore an i3 workspace layout.
     """
+    filename = f'workspace_{workspace}_layout.json'
+    if profile is not None:
+        filename = f'{profile}_layout.json'
+    layout_file = Path(directory) / filename
+
+    # Read saved layout file.
+    layout = None
+    try:
+        layout = json.loads(layout_file.read_text())
+    except FileNotFoundError:
+        if profile is not None:
+            util.eprint(f'Could not find saved layout for profile "{profile}"')
+        else:
+            util.eprint('Could not find saved layout for workspace '
+                        f'"{workspace}"')
+        return
+
     window_ids = []
     placeholder_window_ids = []
 
@@ -226,11 +279,6 @@ def restore_layout(workspace, directory):
         util.xdo_kill_window(window_id)
 
     try:
-        # Read saved layout file.
-        layout_file = Path(directory) / f'workspace_{workspace}_layout.json'
-        with layout_file.open('r') as f:
-            layout = json.load(f)
-
         # append_layout can only insert nodes so we must separately change the
         # layout mode of the workspace node.
         ws_layout_mode = layout.get('layout', 'default')
@@ -257,6 +305,12 @@ def restore_layout(workspace, directory):
 
         # Delete tempfile.
         restorable_layout_file.close()
+    except FileNotFoundError:
+        if profile is not None:
+            util.eprint(f'Could not find saved layout for profile "{profile}"')
+        else:
+            util.eprint('Could not find saved layout for workspace '
+                        f'"{workspace}"')
     except Exception as e:
         util.eprint('Error occurred restoring workspace layout. Note that if '
                     'the layout was saved by a version prior to 1.4.0 it must '
