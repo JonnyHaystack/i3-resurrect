@@ -338,6 +338,7 @@ def list_workspaces(directory, item):
     List saved workspaces or profiles.
     """
     if item == 'workspaces':
+        directory = Path(directory)
         workspaces = []
         for entry in directory.iterdir():
             if entry.is_file():
