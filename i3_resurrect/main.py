@@ -386,17 +386,21 @@ def remove(workspace, directory, profile, target):
     """
     Remove saved layout or programs.
     """
-    programs_filename = f'workspace_{workspace}_programs.json'
-    layout_filename = f'workspace_{workspace}_layout.json'
     if profile is not None:
         programs_filename = f'{profile}_programs.json'
         layout_filename = f'{profile}_layout.json'
+    elif workspace is not None:
+        programs_filename = f'workspace_{workspace}_programs.json'
+        layout_filename = f'workspace_{workspace}_layout.json'
+    else:
+        util.eprint('Either --profile or --workspace must be specified.')
+        sys.exit(1)
     programs_file = Path(directory) / programs_filename
     layout_file = Path(directory) / layout_filename
 
     if target != 'programs_only':
         # Delete programs file.
-        programs_filename.unlink()
+        programs_file.unlink()
 
     if target != 'layout_only':
         # Delete layout file.
