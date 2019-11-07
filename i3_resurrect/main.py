@@ -1,7 +1,5 @@
 import json
-import os
-import shlex
-import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -207,7 +205,7 @@ def restore_programs(workspace, directory, profile):
         else:
             util.eprint('Could not find saved programs for workspace '
                         f'"{workspace}"')
-        return
+        sys.exit(1)
 
     for entry in programs:
         cmdline = entry['command']
@@ -229,7 +227,7 @@ def restore_programs(workspace, directory, profile):
         else:
             command = cmdline
 
-        # Execute command as subprocess.
+        # Execute command via i3 exec.
         i3.command(f'exec cd "{working_directory}" && {command}')
 
 
@@ -252,7 +250,7 @@ def restore_layout(workspace, directory, profile):
         else:
             util.eprint('Could not find saved layout for workspace '
                         f'"{workspace}"')
-        return
+        sys.exit(1)
 
     window_ids = []
     placeholder_window_ids = []
@@ -321,6 +319,38 @@ def restore_layout(workspace, directory, profile):
         # user to lose their windows no matter what.
         for window_id in window_ids:
             util.xdo_map_window(window_id)
+
+
+@main.command('ls')
+@click.option('--directory', '-d',
+              type=click.Path(file_okay=False),
+              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              help=('The directory to search in.\n'
+                    '[default: ~/.i3/i3-resurrect]'))
+@click.argument('item',
+                type=click.Choice(['workspaces', 'profiles']),
+                default='workspaces')
+def list_workspaces(directory, item):
+    """
+    List saved workspaces or profiles.
+    """
+    if item == 'workspaces':
+        for entry in directory.iterdir():
+            if entry.is_file():
+                tokens = entry.name.split('_')
+                workspace = tokens[1]
+                temp = tokens[2]
+                file_type = temp[:temp.index('.json')]
+                print(f'Workspace {workspace} {file_type}')
+    else:
+        directory = Path(directory) / 'profiles'
+        for entry in directory.iterdir():
+            if entry.is_file():
+                tokens = entry.name.split('_')
+                profile = tokens[0]
+                temp = tokens[1]
+                file_type = temp[:temp.index('.json')]
+                print(f'Profile {profile} {file_type}')
 
 
 if __name__ == '__main__':
