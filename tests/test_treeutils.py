@@ -1,4 +1,4 @@
-from i3_resurrect import tree
+from i3_resurrect import treeutil
 
 
 def test_windows_in_container():
@@ -344,5 +344,5 @@ def test_windows_in_container():
         'floating': 'auto_off',
         'swallows': []
     }
-    windows = tree.get_leaves(workspace_tree)
+    windows = treeutil.get_leaves(workspace_tree)
     assert windows is not None

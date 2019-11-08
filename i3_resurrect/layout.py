@@ -7,7 +7,7 @@ from pathlib import Path
 
 import i3ipc
 
-from . import tree
+from . import treeutil
 from . import util
 
 
@@ -20,7 +20,7 @@ def save(workspace, directory, profile, swallow_criteria):
         filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
 
-    workspace_tree = tree.get_workspace_tree(workspace)
+    workspace_tree = treeutil.get_workspace_tree(workspace)
 
     with layout_file.open('w') as f:
         # Build new workspace tree suitable for restoring and write it to a
@@ -60,8 +60,8 @@ def restore(workspace, directory, profile):
     placeholder_window_ids = []
 
     # Get ids of all placeholder or normal windows in workspace.
-    ws = tree.get_workspace_tree(workspace)
-    windows = tree.get_leaves(ws)
+    ws = treeutil.get_workspace_tree(workspace)
+    windows = treeutil.get_leaves(ws)
     for con in windows:
         window_id = con['window']
         if is_placeholder(con):
@@ -133,7 +133,7 @@ def build_layout(tree, swallow):
     Builds a restorable layout tree with basic Python data structures which are
     JSON serialisable.
     """
-    processed = tree.process_node(tree, swallow)
+    processed = treeutil.process_node(tree, swallow)
     return processed
 
 
