@@ -8,6 +8,7 @@ import i3ipc
 import psutil
 
 from . import config
+from . import treeutils
 from . import util
 
 
@@ -126,8 +127,8 @@ def windows_in_workspace(workspace):
     Args:
         workspace: The name of the workspace whose windows to iterate over.
     """
-    ws = get_workspace_tree(workspace)
-    for con in get_leaves(ws):
+    ws = treeutils.get_workspace_tree(workspace)
+    for con in treeutils.get_leaves(ws):
         pid = get_window_pid(con)
         yield (con, pid)
 
