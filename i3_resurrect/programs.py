@@ -51,6 +51,9 @@ def save(workspace, directory, profile):
         if command in ([], ''):
             continue
 
+        # Remove empty string arguments from command.
+        command = [arg for arg in command if arg != '']
+
         try:
             # Obtain working directory using psutil.
             if con['window_properties']['class'] in terminals:
@@ -109,8 +112,7 @@ def restore(workspace, directory, profile):
         if isinstance(cmdline, list):
             # Quote each argument of the command in case some of them contain
             # spaces.
-            for i in range(0, len(cmdline)):
-                cmdline[i] = f'"{cmdline[i]}"'
+            cmdline = [f'"{arg}"' for arg in cmdline if arg != '']
             command = ' '.join(cmdline)
         else:
             command = cmdline
