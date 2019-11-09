@@ -119,7 +119,11 @@ def restore(workspace, directory, profile):
 
         # Execute command via i3 exec.
         i3 = i3ipc.Connection()
-        i3.command(f'exec cd "{working_directory}" && {command}')
+        reply = i3.command(f'exec cd "{working_directory}" && {command}')
+        if not reply[0].success:
+            error_msg = reply[0].error
+            util.eprint('i3 failed to execute command: {command}. '
+                        f'It returned the following error message: {error_msg}')
 
 
 def windows_in_workspace(workspace):
