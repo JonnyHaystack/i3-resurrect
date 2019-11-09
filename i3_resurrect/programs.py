@@ -112,7 +112,7 @@ def restore(workspace, directory, profile):
         if isinstance(cmdline, list):
             # Quote each argument of the command in case some of them contain
             # spaces.
-            cmdline = [f'"{arg}"' for arg in cmdline if arg != '']
+            cmdline = [f'{arg}' for arg in cmdline if arg != '']
             command = ' '.join(cmdline)
         else:
             command = cmdline
