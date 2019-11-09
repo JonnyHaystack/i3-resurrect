@@ -1,0 +1,20 @@
+[
+  {
+    "command": [
+      "xterm"
+    ],
+    "working_directory": "/tmp"
+  },
+  {
+    "command": [
+      "xterm"
+    ],
+    "working_directory": "/tmp"
+  },
+  {
+    "command": [
+      "xterm"
+    ],
+    "working_directory": "/tmp"
+  }
+]

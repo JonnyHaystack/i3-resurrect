@@ -53,3 +53,13 @@ def test_get_window_command(monkeypatch):
         'title': 'Some arbitrary title',
     }
     assert programs.get_window_command(program3, ['program3']) == []
+
+
+def test_restore():
+    workspace = "1"
+    directory = "tests/test_data"
+    profile = "test_profile"
+
+    programs.restore(workspace, directory, profile)
+
+    # TODO Assert programs in profile are on workspace
