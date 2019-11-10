@@ -125,6 +125,7 @@ Usage: i3-resurrect save [OPTIONS]
 Options:
   -w, --workspace TEXT       The workspace to save.
                              [default: current workspace]
+  -n, --numeric              Select workspace by number instead of name.
   -d, --directory DIRECTORY  The directory to save the workspace to.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to save the workspace to.
@@ -142,6 +143,7 @@ Usage: i3-resurrect restore [OPTIONS]
 Options:
   -w, --workspace TEXT       The workspace to restore.
                              [default: current workspace]
+  -n, --numeric              Select workspace by number instead of name.
   -d, --directory DIRECTORY  The directory to restore the workspace from.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to restore the workspace from.

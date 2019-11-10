@@ -76,7 +76,7 @@ def process_node(original, swallow):
     return processed
 
 
-def get_workspace_tree(workspace):
+def get_workspace_tree(workspace, numeric):
     """
     Get full workspace layout tree from i3.
     """
@@ -89,10 +89,12 @@ def get_workspace_tree(workspace):
                 pass
             for ws in container['nodes']:
                 # Select workspace and trigger name and num field
-                if workspace.isdigit() and 'num' in ws:
-                    if ws['num'] == int(workspace):
+                if numeric:
+                    if (workspace.isdigit()
+                            and 'num' in ws
+                            and ws['num'] == int(workspace)):
                         return ws
-                if ws['name'] == workspace:
+                elif ws['name'] == workspace:
                     return ws
     return {}
 

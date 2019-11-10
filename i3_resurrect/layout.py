@@ -11,7 +11,7 @@ from . import treeutils
 from . import util
 
 
-def save(workspace, directory, profile, swallow_criteria):
+def save(workspace, numeric, directory, profile, swallow_criteria):
     """
     Save an i3 workspace layout to a file.
     """
@@ -20,7 +20,7 @@ def save(workspace, directory, profile, swallow_criteria):
         filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
 
-    workspace_tree = treeutils.get_workspace_tree(workspace)
+    workspace_tree = treeutils.get_workspace_tree(workspace, numeric)
 
     with layout_file.open('w') as f:
         # Build new workspace tree suitable for restoring and write it to a
@@ -33,7 +33,7 @@ def save(workspace, directory, profile, swallow_criteria):
         )
 
 
-def restore(workspace, directory, profile):
+def restore(workspace, numeric, directory, profile):
     """
     Restore an i3 workspace layout.
     """
@@ -60,7 +60,7 @@ def restore(workspace, directory, profile):
     placeholder_window_ids = []
 
     # Get ids of all placeholder or normal windows in workspace.
-    ws = treeutils.get_workspace_tree(workspace)
+    ws = treeutils.get_workspace_tree(workspace, numeric)
     windows = treeutils.get_leaves(ws)
     for con in windows:
         window_id = con['window']

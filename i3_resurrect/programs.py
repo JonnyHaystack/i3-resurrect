@@ -12,7 +12,7 @@ from . import treeutils
 from . import util
 
 
-def save(workspace, directory, profile):
+def save(workspace, numeric, directory, profile):
     """
     Save the commands to launch the programs open in the specified workspace
     to a file.
@@ -36,7 +36,7 @@ def save(workspace, directory, profile):
     # Loop through windows and save commands to launch programs on saved
     # workspace.
     programs = []
-    for (con, pid) in windows_in_workspace(workspace):
+    for (con, pid) in windows_in_workspace(workspace, numeric):
         if pid == 0:
             continue
 
@@ -122,14 +122,14 @@ def restore(workspace, directory, profile):
         i3.command(f'exec cd "{working_directory}" && {command}')
 
 
-def windows_in_workspace(workspace):
+def windows_in_workspace(workspace, numeric):
     """
     Generator to iterate over windows in a workspace.
 
     Args:
         workspace: The name of the workspace whose windows to iterate over.
     """
-    ws = treeutils.get_workspace_tree(workspace)
+    ws = treeutils.get_workspace_tree(workspace, numeric)
     for con in treeutils.get_leaves(ws):
         pid = get_window_pid(con)
         yield (con, pid)

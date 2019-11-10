@@ -20,6 +20,9 @@ def main():
 @main.command('save')
 @click.option('--workspace', '-w',
               help='The workspace to save.\n[default: current workspace]')
+@click.option('--numeric', '-n',
+              is_flag=True,
+              help='Select workspace by number instead of name.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
@@ -39,7 +42,7 @@ def main():
 @click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only save running programs.')
-def save_workspace(workspace, directory, profile, swallow, target):
+def save_workspace(workspace, numeric, directory, profile, swallow, target):
     """
     Save an i3 workspace's layout and running programs to a file.
     """
@@ -56,16 +59,19 @@ def save_workspace(workspace, directory, profile, swallow, target):
     if target != 'programs_only':
         # Save workspace layout to file.
         swallow_criteria = swallow.split(',')
-        layout.save(workspace, directory, profile, swallow_criteria)
+        layout.save(workspace, numeric, directory, profile, swallow_criteria)
 
     if target != 'layout_only':
         # Save running programs to file.
-        programs.save(workspace, directory, profile)
+        programs.save(workspace, numeric, directory, profile)
 
 
 @main.command('restore')
 @click.option('--workspace', '-w',
               help='The workspace to restore.\n[default: current workspace]')
+@click.option('--numeric', '-n',
+              is_flag=True,
+              help='Select workspace by number instead of name.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=Path('~/.i3/i3-resurrect/').expanduser(),
@@ -80,7 +86,7 @@ def save_workspace(workspace, directory, profile, swallow, target):
 @click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only restore running programs.')
-def restore_workspace(workspace, directory, profile, target):
+def restore_workspace(workspace, numeric, directory, profile, target):
     """
     Restore i3 workspace layout and programs.
     """
@@ -93,14 +99,20 @@ def restore_workspace(workspace, directory, profile, target):
         directory = Path(directory) / 'profiles'
 
     # Switch to the workspace which we are loading.
-    if workspace.isdigit():
-        i3.command(f'workspace --no-auto-back-and-forth number {workspace}')
+    if numeric:
+        if workspace.isdigit():
+            i3.command(
+                f'workspace --no-auto-back-and-forth number {workspace}'
+            )
+        else:
+            util.eprint('Invalid workspace number.')
+            sys.exit(1)
     else:
         i3.command(f'workspace --no-auto-back-and-forth {workspace}')
 
     if target != 'programs_only':
         # Load workspace layout.
-        layout.restore(workspace, directory, profile)
+        layout.restore(workspace, numeric, directory, profile)
 
     if target != 'layout_only':
         # Restore programs.
