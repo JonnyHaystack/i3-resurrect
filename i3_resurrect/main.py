@@ -98,21 +98,23 @@ def restore_workspace(workspace, numeric, directory, profile, target):
     if profile is not None:
         directory = Path(directory) / 'profiles'
 
-    # Switch to the workspace which we are loading.
-    if numeric:
-        if workspace.isdigit():
-            i3.command(
-                f'workspace --no-auto-back-and-forth number {workspace}'
-            )
-        else:
-            util.eprint('Invalid workspace number.')
-            sys.exit(1)
+    if numeric and not workspace.isdigit():
+        util.eprint('Invalid workspace number.')
+        sys.exit(1)
+
+    # Get layout name from file.
+    workspace_layout = layout.read(workspace, directory, profile)
+    if 'name' in workspace_layout and profile is None:
+        workspace_name = workspace_layout['name']
     else:
-        i3.command(f'workspace --no-auto-back-and-forth {workspace}')
+        workspace_name = workspace
+
+    # Switch to the workspace which we are loading.
+    i3.command(f'workspace --no-auto-back-and-forth {workspace_name}')
 
     if target != 'programs_only':
         # Load workspace layout.
-        layout.restore(workspace, numeric, directory, profile)
+        layout.restore(workspace_name, workspace_layout)
 
     if target != 'layout_only':
         # Restore programs.
