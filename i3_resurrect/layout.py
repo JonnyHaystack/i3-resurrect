@@ -33,21 +33,17 @@ def save(workspace, numeric, directory, profile, swallow_criteria):
         )
 
 
-def restore(workspace, numeric, directory, profile):
+def read(workspace, directory, profile):
     """
-    Restore an i3 workspace layout.
+    Read saved layout file.
     """
     filename = f'workspace_{workspace}_layout.json'
     if profile is not None:
         filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
-
-    # Read saved layout file.
     layout = None
     try:
         layout = json.loads(layout_file.read_text())
-        if layout == {}:
-            return
     except FileNotFoundError:
         if profile is not None:
             util.eprint(f'Could not find saved layout for profile "{profile}"')
@@ -55,12 +51,20 @@ def restore(workspace, numeric, directory, profile):
             util.eprint('Could not find saved layout for workspace '
                         f'"{workspace}"')
         sys.exit(1)
+    return layout
 
+
+def restore(workspace_name, layout):
+    """
+    Restore an i3 workspace layout.
+    """
+    if layout == {}:
+        return
     window_ids = []
     placeholder_window_ids = []
 
     # Get ids of all placeholder or normal windows in workspace.
-    ws = treeutils.get_workspace_tree(workspace, numeric)
+    ws = treeutils.get_workspace_tree(workspace_name, False)
     windows = treeutils.get_leaves(ws)
     for con in windows:
         window_id = con['window']
@@ -110,12 +114,6 @@ def restore(workspace, numeric, directory, profile):
 
         # Delete tempfile.
         restorable_layout_file.close()
-    except FileNotFoundError:
-        if profile is not None:
-            util.eprint(f'Could not find saved layout for profile "{profile}"')
-        else:
-            util.eprint('Could not find saved layout for workspace '
-                        f'"{workspace}"')
     except Exception as e:
         util.eprint('Error occurred restoring workspace layout. Note that if '
                     'the layout was saved by a version prior to 1.4.0 it must '
