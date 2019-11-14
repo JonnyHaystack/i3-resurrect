@@ -139,10 +139,10 @@ def list_workspaces(directory, item):
         workspaces = []
         for entry in directory.iterdir():
             if entry.is_file():
-                tokens = entry.name.split('_')
-                workspace = tokens[1]
-                temp = tokens[2]
-                file_type = temp[:temp.index('.json')]
+                name = entry.name
+                name = name[name.index('_') + 1:]
+                workspace = name[:name.rfind('_')]
+                file_type = name[name.rfind('_') + 1:name.index('.json')]
                 workspaces.append(f'Workspace {workspace} {file_type}')
         workspaces = natsorted(workspaces)
         for workspace in workspaces:
@@ -153,10 +153,9 @@ def list_workspaces(directory, item):
         try:
             for entry in directory.iterdir():
                 if entry.is_file():
-                    tokens = entry.name.split('_')
-                    profile = tokens[0]
-                    temp = tokens[1]
-                    file_type = temp[:temp.index('.json')]
+                    name = entry.name
+                    profile = name[:name.rfind('_')]
+                    file_type = name[name.rfind('_') + 1:name.index('.json')]
                     profiles.append(f'Profile {profile} {file_type}')
             profiles = natsorted(profiles)
             for profile in profiles:
