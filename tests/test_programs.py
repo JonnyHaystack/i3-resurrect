@@ -2,29 +2,6 @@ from i3_resurrect import config
 from i3_resurrect import programs
 
 
-def test_split_args():
-    cmdline = [
-        'test --test "test1 test2 test3" -test -t -e -s -t test',
-        'test',
-        '',
-        'test4',
-    ]
-    expected_cmdline = [
-        'test',
-        '--test',
-        'test1 test2 test3',
-        '-test',
-        '-t',
-        '-e',
-        '-s',
-        '-t',
-        'test',
-        'test',
-        'test4',
-    ]
-    assert programs.split_args(cmdline) == expected_cmdline
-
-
 def test_get_window_command(monkeypatch):
     # Monkeypatch config.
     monkeypatch.setattr(
