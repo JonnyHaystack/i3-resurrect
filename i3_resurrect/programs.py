@@ -51,8 +51,8 @@ def save(workspace, numeric, directory, profile):
         if command in ([], ''):
             continue
 
-        # Ensure args are split properly and remove empty args.
-        command = split_args(command)
+        # Remove empty string arguments from command.
+        command = [arg for arg in command if arg != '']
 
         try:
             # Obtain working directory using psutil.
@@ -110,11 +110,9 @@ def restore(workspace, directory, profile):
         # If cmdline is array, join it into one string for use with i3's exec
         # command.
         if isinstance(cmdline, list):
-            # Ensure args are split properly and remove empty args.
-            cmdline = split_args(cmdline)
             # Quote each argument of the command in case some of them contain
             # spaces.
-            cmdline = [f'"{arg}"' for arg in cmdline]
+            cmdline = [f'"{arg}"' for arg in cmdline if arg != '']
             command = ' '.join(cmdline)
         else:
             command = cmdline
@@ -122,25 +120,6 @@ def restore(workspace, directory, profile):
         # Execute command via i3 exec.
         i3 = i3ipc.Connection()
         i3.command(f'exec cd "{working_directory}" && {command}')
-
-
-def split_args(cmdline):
-    """
-    Function for making sure command line arguments are split properly and
-    removing empty arguments.
-
-    Args:
-        cmdline: The cmdline to process.
-    """
-    # Sometimes the process may modify its own cmdline which can result in the
-    # cmdline returned by psutil not being split correctly, so we must make
-    # sure every element is a single argument.
-    result = []
-    for arg in cmdline:
-        result += shlex.split(arg)
-    # Empty string args cause problems with i3 exec so we filter them out.
-    result = [arg for arg in result if arg != '']
-    return result
 
 
 def windows_in_workspace(workspace, numeric):
