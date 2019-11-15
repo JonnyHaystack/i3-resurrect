@@ -189,8 +189,9 @@ def remove(workspace, directory, profile, target):
         programs_filename = f'{profile}_programs.json'
         layout_filename = f'{profile}_layout.json'
     elif workspace is not None:
-        programs_filename = f'workspace_{workspace}_programs.json'
-        layout_filename = f'workspace_{workspace}_layout.json'
+        workspace_id = util.filename_filter(workspace)
+        programs_filename = f'workspace_{workspace_id}_programs.json'
+        layout_filename = f'workspace_{workspace_id}_layout.json'
     else:
         util.eprint('Either --profile or --workspace must be specified.')
         sys.exit(1)
