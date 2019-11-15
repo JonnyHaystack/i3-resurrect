@@ -17,7 +17,8 @@ def save(workspace, numeric, directory, profile):
     Save the commands to launch the programs open in the specified workspace
     to a file.
     """
-    filename = f'workspace_{workspace}_programs.json'
+    workspace_id = util.filename_filter(workspace)
+    filename = f'workspace_{workspace_id}_programs.json'
     if profile is not None:
         filename = f'{profile}_programs.json'
     programs_file = Path(directory) / filename
@@ -80,7 +81,8 @@ def restore(workspace, directory, profile):
     """
     Restore the running programs from an i3 workspace.
     """
-    filename = f'workspace_{workspace}_programs.json'
+    workspace_id = util.filename_filter(workspace)
+    filename = f'workspace_{workspace_id}_programs.json'
     if profile is not None:
         filename = f'{profile}_programs.json'
     programs_file = Path(directory) / filename

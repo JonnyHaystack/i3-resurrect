@@ -15,7 +15,8 @@ def save(workspace, numeric, directory, profile, swallow_criteria):
     """
     Save an i3 workspace layout to a file.
     """
-    filename = f'workspace_{workspace}_layout.json'
+    workspace_id = util.filename_filter(workspace)
+    filename = f'workspace_{workspace_id}_layout.json'
     if profile is not None:
         filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
@@ -37,7 +38,8 @@ def read(workspace, directory, profile):
     """
     Read saved layout file.
     """
-    filename = f'workspace_{workspace}_layout.json'
+    workspace_id = util.filename_filter(workspace)
+    filename = f'workspace_{workspace_id}_layout.json'
     if profile is not None:
         filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
