@@ -18,7 +18,11 @@ def test_get_window_command(monkeypatch):
                     'command': 'run_program1'
                 },
                 {
-                    'title': 'Some arbitrary title'
+                    'title': 'Some arbitrary title',
+                },
+                {
+                    'class': 'Program4',
+                    'command': 'run_program4 {1}'
                 }
             ],
         },
@@ -27,7 +31,7 @@ def test_get_window_command(monkeypatch):
     # Test class + title mapping.
     program1_main = {
         'class': 'Program1',
-        'title': 'Main window title'
+        'title': 'Main window title',
     }
     assert programs.get_window_command(program1_main, ['program1']) == [
         'run_program1',
@@ -36,7 +40,7 @@ def test_get_window_command(monkeypatch):
     # Test class only mapping.
     program1_secondary = {
         'class': 'Program1',
-        'title': 'Blah random title'
+        'title': 'Blah random title',
     }
     assert programs.get_window_command(program1_secondary, ['program1']) == []
 
@@ -53,3 +57,13 @@ def test_get_window_command(monkeypatch):
         'title': 'Some arbitrary title',
     }
     assert programs.get_window_command(program3, ['program3']) == []
+
+    # Test cmdline arg interpolation.
+    program4 = {
+        'class': 'Program4',
+        'title': 'Blah random title',
+    }
+    assert programs.get_window_command(
+        program4,
+        ['/opt/Program4/program4', '/tmp/test.txt'],
+    ) == ['run_program4', '/tmp/test.txt']

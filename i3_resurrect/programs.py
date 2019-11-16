@@ -182,18 +182,31 @@ def get_window_command(window_properties, cmdline):
 
     # Find the mapping that gets the highest score.
     current_score = 0
+    best_match = None
     for rule in window_command_mappings:
         # Calculate score.
         score = calc_rule_match_score(rule, window_properties)
 
         if score > current_score:
             current_score = score
-            if 'command' not in rule:
-                command = []
-            elif isinstance(rule['command'], list):
-                command = rule['command']
-            else:
-                command = shlex.split(rule['command'])
+            best_match = rule
+
+    # If no match found, just use the original cmdline.
+    if best_match is None:
+        return command
+
+    try:
+        if 'command' not in best_match:
+            command = []
+        elif isinstance(best_match['command'], list):
+            command = [arg.format(*cmdline) for arg in best_match['command']]
+        else:
+            command = shlex.split(best_match['command'].format(*cmdline))
+    except IndexError:
+        util.eprint('IndexError occurred while processing command mapping:\n'
+                    f'  Mapping: {best_match}\n'
+                    f'  Process cmdline: {cmdline}')
+
     return command
 
 
