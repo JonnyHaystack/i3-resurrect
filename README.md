@@ -17,6 +17,9 @@ A simple but flexible solution to saving and restoring i3 workspaces
    * [Installation](#installation)
    * [Usage](#usage)
 * [Configuration](#configuration)
+   * [Window command mappings](#window-command-mappings)
+   * [Terminals](#terminals)
+   * [Per window swallow criteria](#per-window-swallow-criteria)
 * [Contributing](#contributing)
 * [Contributors](#contributors)
 * [License](#license)
@@ -386,7 +389,8 @@ in a terminal and then click on the desired window.
 #### Argument interpolation
 
 You can also interpolate arguments from the actual process's cmdline into a
-custom command mapping using Python format specifiers. For example:
+custom command mapping using Python format specifiers. This is useful when you
+want to keep parts of the original command. Example:
 
 Command mapping:
 ```
