@@ -16,7 +16,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
    * [Requirements](#requirements)
    * [Installation](#installation)
    * [Usage](#usage)
-   * [Configuration](#configuration)
+* [Configuration](#configuration)
 * [Contributing](#contributing)
 * [Contributors](#contributors)
 * [License](#license)
@@ -323,12 +323,12 @@ Example of usage with the second configuration:
 
 [![Example of usage with the second configuration](https://i.imgur.com/mi9Uml8.gif)](https://gfycat.com/selfreliantdarkkoodoo)
 
-### Configuration
+## Configuration
 
 The config file should be located at `~/.config/i3-resurrect/config.json`.
 A default config file will be created when you first run i3-resurrect.
 
-#### Window command mappings
+### Window command mappings
 
 In the case of a window where the process `cmdline` is not the same as the
 command you must run to launch that program, you can add an explicit window
@@ -363,17 +363,18 @@ if it also matches a certain title:
 ```
 {
   ...
-    "window_command_mappings": [
-      ...
-      {
-        "class": "Some-program",
-      },
-      {
-        "class": "Some-program",
-        "title": "Main window's title"
-      }
-      ...
-    ]
+  "window_command_mappings": [
+    ...
+    {
+      "class": "Some-program"
+    },
+    {
+      "class": "Some-program",
+      "title": "Main window's title",
+      "command": ["some-program", "arg1", "arg2"]
+    }
+    ...
+  ]
   ...
 }
 ```
@@ -382,7 +383,32 @@ Hint:
 If you need to find out a window's class/instance, type `xprop | grep WM_CLASS`
 in a terminal and then click on the desired window.
 
-#### Terminals
+#### Argument interpolation
+
+You can also interpolate arguments from the actual process's cmdline into a
+custom command mapping using Python format specifiers. For example:
+
+Command mapping:
+```
+{
+  ...
+  "window_command_mappings": [
+    ...
+    {
+      "class": "Code",
+      "command": "code -n {1}"
+    }
+    ...
+  ]
+  ...
+}
+```
+
+Actual cmdline: `['code', '/path/to/file.txt']`
+
+Resulting command that gets saved: `code -n /path/to/file.txt`
+
+### Terminals
 
 For terminal emulator windows, we must get the working directory from the
 first subprocess (usually this will be your shell) instead of the window's root
@@ -410,7 +436,7 @@ Some examples are included in the default config. If you would like me to add
 more command mappings or terminals to the default config, please open an issue
 for it.
 
-#### Per window swallow criteria
+### Per window swallow criteria
 
 It is also possible to configure swallow criteria on a per window basis, which
 will override the criteria set by the `--swallow` command line parameter.
