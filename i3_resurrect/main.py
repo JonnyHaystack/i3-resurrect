@@ -118,7 +118,8 @@ def restore_workspace(workspace, numeric, directory, profile, target):
 
     if target != 'layout_only':
         # Restore programs.
-        programs.restore(workspace, directory, profile)
+        saved_programs = programs.read(workspace, directory, profile)
+        programs.restore(workspace_name, saved_programs)
 
 
 @main.command('ls')
