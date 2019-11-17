@@ -90,6 +90,12 @@ reimplemented it in Python.
 ### Installation
 
 #### From the AUR using yay (recommended for Arch Linux users)
+Latest release:
+```
+yay -S i3-resurrect
+```
+
+Latest development version:
 ```
 yay -S i3-resurrect-git
 ```
