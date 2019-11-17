@@ -43,6 +43,7 @@ def read(workspace, directory, profile):
     if profile is not None:
         filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
+
     layout = None
     try:
         layout = json.loads(layout_file.read_text())

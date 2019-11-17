@@ -23,8 +23,6 @@ def save(workspace, numeric, directory, profile):
         filename = f'{profile}_programs.json'
     programs_file = Path(directory) / filename
 
-    terminals = config.get('terminals', [])
-
     # Print deprecation warning if using old dictionary method of writing
     # window command mappings.
     # TODO: Remove in 2.0.0
@@ -34,6 +32,78 @@ def save(workspace, numeric, directory, profile):
               'is deprecated and will be removed in favour of the list method '
               'in the next major version.')
 
+    programs = get_programs(workspace, numeric)
+
+    # Write list of commands to file as JSON.
+    with programs_file.open('w') as f:
+        f.write(json.dumps(programs, indent=2))
+
+
+def read(workspace, directory, profile):
+    """
+    Read saved programs file.
+    """
+    workspace_id = util.filename_filter(workspace)
+    filename = f'workspace_{workspace_id}_programs.json'
+    if profile is not None:
+        filename = f'{profile}_programs.json'
+    programs_file = Path(directory) / filename
+
+    programs = None
+    try:
+        programs = json.loads(programs_file.read_text())
+    except FileNotFoundError:
+        if profile is not None:
+            util.eprint('Could not find saved programs for profile '
+                        f'"{profile}"')
+        else:
+            util.eprint('Could not find saved programs for workspace '
+                        f'"{workspace}"')
+        sys.exit(1)
+    return programs
+
+
+def restore(workspace_name, saved_programs):
+    """
+    Restore the running programs from an i3 workspace.
+    """
+    # Remove already running programs from the list of program to restore.
+    running_programs = get_programs(workspace_name, False)
+    for program in running_programs:
+        saved_programs.remove(program)
+
+    i3 = i3ipc.Connection()
+    for entry in saved_programs:
+        cmdline = entry['command']
+        working_directory = entry['working_directory']
+
+        # If the working directory does not exist, set working directory to
+        # user's home directory.
+        if not Path(working_directory).exists():
+            working_directory = Path.home()
+
+        # If cmdline is array, join it into one string for use with i3's exec
+        # command.
+        if isinstance(cmdline, list):
+            # Quote each argument of the command in case some of them contain
+            # spaces.
+            cmdline = [f'"{arg}"' for arg in cmdline if arg != '']
+            command = ' '.join(cmdline)
+        else:
+            command = cmdline
+
+        # Execute command via i3 exec.
+        i3.command(f'exec cd "{working_directory}" && {command}')
+
+
+def get_programs(workspace, numeric):
+    """
+    Get running programs in specified workspace.
+
+    Args:
+        workspace: The workspace to search.
+        numeric: Identify workspace by number instead of name.
+    """
     # Loop through windows and save commands to launch programs on saved
     # workspace.
     programs = []
@@ -55,6 +125,8 @@ def save(workspace, numeric, directory, profile):
         # Remove empty string arguments from command.
         command = [arg for arg in command if arg != '']
 
+        terminals = config.get('terminals', [])
+
         try:
             # Obtain working directory using psutil.
             if con['window_properties']['class'] in terminals:
@@ -72,56 +144,7 @@ def save(workspace, numeric, directory, profile):
             'working_directory': working_directory
         })
 
-    # Write list of commands to file as JSON.
-    with programs_file.open('w') as f:
-        f.write(json.dumps(programs, indent=2))
-
-
-def restore(workspace, directory, profile):
-    """
-    Restore the running programs from an i3 workspace.
-    """
-    workspace_id = util.filename_filter(workspace)
-    filename = f'workspace_{workspace_id}_programs.json'
-    if profile is not None:
-        filename = f'{profile}_programs.json'
-    programs_file = Path(directory) / filename
-
-    # Read saved programs file.
-    programs = None
-    try:
-        programs = json.loads(programs_file.read_text())
-    except FileNotFoundError:
-        if profile is not None:
-            util.eprint('Could not find saved programs for profile '
-                        f'"{profile}"')
-        else:
-            util.eprint('Could not find saved programs for workspace '
-                        f'"{workspace}"')
-        sys.exit(1)
-
-    for entry in programs:
-        cmdline = entry['command']
-        working_directory = entry['working_directory']
-
-        # If the working directory does not exist, set working directory to
-        # user's home directory.
-        if not Path(working_directory).exists():
-            working_directory = Path.home()
-
-        # If cmdline is array, join it into one string for use with i3's exec
-        # command.
-        if isinstance(cmdline, list):
-            # Quote each argument of the command in case some of them contain
-            # spaces.
-            cmdline = [f'"{arg}"' for arg in cmdline if arg != '']
-            command = ' '.join(cmdline)
-        else:
-            command = cmdline
-
-        # Execute command via i3 exec.
-        i3 = i3ipc.Connection()
-        i3.command(f'exec cd "{working_directory}" && {command}')
+    return programs
 
 
 def windows_in_workspace(workspace, numeric):
