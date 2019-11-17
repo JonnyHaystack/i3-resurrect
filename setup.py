@@ -15,8 +15,8 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'Click',
-        'wmctrl-python3',
         'i3ipc',
+        'natsort',
         'psutil',
     ],
     entry_points={

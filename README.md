@@ -16,7 +16,10 @@ A simple but flexible solution to saving and restoring i3 workspaces
    * [Requirements](#requirements)
    * [Installation](#installation)
    * [Usage](#usage)
-   * [Configuration](#configuration)
+* [Configuration](#configuration)
+   * [Window command mappings](#window-command-mappings)
+   * [Terminals](#terminals)
+   * [Per window swallow criteria](#per-window-swallow-criteria)
 * [Contributing](#contributing)
 * [Contributors](#contributors)
 * [License](#license)
@@ -64,10 +67,10 @@ customise a layout manually after saving it and relaunch all your programs
 manually when you restore the layout.
 
 My solution was to create a script that would extract just the bits from
-i3-save-tree that are needed, and use the
+i3-save-tree that are needed, and use
 [i3ipc](https://github.com/acrisci/i3ipc-python),
-[wmctrl](https://bitbucket.org/antocuni/wmctrl), and
-[psutil](https://github.com/giampaolo/psutil) Python libraries to obtain the
+[xprop](https://gitlab.freedesktop.org/xorg/app/xprop), and
+[psutil](https://github.com/giampaolo/psutil) to obtain the
 commands necessary to launch the programs in a saved workspace.
 
 Since I decided to release this publicly, I have improved the standard of the
@@ -79,9 +82,9 @@ reimplemented it in Python.
 
 ### Requirements
 
-- Python 3.6
+- Python 3.6+
 - i3
-- wmctrl
+- xprop
 - xdotool
 
 ### Installation
@@ -118,15 +121,17 @@ pip3 install --user .
 
 Full command line documentation:
 ```
-Usage: i3_resurrect.py save [OPTIONS]
+Usage: i3-resurrect save [OPTIONS]
 
   Save an i3 workspace's layout and running programs to a file.
 
 Options:
   -w, --workspace TEXT       The workspace to save.
                              [default: current workspace]
+  -n, --numeric              Select workspace by number instead of name.
   -d, --directory DIRECTORY  The directory to save the workspace to.
                              [default: ~/.i3/i3-resurrect]
+  -p, --profile TEXT         The profile to save the workspace to.
   -s, --swallow TEXT         The swallow criteria to use.
                              [options: class,instance,title,window_role]
                              [default: class,instance]
@@ -134,17 +139,41 @@ Options:
   --programs-only            Only save running programs.
 
 
-Usage: i3_resurrect.py restore [OPTIONS]
+Usage: i3-resurrect restore [OPTIONS]
 
   Restore i3 workspace layout and programs.
 
 Options:
   -w, --workspace TEXT       The workspace to restore.
                              [default: current workspace]
+  -n, --numeric              Select workspace by number instead of name.
   -d, --directory DIRECTORY  The directory to restore the workspace from.
                              [default: ~/.i3/i3-resurrect]
+  -p, --profile TEXT         The profile to restore the workspace from.
   --layout-only              Only restore layout.
   --programs-only            Only restore running programs.
+
+
+Usage: i3-resurrect ls [OPTIONS] [[workspaces|profiles]]
+
+  List saved workspaces or profiles.
+
+Options:
+  -d, --directory DIRECTORY  The directory to search in.
+                             [default: ~/.i3/i3-resurrect]
+
+
+Usage: i3-resurrect rm [OPTIONS]
+
+  Remove saved layout or programs.
+
+Options:
+  -w, --workspace TEXT       The saved workspace to delete.
+  -d, --directory DIRECTORY  The directory to delete from.
+                             [default: ~/.i3/i3-resurrect]
+  -p, --profile TEXT         The profile to delete.
+  --layout-only              Only delete saved layout.
+  --programs-only            Only delete saved programs.
 ```
 
 Basic usage, matching only window class/instance:
@@ -173,6 +202,14 @@ because the title often won't match when the window first appears.
 When restoring a layout, i3-resurrect uses xdotool to unmap and remap every
 window on the workspace which causes i3 to see them as new windows so they will
 be swallowed by the placeholder windows.
+
+#### Scratchpad
+
+The scratchpad can be saved and restored like so:
+```
+i3-resurrect save -w __i3_scratch
+i3-resurrect restore -w __i3_scratch
+```
 
 #### Example configuration in i3
 
@@ -289,12 +326,12 @@ Example of usage with the second configuration:
 
 [![Example of usage with the second configuration](https://i.imgur.com/mi9Uml8.gif)](https://gfycat.com/selfreliantdarkkoodoo)
 
-### Configuration
+## Configuration
 
 The config file should be located at `~/.config/i3-resurrect/config.json`.
 A default config file will be created when you first run i3-resurrect.
 
-#### Window command mappings
+### Window command mappings
 
 In the case of a window where the process `cmdline` is not the same as the
 command you must run to launch that program, you can add an explicit window
@@ -329,17 +366,18 @@ if it also matches a certain title:
 ```
 {
   ...
-    "window_command_mappings": [
-      ...
-      {
-        "class": "Some-program",
-      },
-      {
-        "class": "Some-program",
-        "title": "Main window's title"
-      }
-      ...
-    ]
+  "window_command_mappings": [
+    ...
+    {
+      "class": "Some-program"
+    },
+    {
+      "class": "Some-program",
+      "title": "Main window's title",
+      "command": ["some-program", "arg1", "arg2"]
+    }
+    ...
+  ]
   ...
 }
 ```
@@ -348,7 +386,33 @@ Hint:
 If you need to find out a window's class/instance, type `xprop | grep WM_CLASS`
 in a terminal and then click on the desired window.
 
-#### Terminals
+#### Argument interpolation
+
+You can also interpolate arguments from the actual process's cmdline into a
+custom command mapping using Python format specifiers. This is useful when you
+want to keep parts of the original command. Example:
+
+Command mapping:
+```
+{
+  ...
+  "window_command_mappings": [
+    ...
+    {
+      "class": "Code",
+      "command": "code -n {1}"
+    }
+    ...
+  ]
+  ...
+}
+```
+
+Actual cmdline: `['code', '/path/to/file.txt']`
+
+Resulting command that gets saved: `code -n /path/to/file.txt`
+
+### Terminals
 
 For terminal emulator windows, we must get the working directory from the
 first subprocess (usually this will be your shell) instead of the window's root
@@ -376,7 +440,7 @@ Some examples are included in the default config. If you would like me to add
 more command mappings or terminals to the default config, please open an issue
 for it.
 
-#### Per window swallow criteria
+### Per window swallow criteria
 
 It is also possible to configure swallow criteria on a per window basis, which
 will override the criteria set by the `--swallow` command line parameter.
@@ -413,7 +477,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * [Click](https://github.com/pallets/click) - Used to create the command line interface
 * [i3ipc](https://github.com/acrisci/i3ipc-python) - Used to get/build the workspace tree
-* [wmctrl](https://bitbucket.org/antocuni/wmctrl) - Used to get the PIDs of the windows that are retrieved using i3ipc
+* [xprop](https://gitlab.freedesktop.org/xorg/app/xprop) - Used to get the PIDs of the windows that are retrieved using i3ipc
 * [psutil](https://github.com/giampaolo/psutil) - Used to get the cmdline and cwd of each process
 * [xdotool](https://www.semicomplete.com/projects/xdotool/) - Used to unmap and remap windows
 
@@ -427,7 +491,6 @@ See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrec
 
 * [@pallets](https://github.com/pallets) - for Click
 * [@acrisci](https://github.com/acrisci) - for the i3ipc Python library
-* [@antocuni](https://bitbucket.org/antocuni) - for the wmctrl Python library
 * [@giampaolo](https://github.com/giampaolo) - for the psutil Python library
 * [@jordansissel](https://github.com/jordansissel) - for xdotool
 * Everyone who has worked on i3
