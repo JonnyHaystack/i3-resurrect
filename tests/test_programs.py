@@ -23,6 +23,14 @@ def test_get_window_command(monkeypatch):
                 {
                     'class': 'Program4',
                     'command': 'run_program4 {1}'
+                },
+                {
+                    'class': 'Program6',
+                    'command': 'chrome {1}'
+                },
+                {
+                    'class': 'Program7',
+                    'command': ['/opt/Pulse SMS/pulse-sms'],
                 }
             ],
         },
@@ -49,7 +57,8 @@ def test_get_window_command(monkeypatch):
         'class': 'Program2',
         'title': 'Main window title',
     }
-    assert programs.get_window_command(program2_main, ['program2']) == ['program2']
+    assert programs.get_window_command(
+        program2_main, ['program2']) == ['program2']
 
     # Test that title only mapping matches any window with matching title.
     program3 = {
@@ -67,3 +76,42 @@ def test_get_window_command(monkeypatch):
         program4,
         ['/opt/Program4/program4', '/tmp/test.txt'],
     ) == ['run_program4', '/tmp/test.txt']
+
+    # Test splitting of single arg command.
+    program5 = {
+        'class': 'Program5',
+        'title': 'program 5 title',
+    }
+    assert programs.get_window_command(
+        program5,
+        ['/opt/google/chrome/chrome --profile-directory=Default '
+         '--app=http://instacalc.com --user-data-dir=.config'],
+    ) == [
+        '/opt/google/chrome/chrome',
+        '--profile-directory=Default',
+        '--app=http://instacalc.com',
+        '--user-data-dir=.config',
+    ]
+
+    # Test splitting of single arg command when used with mapping and cmdline
+    # interpolation.
+    program6 = {
+        'class': 'Program6',
+    }
+    assert programs.get_window_command(
+        program6,
+        ['/opt/google/chrome/chrome --profile-directory=Default '
+         '--app=http://instacalc.com --user-data-dir=.config'],
+    ) == [
+        'chrome',
+        '--profile-directory=Default',
+    ]
+
+    # Test single arg command with space in executable path.
+    program7 = {
+        'class': 'Program7',
+    }
+    assert programs.get_window_command(
+        program7,
+        ['/opt/Pulse SMS/pulse-sms']
+    ) == ['/opt/Pulse SMS/pulse-sms']

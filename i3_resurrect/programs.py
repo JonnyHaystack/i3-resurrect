@@ -192,6 +192,14 @@ def get_window_command(window_properties, cmdline):
     highest score is then returned.
     """
     window_command_mappings = config.get('window_command_mappings', [])
+
+    # If cmdline has only one argument, try to split it. This means we can
+    # cover cases where the process overwrote its own cmdline, with the
+    # tradeoff that legitimate single argument cmdlines with spaces in the
+    # executable path will be broken.
+    if len(cmdline) == 1:
+        cmdline = shlex.split(cmdline[0])
+
     command = cmdline
 
     # If window command mappings is a dictionary in the config file, use the
@@ -251,7 +259,8 @@ def calc_rule_match_score(rule, window_properties):
     for criterion in criteria:
         if criterion in rule:
             # Score is zero if there are any non-matching criteria.
-            if rule[criterion] != window_properties[criterion]:
+            if (criterion not in window_properties
+                    or rule[criterion] != window_properties[criterion]):
                 return 0
             score += criteria[criterion]
     return score
