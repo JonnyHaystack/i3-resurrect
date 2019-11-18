@@ -20,6 +20,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
    * [Window command mappings](#window-command-mappings)
    * [Terminals](#terminals)
    * [Per window swallow criteria](#per-window-swallow-criteria)
+* [Troubleshooting](#troubleshooting)
 * [Contributing](#contributing)
 * [Contributors](#contributors)
 * [License](#license)
@@ -470,6 +471,36 @@ This can be achieved by putting the following in your config file:
   ...
 }
 ```
+
+## Troubleshooting
+
+### Programs with spaces in the executable path
+
+If the process of a program you are saving has one only argument (the
+executable) and the executable path contains spaces, it cannot be saved/restored 
+correctly unless you [create a custom command mapping](#window-command-mappings)
+for it.
+
+See issue #55 for why this is the case.
+
+### Manually editing programs files
+
+If you manually edit a saved programs file, you must be aware of a few things:
+
+If using an array to specify the command, each array element must be a distinct
+argument, otherwise it won't work. For example:
+```
+"command": ["some-program arg1 arg2"]
+```
+is invalid, but both
+```
+"command": ["some-program", "arg1", "arg2"]
+```
+and
+```
+"command": "some-program arg1 arg2"
+```
+are valid.
 
 ## Contributing
 
