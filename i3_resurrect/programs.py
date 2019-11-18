@@ -70,7 +70,8 @@ def restore(workspace_name, saved_programs):
     # Remove already running programs from the list of program to restore.
     running_programs = get_programs(workspace_name, False)
     for program in running_programs:
-        saved_programs.remove(program)
+        if program in saved_programs:
+            saved_programs.remove(program)
 
     i3 = i3ipc.Connection()
     for entry in saved_programs:
