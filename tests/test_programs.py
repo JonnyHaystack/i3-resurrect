@@ -41,7 +41,11 @@ def test_get_window_command(monkeypatch):
         'class': 'Program1',
         'title': 'Main window title',
     }
-    assert programs.get_window_command(program1_main, ['program1']) == [
+    assert programs.get_window_command(
+        program1_main,
+        ['program1'],
+        '/usr/bin/program1',
+    ) == [
         'run_program1',
     ]
 
@@ -50,7 +54,11 @@ def test_get_window_command(monkeypatch):
         'class': 'Program1',
         'title': 'Blah random title',
     }
-    assert programs.get_window_command(program1_secondary, ['program1']) == []
+    assert programs.get_window_command(
+        program1_secondary,
+        ['program1'],
+        '/usr/bin/program1',
+    ) == []
 
     # Test with separate program window with matching title but not class.
     program2_main = {
@@ -58,14 +66,21 @@ def test_get_window_command(monkeypatch):
         'title': 'Main window title',
     }
     assert programs.get_window_command(
-        program2_main, ['program2']) == ['program2']
+        program2_main,
+        ['program2'],
+        '/usr/bin/program2'
+    ) == ['/usr/bin/program2']
 
     # Test that title only mapping matches any window with matching title.
     program3 = {
         'class': 'Program3',
         'title': 'Some arbitrary title',
     }
-    assert programs.get_window_command(program3, ['program3']) == []
+    assert programs.get_window_command(
+        program3,
+        ['program3'],
+        '/usr/bin/program3',
+    ) == []
 
     # Test cmdline arg interpolation.
     program4 = {
@@ -75,6 +90,7 @@ def test_get_window_command(monkeypatch):
     assert programs.get_window_command(
         program4,
         ['/opt/Program4/program4', '/tmp/test.txt'],
+        '/opt/Program4/program4',
     ) == ['run_program4', '/tmp/test.txt']
 
     # Test splitting of single arg command.
@@ -86,6 +102,7 @@ def test_get_window_command(monkeypatch):
         program5,
         ['/opt/google/chrome/chrome --profile-directory=Default '
          '--app=http://instacalc.com --user-data-dir=.config'],
+        '/opt/google/chrome/chrome',
     ) == [
         '/opt/google/chrome/chrome',
         '--profile-directory=Default',
@@ -102,6 +119,7 @@ def test_get_window_command(monkeypatch):
         program6,
         ['/opt/google/chrome/chrome --profile-directory=Default '
          '--app=http://instacalc.com --user-data-dir=.config'],
+        '/opt/google/chrome/chrome',
     ) == [
         'chrome',
         '--profile-directory=Default',
@@ -113,5 +131,16 @@ def test_get_window_command(monkeypatch):
     }
     assert programs.get_window_command(
         program7,
-        ['/opt/Pulse SMS/pulse-sms']
+        ['/opt/Pulse SMS/pulse-sms'],
+        None
     ) == ['/opt/Pulse SMS/pulse-sms']
+
+    # Test single arg command with space in executable path with exe available.
+    program8 = {
+        'class': 'Program8',
+    }
+    assert programs.get_window_command(
+        program8,
+        ['/opt/Pulse SMS/pulse-sms'],
+        '/opt/Pulse SMS/pulse-sms',
+    )
