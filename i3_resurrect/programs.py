@@ -205,12 +205,15 @@ def get_window_command(window_properties, cmdline, exe):
     """
     window_command_mappings = config.get('window_command_mappings', [])
 
+    # Remove empty args from cmdline.
+    cmdline = [arg for arg in cmdline if arg != '']
+
+    # If cmdline has only one argument which is not a known executable path,
+    # try to split it. This means we can cover cases where the process
+    # overwrote its own cmdline, with the tradeoff that legitimate single
+    # argument cmdlines with a relative executable path containing spaces will
+    # be broken.
     if len(cmdline) == 1 and shutil.which(cmdline[0]) is None:
-        # If cmdline has only one argument which is not a known executable
-        # path, try to split it. This means we can cover cases where the
-        # process overwrote its own cmdline, with the tradeoff that legitimate
-        # single argument cmdlines with a relative executable path containing
-        # spaces will be broken.
         cmdline = shlex.split(cmdline[0])
     # Use the absolute executable path in case a relative path was used.
     if exe is not None:
