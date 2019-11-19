@@ -143,4 +143,17 @@ def test_get_window_command(monkeypatch):
         program8,
         ['/opt/Pulse SMS/pulse-sms'],
         '/opt/Pulse SMS/pulse-sms',
-    )
+    ) == ['/opt/Pulse SMS/pulse-sms', 'SMS/pulse-sms']
+
+    # Test cmdline with empty args is processed correctly.
+    assert programs.get_window_command(
+        program5,
+        ['/opt/google/chrome/chrome --profile-directory=Default '
+         '--app=http://instacalc.com --user-data-dir=.config', '', '', '', ''],
+        '/opt/google/chrome/chrome',
+    ) == [
+        '/opt/google/chrome/chrome',
+        '--profile-directory=Default',
+        '--app=http://instacalc.com',
+        '--user-data-dir=.config',
+    ]
