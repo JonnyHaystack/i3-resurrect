@@ -1,8 +1,11 @@
 import json
+import os
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
+from distutils import spawn
 
 import i3ipc
 import psutil
@@ -115,10 +118,18 @@ def get_programs(workspace, numeric):
         # Get process info for the window.
         procinfo = psutil.Process(pid)
 
+        # Try to get absolute path to executable.
+        exe = None
+        try:
+            exe = procinfo.exe()
+        except Exception:
+            pass
+
         # Create command to launch program.
         command = get_window_command(
             con['window_properties'],
             procinfo.cmdline(),
+            exe,
         )
         if command in ([], ''):
             continue
@@ -184,7 +195,7 @@ def get_window_pid(con):
     return pid
 
 
-def get_window_command(window_properties, cmdline):
+def get_window_command(window_properties, cmdline, exe):
     """
     Gets a window command.
 
@@ -194,12 +205,16 @@ def get_window_command(window_properties, cmdline):
     """
     window_command_mappings = config.get('window_command_mappings', [])
 
-    # If cmdline has only one argument, try to split it. This means we can
-    # cover cases where the process overwrote its own cmdline, with the
-    # tradeoff that legitimate single argument cmdlines with spaces in the
-    # executable path will be broken.
-    if len(cmdline) == 1:
+    if len(cmdline) == 1 and shutil.which(cmdline[0]) is None:
+        # If cmdline has only one argument which is not a known executable
+        # path, try to split it. This means we can cover cases where the
+        # process overwrote its own cmdline, with the tradeoff that legitimate
+        # single argument cmdlines with a relative executable path containing
+        # spaces will be broken.
         cmdline = shlex.split(cmdline[0])
+    # Use the absolute executable path in case a relative path was used.
+    if exe is not None:
+        cmdline[0] = exe
 
     command = cmdline
 

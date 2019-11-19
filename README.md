@@ -477,11 +477,14 @@ This can be achieved by putting the following in your config file:
 ### Programs with spaces in the executable path
 
 If the process of a program you are saving has one only argument (the
-executable) and the executable path contains spaces, it cannot be saved/restored 
-correctly unless you [create a custom command mapping](#window-command-mappings)
-for it.
+executable) and the executable path is a relative path containing spaces, it
+cannot be saved/restored correctly unless you
+[create a custom command mapping](#window-command-mappings) for it.
 
 See issue #55 for why this is the case.
+
+I think this is a pretty far out edge case though and I'd be surprised if it
+caused anyone issues.
 
 ### Manually editing programs files
 
