@@ -11,14 +11,12 @@ from . import treeutils
 from . import util
 
 
-def save(workspace, numeric, directory, profile, swallow_criteria):
+def save(workspace, numeric, directory, swallow_criteria):
     """
     Save an i3 workspace layout to a file.
     """
     workspace_id = util.filename_filter(workspace)
     filename = f'workspace_{workspace_id}_layout.json'
-    if profile is not None:
-        filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
 
     workspace_tree = treeutils.get_workspace_tree(workspace, numeric)
@@ -34,24 +32,19 @@ def save(workspace, numeric, directory, profile, swallow_criteria):
         )
 
 
-def read(workspace, directory, profile):
+def read(workspace, directory):
     """
     Read saved layout file.
     """
     workspace_id = util.filename_filter(workspace)
     filename = f'workspace_{workspace_id}_layout.json'
-    if profile is not None:
-        filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
 
     layout = None
     try:
         layout = json.loads(layout_file.read_text())
     except FileNotFoundError:
-        if profile is not None:
-            util.eprint(f'Could not find saved layout for profile "{profile}"')
-        else:
-            util.eprint('Could not find saved layout for workspace '
+        util.eprint('Could not find saved layout for workspace '
                         f'"{workspace}"')
         sys.exit(1)
     return layout

@@ -33,7 +33,7 @@ def main():
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
               default=None,
-              help=('The profile to save the workspace to.'))
+              help=('The profile to save.'))
 @click.option('--swallow', '-s',
               default='class,instance',
               help=('The swallow criteria to use.\n'
@@ -81,7 +81,7 @@ def save_workspace(workspace, numeric, directory, profile, swallow, target):
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
               default=None,
-              help=('The profile to restore the workspace from.'))
+              help=('The profile to restore.'))
 @click.option('--layout-only', 'target',
               flag_value='layout_only',
               help='Only restore layout.')
@@ -104,7 +104,7 @@ def restore_workspace(workspace, numeric, directory, profile, target):
         sys.exit(1)
 
     # Get layout name from file.
-    workspace_layout = layout.read(workspace, directory, profile)
+    workspace_layout = layout.read(workspace, directory)
     if 'name' in workspace_layout and profile is None:
         workspace_name = workspace_layout['name']
     else:
@@ -119,7 +119,7 @@ def restore_workspace(workspace, numeric, directory, profile, target):
 
     if target != 'layout_only':
         # Restore programs.
-        saved_programs = programs.read(workspace, directory, profile)
+        saved_programs = programs.read(workspace, directory)
         programs.restore(workspace_name, saved_programs)
 
 
@@ -129,42 +129,37 @@ def restore_workspace(workspace, numeric, directory, profile, target):
               default=DEFAULT_DIRECTORY,
               help=('The directory to search in.\n'
                     '[default: ~/.i3/i3-resurrect]'))
-@click.argument('item',
-                type=click.Choice(['workspaces', 'profiles']),
-                default='workspaces')
-def list_workspaces(directory, item):
+@click.option('--profile', '-p',
+              default=None,
+              help=('list saved workspaces from given profile.'))
+@click.option('--profiles', '-P',
+              is_flag=True,
+              help=('list saved profiles names.'))
+def list_workspaces(directory, profile, profiles):
     """
     List saved workspaces or profiles.
     """
-    directory = util.resolve_directory(directory)
+    directory = util.resolve_directory(directory, profile)
 
-    if item == 'workspaces':
-        workspaces = []
-        for entry in directory.iterdir():
-            if entry.is_file():
-                name = entry.name
+    directory = Path(directory)
+    items = []
+    # import ipdb; ipdb.set_trace()
+    for entry in directory.iterdir():
+        if not profiles and entry.is_file():
+            # List workspaces
+            name = entry.name
+            if name.rfind('workspace_') != -1:
                 name = name[name.index('_') + 1:]
                 workspace = name[:name.rfind('_')]
                 file_type = name[name.rfind('_') + 1:name.index('.json')]
-                workspaces.append(f'Workspace {workspace} {file_type}')
-        workspaces = natsorted(workspaces)
-        for workspace in workspaces:
-            print(workspace)
-    else:
-        directory = directory / 'profiles'
-        profiles = []
-        try:
-            for entry in directory.iterdir():
-                if entry.is_file():
-                    name = entry.name
-                    profile = name[:name.rfind('_')]
-                    file_type = name[name.rfind('_') + 1:name.index('.json')]
-                    profiles.append(f'Profile {profile} {file_type}')
-            profiles = natsorted(profiles)
-            for profile in profiles:
-                print(profile)
-        except FileNotFoundError:
-            print('No profiles found')
+                items.append(f'Workspace {workspace} {file_type}')
+        elif profiles and entry.is_dir():
+            # List profiles names
+            profile = entry.name
+            items.append(f'Profile {profile}')
+    items = natsorted(items)
+    for item in items:
+        print(item)
 
 
 @main.command('rm')
@@ -189,15 +184,12 @@ def remove(workspace, directory, profile, target):
     """
     directory = util.resolve_directory(directory, profile)
 
-    if profile is not None:
-        programs_filename = f'{profile}_programs.json'
-        layout_filename = f'{profile}_layout.json'
-    elif workspace is not None:
+    if workspace is not None:
         workspace_id = util.filename_filter(workspace)
         programs_filename = f'workspace_{workspace_id}_programs.json'
         layout_filename = f'workspace_{workspace_id}_layout.json'
     else:
-        util.eprint('Either --profile or --workspace must be specified.')
+        util.eprint('--workspace must be specified.')
         sys.exit(1)
     programs_file = Path(directory) / programs_filename
     layout_file = Path(directory) / layout_filename

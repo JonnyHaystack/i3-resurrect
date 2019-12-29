@@ -13,15 +13,13 @@ from . import treeutils
 from . import util
 
 
-def save(workspace, numeric, directory, profile):
+def save(workspace, numeric, directory):
     """
     Save the commands to launch the programs open in the specified workspace
     to a file.
     """
     workspace_id = util.filename_filter(workspace)
     filename = f'workspace_{workspace_id}_programs.json'
-    if profile is not None:
-        filename = f'{profile}_programs.json'
     programs_file = Path(directory) / filename
 
     # Print deprecation warning if using old dictionary method of writing
@@ -40,25 +38,19 @@ def save(workspace, numeric, directory, profile):
         f.write(json.dumps(programs, indent=2))
 
 
-def read(workspace, directory, profile):
+def read(workspace, directory):
     """
     Read saved programs file.
     """
     workspace_id = util.filename_filter(workspace)
     filename = f'workspace_{workspace_id}_programs.json'
-    if profile is not None:
-        filename = f'{profile}_programs.json'
     programs_file = Path(directory) / filename
 
     programs = None
     try:
         programs = json.loads(programs_file.read_text())
     except FileNotFoundError:
-        if profile is not None:
-            util.eprint('Could not find saved programs for profile '
-                        f'"{profile}"')
-        else:
-            util.eprint('Could not find saved programs for workspace '
+        util.eprint('Could not find saved programs for workspace '
                         f'"{workspace}"')
         sys.exit(1)
     return programs
