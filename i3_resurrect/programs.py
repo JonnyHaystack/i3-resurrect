@@ -1,11 +1,9 @@
 import json
-import os
 import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from distutils import spawn
 
 import i3ipc
 import psutil
