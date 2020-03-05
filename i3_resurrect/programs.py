@@ -1,11 +1,9 @@
 import json
-import os
 import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from distutils import spawn
 
 import i3ipc
 import psutil
@@ -91,13 +89,13 @@ def restore(workspace_name, saved_programs):
         if isinstance(cmdline, list):
             # Quote each argument of the command in case some of them contain
             # spaces.
-            cmdline = [f'"{arg}"' for arg in cmdline if arg != '']
+            cmdline = [f'\\"{arg}\\"' for arg in cmdline if arg != '']
             command = ' '.join(cmdline)
         else:
             command = cmdline
 
         # Execute command via i3 exec.
-        i3.command(f'exec cd "{working_directory}" && {command}')
+        i3.command(f'exec "cd \\"{working_directory}\\" && {command}"')
 
 
 def get_programs(workspace, numeric):
