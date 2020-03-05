@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+tox = "*"
+coveralls = "*"
+pylint = "*"
+yapf = "*"
+
+[packages]
+click = "*"
+i3ipc = "*"
+psutil = "*"
+natsort = "*"
+
+[requires]
+python_version = "3.8"
