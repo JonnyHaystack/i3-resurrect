@@ -46,7 +46,6 @@ def read(workspace, directory):
     except FileNotFoundError:
         util.eprint('Could not find saved layout for workspace '
                         f'"{workspace}"')
-        sys.exit(1)
     return layout
 
 
