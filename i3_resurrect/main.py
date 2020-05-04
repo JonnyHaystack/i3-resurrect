@@ -342,5 +342,51 @@ def remove(workspace, session, directory, profile, target, workspaces):
         sys.exit(1)
 
 
+@main.command('kill')
+@click.option('--workspace', '-w',
+              is_flag=True,
+              help='Kill workspace(s) layout(s) and program(s).')
+@click.option('--session', '-S',
+              is_flag=True,
+              help='Kill all workspace(s) and program(s) in current session.\n')
+@click.option('--force', '-F',
+              is_flag=True,
+              help='Do not ask for confirmation.')
+@click.argument('workspaces', nargs=-1)
+def kill(workspace, session, force, workspaces):
+    """
+    Kill workspace(s) or whole session.
+    """
+    i3 = i3ipc.Connection()
+
+    if not workspaces:
+        workspaces = ( i3.get_tree().find_focused().workspace().name, )
+
+    answer = "n"
+    if session:
+        workspaces = layout.list(i3, False)
+        if not force:
+            answer = input("Kill all workspaces in current session y/N ? ")
+    elif workspace:
+        if not force:
+            import ipdb; ipdb.set_trace()
+            w_list = workspaces[0]
+            for workspace in workspaces[1:]:
+                w_list = w_list + "," + "'" + workspace + "'"
+            if len(workspaces) == 1:
+                answer = input(f"Kill workspace {w_list} y/N ? ")
+            else:
+                answer = input(f"Kill workspaces {w_list} y/N ? ")
+    else:
+        util.eprint('either --workspace or --session option should be specified.')
+        sys.exit(1)
+
+    if not force and answer not in ("y", "Y"):
+        sys.exit(1)
+
+    for workspace_id in workspaces:
+        i3.command(f'[workspace="{workspace_id}"] kill')
+
+
 if __name__ == '__main__':
     main()
