@@ -97,8 +97,8 @@ def save_workspace(workspace, numeric, session, directory, profile, swallow, tar
             programs.save(workspace_id, numeric, directory)
 
 
-def restore_workspace(i3, saved_layout, saved_programs, target):
-    if saved_layout == None:
+def restore_workspace(i3, saved_layout, saved_programs, target, kill):
+    if not saved_layout:
         return
 
     # Get layout name from file.
@@ -112,7 +112,9 @@ def restore_workspace(i3, saved_layout, saved_programs, target):
 
     if target != 'programs_only':
         # Load workspace layout.
-        layout.restore(workspace_name, saved_layout)
+        layout.restore(
+            workspace_name, saved_layout, saved_programs, target, kill
+        )
 
     if target != 'layout_only':
         # Restore programs.
@@ -143,9 +145,19 @@ def restore_workspace(i3, saved_layout, saved_programs, target):
 @click.option('--programs-only', 'target',
               flag_value='programs_only',
               help='Only restore running programs.')
+@click.option('--clean', '-c', 'target',
+              flag_value='clean',
+              help='Move program that are not part of the workspace layout to \
+              the scratchpad.')
+@click.option('--reload', '-r', 'target',
+              flag_value='reload',
+              help='Move program from the workspace to the scratchpad. before restore it.')
+@click.option('--kill', '-K',
+              is_flag=True,
+              help='Kill unwanted program insted of moving it the scratchpad.')
 @click.argument('workspaces', nargs=-1)
 def restore_workspaces(workspace, numeric, session, directory, profile, target,
-        workspaces):
+        kill, workspaces):
     """
     Restore i3 workspace(s) layout(s) or whole session and programs.
 
@@ -182,7 +194,7 @@ def restore_workspaces(workspace, numeric, session, directory, profile, target,
         for layout_file, programs_file in files:
             saved_layout = json.loads(layout_file.read_text())
             saved_programs = json.loads(programs_file.read_text())
-            restore_workspace(i3, saved_layout, saved_programs, target)
+            restore_workspace(i3, saved_layout, saved_programs, target, kill)
     elif workspace:
         for workspace_id in workspaces:
             if numeric and not workspace_id.isdigit():
@@ -190,7 +202,7 @@ def restore_workspaces(workspace, numeric, session, directory, profile, target,
                 sys.exit(1)
             saved_layout = layout.read(workspace_id, directory)
             saved_programs = programs.read(workspace_id, directory)
-            restore_workspace(i3, saved_layout, saved_programs, target)
+            restore_workspace(i3, saved_layout, saved_programs, target, kill)
     else:
         workspace_layout = workspaces[0]
         # Get layout from file.
@@ -222,7 +234,7 @@ def restore_workspaces(workspace, numeric, session, directory, profile, target,
             if target != 'programs_only':
                 # Load workspace layout.
                 layout.restore(target_workspace, saved_layout,
-                        saved_programs)
+                        saved_programs, target)
 
             if target != 'layout_only':
                 # Restore programs.

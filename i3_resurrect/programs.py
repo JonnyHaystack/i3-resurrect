@@ -147,6 +147,7 @@ def get_programs(workspace, numeric):
 
         # Add the command to the list.
         programs.append({
+            'window_properties': con['window_properties'],
             'command': command,
             'working_directory': working_directory
         })
