@@ -1,4 +1,6 @@
+import json
 import sys
+import os
 from pathlib import Path
 
 import click
@@ -27,6 +29,9 @@ def main():
 @click.option('--numeric', '-n',
               is_flag=True,
               help='Select workspace by number instead of name.')
+@click.option('--session', '-S',
+              is_flag=True,
+              help='Save current session.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
               default=DEFAULT_DIRECTORY,
@@ -47,11 +52,13 @@ def main():
               flag_value='programs_only',
               help='Only save running programs.')
 @click.argument('workspaces', nargs=-1, default=None)
-def save_workspace(workspace, numeric, directory, profile, swallow, target, workspaces):
+def save_workspace(workspace, numeric, session, directory, profile, swallow, target, workspaces):
     """
     Save i3 workspace(s) layout(s) or whole session and running programs to a file.
 
     Use cases:
+
+    i3-resurrect save [--session]
 
     i3-resurrect save [--workspace] WORKSPACES
 
@@ -69,6 +76,16 @@ def save_workspace(workspace, numeric, directory, profile, swallow, target, work
 
     if target != 'programs_only':
         swallow_criteria = swallow.split(',')
+
+    if session and os.path.isdir(directory):
+        # Purge previous layout files before saving in current profile
+        purge_directory(directory, target)
+
+    if session:
+        workspaces = layout.list(i3, numeric)
+    elif not workspace:
+        util.eprint('Either --workspace or --session should be specified.')
+        sys.exit(1)
 
     for workspace_id in workspaces:
         if target != 'programs_only':
@@ -109,6 +126,9 @@ def restore_workspace(i3, saved_layout, saved_programs, target):
 @click.option('--numeric', '-n',
               is_flag=True,
               help='Select workspace(s) by number instead of name.')
+@click.option('--session', '-S',
+              is_flag=True,
+              help='Restore current session.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=DEFAULT_DIRECTORY,
@@ -124,12 +144,14 @@ def restore_workspace(i3, saved_layout, saved_programs, target):
               flag_value='programs_only',
               help='Only restore running programs.')
 @click.argument('workspaces', nargs=-1)
-def restore_workspaces(workspace, numeric, directory, profile, target,
+def restore_workspaces(workspace, numeric, session, directory, profile, target,
         workspaces):
     """
-    Restore i3 workspace(s) layout(s) and programs.
+    Restore i3 workspace(s) layout(s) or whole session and programs.
 
     Use cases:
+
+    i3-resurrect restore [--session]
 
     i3-resurrect restore [--workspace] WORKSPACES
 
@@ -154,7 +176,14 @@ def restore_workspaces(workspace, numeric, directory, profile, target,
 
     directory = util.resolve_directory(directory, profile)
 
-    if workspace:
+    if session:
+        # Restore all workspaces from dir
+        files = util.list_filenames(directory)
+        for layout_file, programs_file in files:
+            saved_layout = json.loads(layout_file.read_text())
+            saved_programs = json.loads(programs_file.read_text())
+            restore_workspace(i3, saved_layout, saved_programs, target)
+    elif workspace:
         for workspace_id in workspaces:
             if numeric and not workspace_id.isdigit():
                 util.eprint('Invalid workspace number.')
@@ -249,10 +278,22 @@ def delete(layout_file, programs_file, target):
         layout_file.unlink()
 
 
+def purge_directory(directory, target):
+    '''
+    purge saved layout session
+    '''
+    files = util.list_filenames(directory)
+    for layout_file, programs_file in files:
+        delete(layout_file, programs_file, target)
+
+
 @main.command('rm')
 @click.option('--workspace', '-w',
               is_flag=True,
               help='Delete workspace(s) files.')
+@click.option('--session', '-S',
+              is_flag=True,
+              help='Delete saved session layout.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
               default=DEFAULT_DIRECTORY,
@@ -266,13 +307,17 @@ def delete(layout_file, programs_file, target):
               flag_value='programs_only',
               help='Only delete saved programs.')
 @click.argument('workspaces', nargs=-1)
-def remove(workspace, directory, profile, target, workspaces):
+def remove(workspace, session, directory, profile, target, workspaces):
     """
-    Remove saved worspace(s) layout(s), or programs.
+    Remove saved worspace(s) layout(s), whole session, or programs.
     """
     directory = util.resolve_directory(directory, profile)
 
-    if workspace:
+    if session and os.path.isdir(directory):
+        purge_directory(directory, target)
+        if profile is not None:
+            os.rmdir(directory)
+    elif workspace:
         for workspace_id in workspaces:
             workspace_id = util.filename_filter(workspace_id)
             programs_filename = f'workspace_{workspace_id}_programs.json'
@@ -281,7 +326,7 @@ def remove(workspace, directory, profile, target, workspaces):
             layout_file = Path(directory) / layout_filename
             delete(layout_file, programs_file, target)
     else:
-        util.eprint('--workspace must be specified.')
+        util.eprint('either --workspace or --session option should be specified.')
         sys.exit(1)
 
 

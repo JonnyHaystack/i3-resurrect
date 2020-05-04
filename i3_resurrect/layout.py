@@ -11,6 +11,18 @@ from . import treeutils
 from . import util
 
 
+def list(i3, numeric):
+    # List all active workspaces
+    workspaces_data = i3.get_workspaces()
+    workspaces = []
+    for n, workspace_data in enumerate(workspaces_data):
+        # Get all active workspaces from session
+        if numeric:
+            workspaces.append(str(workspace_data.num))
+        else:
+            workspaces.append(workspace_data.name)
+    return workspaces
+
 def save(workspace, numeric, directory, swallow_criteria):
     """
     Save an i3 workspace layout to a file.
