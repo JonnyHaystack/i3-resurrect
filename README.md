@@ -15,7 +15,11 @@ A simple but flexible solution to saving and restoring i3 workspaces
 * [Getting Started](#getting-started)
    * [Requirements](#requirements)
    * [Installation](#installation)
-   * [Usage](#usage)
+* [Usage](#usage)
+   * [Command line](#command-line)
+   * [Scratchpad](#scratchpad)
+   * [Example configuration in i3](#example-configuration-in-i3)
+   * [rofi/dmenu](#rofi-dmenu)
 * [Configuration](#configuration)
    * [Window command mappings](#window-command-mappings)
    * [Terminals](#terminals)
@@ -122,9 +126,9 @@ cd i3-resurrect
 pip3 install --user .
 ```
 
-### Usage
+## Usage
 
-#### Command line
+### Command line
 
 Full command line documentation:
 ```
@@ -210,7 +214,7 @@ When restoring a layout, i3-resurrect uses xdotool to unmap and remap every
 window on the workspace which causes i3 to see them as new windows so they will
 be swallowed by the placeholder windows.
 
-#### Scratchpad
+### Scratchpad
 
 The scratchpad can be saved and restored like so:
 ```
@@ -218,7 +222,7 @@ i3-resurrect save -w __i3_scratch
 i3-resurrect restore -w __i3_scratch
 ```
 
-#### Example configuration in i3
+### Example configuration in i3
 
 A very basic setup without window title matching:
 ```
@@ -332,6 +336,13 @@ bindsym $mod+n mode "restore"
 Example of usage with the second configuration:
 
 [![Example of usage with the second configuration](https://i.imgur.com/mi9Uml8.gif)](https://gfycat.com/selfreliantdarkkoodoo)
+
+### rofi/dmenu
+
+There is a sample rofi/dmenu script available
+[here](contrib/scripts/i3-resurrect-dmenu) for convenience.
+This can be given a keybinding and allows easy saving, restoring, and deletion
+of workspaces and profiles.
 
 ## Configuration
 
