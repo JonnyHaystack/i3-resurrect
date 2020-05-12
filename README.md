@@ -19,7 +19,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
    * [Command line](#command-line)
    * [Scratchpad](#scratchpad)
    * [Example configuration in i3](#example-configuration-in-i3)
-   * [rofi/dmenu](#rofi-dmenu)
+   * [rofi/dmenu](#rofidmenu)
 * [Configuration](#configuration)
    * [Window command mappings](#window-command-mappings)
    * [Terminals](#terminals)
