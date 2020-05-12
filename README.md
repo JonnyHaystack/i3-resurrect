@@ -45,11 +45,11 @@ used. This creates placeholder windows where each one will "swallow" any new
 window that matches specified criteria (window class, instance, title etc).
 
 xdotool is used to make i3 see existing windows as new windows.
-This is necessary for matching by window title because the title must match
-when the window first appears and programs usually only update the title after
-the window is created
-(see [here](https://i3wm.org/docs/layout-saving.html#_placeholders_using_window_title_matches_don_8217_t_swallow_the_window)
-for more details).
+This is necessary on older i3 versions for matching by window title because the
+title must match when the window first appears and programs usually only update
+the title after the window is created.
+This is fixed on newer i3 versions, but it is also necessary to do this to apply
+a layout to existing windows if they are created before the placeholder windows.
 
 ## Background
 
