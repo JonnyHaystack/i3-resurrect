@@ -9,6 +9,7 @@ tox = "*"
 coveralls = "*"
 pylint = "*"
 yapf = "*"
+jedi = "*"
 
 [packages]
 click = "*"
