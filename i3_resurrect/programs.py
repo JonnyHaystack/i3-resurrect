@@ -87,9 +87,11 @@ def restore(workspace_name, saved_programs):
         # If cmdline is array, join it into one string for use with i3's exec
         # command.
         if isinstance(cmdline, list):
-            # Quote each argument of the command in case some of them contain
-            # spaces.
-            cmdline = [f'\\"{arg}\\"' for arg in cmdline if arg != '']
+            # Quote each argument of the command in case some of
+            # them contain spaces. Also protect quotes contained in the
+            # arguments and those to be added from i3's command parser.
+            cmdline = ['\\"' + arg.replace('"', '\\\\\\"') + '\\"' \
+                    for arg in cmdline if arg != '']
             command = ' '.join(cmdline)
         else:
             command = cmdline
