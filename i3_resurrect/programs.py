@@ -90,8 +90,11 @@ def restore(workspace_name, saved_programs):
             # Quote each argument of the command in case some of
             # them contain spaces. Also protect quotes contained in the
             # arguments and those to be added from i3's command parser.
-            cmdline = ['\\"' + arg.replace('"', '\\\\\\"') + '\\"' \
-                    for arg in cmdline if arg != '']
+            cmdline = [
+                '\\"' + arg.replace('"', '\\\\\\"') + '\\"'
+                for arg in cmdline
+                if arg != ""
+            ]
             command = ' '.join(cmdline)
         else:
             command = cmdline
