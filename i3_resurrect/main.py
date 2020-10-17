@@ -5,9 +5,12 @@ import click
 import i3ipc
 from natsort import natsorted
 
+from . import config
 from . import layout
 from . import programs
 from . import util
+
+DEFAULT_DIRECTORY = config.get('directory', '~/.i3/i3-resurrect/')
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help'],
@@ -25,7 +28,7 @@ def main():
               help='Select workspace by number instead of name.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False, writable=True),
-              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              default=DEFAULT_DIRECTORY,
               help=('The directory to save the workspace to.\n'
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
@@ -50,8 +53,7 @@ def save_workspace(workspace, numeric, directory, profile, swallow, target):
         i3 = i3ipc.Connection()
         workspace = i3.get_tree().find_focused().workspace().name
 
-    if profile is not None:
-        directory = Path(directory) / 'profiles'
+    directory = util.resolve_directory(directory, profile)
 
     # Create directory if non-existent.
     Path(directory).mkdir(parents=True, exist_ok=True)
@@ -74,7 +76,7 @@ def save_workspace(workspace, numeric, directory, profile, swallow, target):
               help='Select workspace by number instead of name.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
-              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              default=DEFAULT_DIRECTORY,
               help=('The directory to restore the workspace from.\n'
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p',
@@ -95,8 +97,7 @@ def restore_workspace(workspace, numeric, directory, profile, target):
     if workspace is None:
         workspace = i3.get_tree().find_focused().workspace().name
 
-    if profile is not None:
-        directory = Path(directory) / 'profiles'
+    directory = util.resolve_directory(directory, profile)
 
     if numeric and not workspace.isdigit():
         util.eprint('Invalid workspace number.')
@@ -125,7 +126,7 @@ def restore_workspace(workspace, numeric, directory, profile, target):
 @main.command('ls')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
-              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              default=DEFAULT_DIRECTORY,
               help=('The directory to search in.\n'
                     '[default: ~/.i3/i3-resurrect]'))
 @click.argument('item',
@@ -135,8 +136,9 @@ def list_workspaces(directory, item):
     """
     List saved workspaces or profiles.
     """
+    directory = util.resolve_directory(directory)
+
     if item == 'workspaces':
-        directory = Path(directory)
         workspaces = []
         for entry in directory.iterdir():
             if entry.is_file():
@@ -149,7 +151,6 @@ def list_workspaces(directory, item):
         for workspace in workspaces:
             print(workspace)
     else:
-        directory = Path(directory) / 'profiles'
         profiles = []
         try:
             for entry in directory.iterdir():
@@ -171,7 +172,7 @@ def list_workspaces(directory, item):
               help='The saved workspace to delete.')
 @click.option('--directory', '-d',
               type=click.Path(file_okay=False),
-              default=Path('~/.i3/i3-resurrect/').expanduser(),
+              default=DEFAULT_DIRECTORY,
               help=('The directory to delete from.\n'
                     '[default: ~/.i3/i3-resurrect]'))
 @click.option('--profile', '-p', default=None, help=('The profile to delete.'))
@@ -185,8 +186,9 @@ def remove(workspace, directory, profile, target):
     """
     Remove saved layout or programs.
     """
+    directory = util.resolve_directory(directory, profile)
+
     if profile is not None:
-        directory = Path(directory) / 'profiles'
         programs_filename = f'{profile}_programs.json'
         layout_filename = f'{profile}_layout.json'
     elif workspace is not None:
