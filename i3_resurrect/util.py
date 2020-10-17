@@ -1,4 +1,6 @@
 import sys
+from os.path import expandvars
+from pathlib import Path
 
 
 def eprint(*args, **kwargs):
@@ -21,3 +23,10 @@ def filename_filter(filename):
         filename = filename.replace(char, '')
 
     return filename
+
+
+def resolve_directory(directory, profile=None):
+    directory = Path(expandvars(directory)).expanduser()
+    if profile is not None:
+        directory = directory / 'profiles'
+    return directory

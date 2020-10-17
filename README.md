@@ -24,6 +24,7 @@ A simple but flexible solution to saving and restoring i3 workspaces
    * [Window command mappings](#window-command-mappings)
    * [Terminals](#terminals)
    * [Per window swallow criteria](#per-window-swallow-criteria)
+   * [Default directory](#default-directory)
 * [Troubleshooting](#troubleshooting)
 * [Contributing](#contributing)
 * [Contributors](#contributors)
@@ -479,6 +480,19 @@ This can be achieved by putting the following in your config file:
   "window_swallow_criteria": {
     "Ario": ["class", "instance"]
   }
+  ...
+}
+```
+
+### Default directory
+
+The default directory used for the saving and loading of workspaces can also be
+set in the config file:
+
+```
+{
+  ...
+  "directory": "~/.i3-resurrect/"
   ...
 }
 ```
