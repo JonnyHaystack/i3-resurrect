@@ -151,6 +151,7 @@ def list_workspaces(directory, item):
         for workspace in workspaces:
             print(workspace)
     else:
+        directory = directory / 'profiles'
         profiles = []
         try:
             for entry in directory.iterdir():
