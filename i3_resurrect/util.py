@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import subprocess
 from os.path import expandvars
 from pathlib import Path
 
@@ -47,3 +48,7 @@ def list_filenames(directory):
         programs_file = Path(directory) / programs_filenames[n]
         files.append((layout_file, programs_file))
     return files
+
+
+def nag_bar_process():
+    return subprocess.Popen(["i3-nagbar", "--type", "warning", "-m", "Currently restoring session. Don't change workspace focus!"])

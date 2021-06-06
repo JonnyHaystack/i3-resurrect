@@ -3,6 +3,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+from time import sleep
 from pathlib import Path
 
 import i3ipc
@@ -93,6 +94,8 @@ def restore(workspace_name, saved_programs):
 
         # Execute command via i3 exec.
         i3.command(f'exec "cd \\"{working_directory}\\" && {command}"')
+        exec_timeout = config.get('exec_timeout', 0.1)
+        sleep(exec_timeout)
 
 
 def get_programs(workspace, numeric):

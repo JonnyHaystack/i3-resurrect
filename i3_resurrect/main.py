@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+from time import sleep
 from pathlib import Path
 
 import click
@@ -178,6 +179,9 @@ def restore_workspaces(workspace, numeric, session, directory, profile, target,
     """
     i3 = i3ipc.Connection()
 
+    # Display warning message
+    nag_bar = util.nag_bar_process()
+
     focused_workspace = i3.get_tree().find_focused().workspace().name
 
     if not workspaces:
@@ -239,6 +243,10 @@ def restore_workspaces(workspace, numeric, session, directory, profile, target,
             if target != 'layout_only':
                 # Restore programs.
                 programs.restore(target_workspace, saved_programs)
+
+    restore_timeout = config.get('restore_timeout', 2)
+    sleep(restore_timeout)
+    nag_bar.terminate()
 
 
 @main.command('ls')
@@ -369,7 +377,6 @@ def kill(workspace, session, force, workspaces):
             answer = input("Kill all workspaces in current session y/N ? ")
     elif workspace:
         if not force:
-            import ipdb; ipdb.set_trace()
             w_list = workspaces[0]
             for workspace in workspaces[1:]:
                 w_list = w_list + "," + "'" + workspace + "'"

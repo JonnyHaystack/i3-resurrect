@@ -2,11 +2,13 @@ import json
 import shlex
 import subprocess
 import sys
+from time import sleep
 import tempfile
 from pathlib import Path
 
 import i3ipc
 
+from . import config
 from . import programs
 from . import treeutils
 from . import util
@@ -185,6 +187,8 @@ def restore(workspace_name, layout, saved_programs, target, kill=False):
         # user to lose their windows no matter what.
         for window in preserved_windows:
             xdo_map_window(window['window'])
+            map_timeout = config.get('map_timeout', 0)
+            sleep(map_timeout)
 
 
 def build_layout(tree, swallow):
