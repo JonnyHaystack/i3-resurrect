@@ -14,7 +14,7 @@ def create_default():
     global _config_file
 
     _config = {
-        'directory': ['~/.i3/i3-resurrect/'],
+        'directory': '~/.i3/i3-resurrect/',
         'window_command_mappings': [
             {
                 'class': 'Gnome-terminal',
