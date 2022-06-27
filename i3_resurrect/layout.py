@@ -2,23 +2,36 @@ import json
 import shlex
 import subprocess
 import sys
+from time import sleep
 import tempfile
 from pathlib import Path
 
 import i3ipc
 
+from . import config
+from . import programs
 from . import treeutils
 from . import util
 
 
-def save(workspace, numeric, directory, profile, swallow_criteria):
+def list(i3, numeric):
+    # List all active workspaces
+    workspaces_data = i3.get_workspaces()
+    workspaces = []
+    for n, workspace_data in enumerate(workspaces_data):
+        # Get all active workspaces from session
+        if numeric:
+            workspaces.append(str(workspace_data.num))
+        else:
+            workspaces.append(workspace_data.name)
+    return workspaces
+
+def save(workspace, numeric, directory, swallow_criteria):
     """
     Save an i3 workspace layout to a file.
     """
     workspace_id = util.filename_filter(workspace)
     filename = f'workspace_{workspace_id}_layout.json'
-    if profile is not None:
-        filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
 
     workspace_tree = treeutils.get_workspace_tree(workspace, numeric)
@@ -34,59 +47,106 @@ def save(workspace, numeric, directory, profile, swallow_criteria):
         )
 
 
-def read(workspace, directory, profile):
+def read(workspace, directory):
     """
     Read saved layout file.
     """
     workspace_id = util.filename_filter(workspace)
     filename = f'workspace_{workspace_id}_layout.json'
-    if profile is not None:
-        filename = f'{profile}_layout.json'
     layout_file = Path(directory) / filename
 
     layout = None
     try:
         layout = json.loads(layout_file.read_text())
     except FileNotFoundError:
-        if profile is not None:
-            util.eprint(f'Could not find saved layout for profile "{profile}"')
-        else:
-            util.eprint('Could not find saved layout for workspace '
+        util.eprint('Could not find saved layout for workspace '
                         f'"{workspace}"')
-        sys.exit(1)
     return layout
 
 
-def restore(workspace_name, layout):
+def remove_windows_from_workspace(normal_windows, kill=False):
+    for window in normal_windows:
+        #  window and program instance that don't match to saved list have to be killed
+        if kill:
+            xdo_kill_window(window['window'])
+        else:
+            xdo_map_window(window['window'])
+            xdo_focus_window(window['window'])
+            i3.command(f'move scratchpad') 
+
+
+def clean_workspace(layout, saved_programs, normal_windows, target, kill=False):
+    """"
+    Move windows that don't match saved programs in layout to scatchpad or kill it.
+    """
+    i3 = i3ipc.Connection()
+    preserved_windows = []
+    saved_windows = treeutils.get_leaves(layout)
+    for saved_program in saved_programs:
+        current_score = 0
+        best_match = None
+        # Get swallow criterias of saved program to restore
+        rule = saved_program['window_properties']
+
+        for window in normal_windows:
+            window_properties = window['window_properties']
+            if rule['class'] == window_properties['class']:
+                # The window is part of the saved layout
+                # calculate match score of window
+                score = programs.calc_rule_match_score(rule, window_properties)
+                if score > current_score:
+                    current_score = score
+                    # Bestmatched window
+                    best_match = window
+
+        if current_score != 0:
+            # saved window already open
+            preserved_windows.append(best_match)
+            normal_windows.remove(best_match)
+
+    remove_windows_from_workspace(normal_windows, target)
+
+    return preserved_windows
+
+
+def restore(workspace_name, layout, saved_programs, target, kill=False):
     """
     Restore an i3 workspace layout.
     """
-    if layout == {}:
-        return
-    window_ids = []
-    placeholder_window_ids = []
+    normal_windows = []
+    placeholder_windows = []
 
     # Get ids of all placeholder or normal windows in workspace.
     ws = treeutils.get_workspace_tree(workspace_name, False)
     windows = treeutils.get_leaves(ws)
-    for con in windows:
-        window_id = con['window']
-        if is_placeholder(con):
+
+    for window in windows:
+        if is_placeholder(window):
             # If window is a placeholder, add it to list of placeholder
             # windows.
-            placeholder_window_ids.append(window_id)
+            placeholder_windows.append(window)
         else:
             # Otherwise, add it to the list of regular windows.
-            window_ids.append(window_id)
+            normal_windows.append(window)
 
-    # Unmap all non-placeholder windows in workspace.
-    for window_id in window_ids:
-        xdo_unmap_window(window_id)
+    if target == 'clean':
+        preserved_windows = clean_workspace(layout, saved_programs, normal_windows, target, kill)
+    elif target == 'reload':
+        remove_windows_from_workspace(normal_windows, target, kill)
+    else:
+        preserved_windows = normal_windows
 
     # Remove any remaining placeholder windows in workspace so that we don't
     # have duplicates.
-    for window_id in placeholder_window_ids:
-        xdo_kill_window(window_id)
+    for window in placeholder_windows:
+        xdo_kill_window(window['window'])
+
+    if layout == {}:
+        return
+
+    # Unmap all non-placeholder windows in workspace.
+    for window in preserved_windows:
+        xdo_unmap_window(window['window'])
 
     try:
         i3 = i3ipc.Connection()
@@ -125,8 +185,10 @@ def restore(workspace_name, layout):
     finally:
         # Map all unmapped windows. We use finally because we don't want the
         # user to lose their windows no matter what.
-        for window_id in window_ids:
-            xdo_map_window(window_id)
+        for window in preserved_windows:
+            xdo_map_window(window['window'])
+            map_timeout = config.get('map_timeout', 0)
+            sleep(map_timeout)
 
 
 def build_layout(tree, swallow):
