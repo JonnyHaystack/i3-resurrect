@@ -562,6 +562,8 @@ See also the list of [contributors](https://github.com/JonnyHaystack/i3-resurrec
 
 ## Related projects
 
+[i3-restore](https://github.com/jdholtz/i3-restore)
+
 For those interested, other excellent software I use to get things up and running quickly includes:
 - [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) - which obviously also inspired
 the name of this project
