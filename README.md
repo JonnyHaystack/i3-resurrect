@@ -127,6 +127,10 @@ cd i3-resurrect
 pip3 install --user .
 ```
 
+### Gentoo
+You can emerge [x11-misc/i3-resurrect](https://github.com/gentoo/guru/tree/master/x11-misc/i3-resurrect) from Guru overlay.
+
+
 ## Usage
 
 ### Command line
