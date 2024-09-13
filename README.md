@@ -95,7 +95,10 @@ reimplemented it in Python.
 
 ### Installation
 
-#### From the AUR using yay (recommended for Arch Linux users)
+#### Arch Linux
+
+Install from the AUR using yay.
+
 Latest release:
 ```
 yay -S i3-resurrect
@@ -105,6 +108,10 @@ Latest development version:
 ```
 yay -S i3-resurrect-git
 ```
+
+#### Gentoo
+
+You can emerge [x11-misc/i3-resurrect](https://github.com/gentoo/guru/tree/master/x11-misc/i3-resurrect) from Guru overlay.
 
 #### From PyPI (recommended for everyone else)
 
@@ -126,10 +133,6 @@ Install locally using pip
 cd i3-resurrect
 pip3 install --user .
 ```
-
-### Gentoo
-You can emerge [x11-misc/i3-resurrect](https://github.com/gentoo/guru/tree/master/x11-misc/i3-resurrect) from Guru overlay.
-
 
 ## Usage
 
