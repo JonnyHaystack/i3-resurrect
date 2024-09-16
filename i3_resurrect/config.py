@@ -23,6 +23,9 @@ def create_default():
         ],
         'window_swallow_criteria': {},
         'terminals': ['Gnome-terminal', 'Alacritty'],
+        'map_timeout': 0,
+        'exec_timeout': 0,
+        'restore_timeout': 2,
     }
 
     # Make config directory if it doesn't exist.

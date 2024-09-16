@@ -140,59 +140,87 @@ pip3 install --user .
 
 Full command line documentation:
 ```
-Usage: i3-resurrect save [OPTIONS]
 
-  Save an i3 workspace's layout and running programs to a file.
+Usage: i3-resurrect save [OPTIONS] [WORKSPACES]...
+
+  Save i3 workspace(s) layout(s) or whole session and running programs to a file.
+
+  Use cases:
+
+  i3-resurrect save [--session]
+
+  i3-resurrect save [--workspace] WORKSPACES
+
+  WORKSPACES are the workspace(s) to save. [default: current workspace]
 
 Options:
-  -w, --workspace TEXT       The workspace to save.
-                             [default: current workspace]
+  -w, --workspace            Save workspace(s).
   -n, --numeric              Select workspace by number instead of name.
-  -d, --directory DIRECTORY  The directory to save the workspace to.
-                             [default: ~/.i3/i3-resurrect]
-  -p, --profile TEXT         The profile to save the workspace to.
-  -s, --swallow TEXT         The swallow criteria to use.
-                             [options: class,instance,title,window_role]
+  -S, --session              Save current session.
+  -d, --directory DIRECTORY  The directory to save the workspace to. [default: ~/.i3/i3-resurrect]
+  -p, --profile TEXT         The profile to save.
+  -s, --swallow TEXT         The swallow criteria to use. [options: class,instance,title,window_role]
                              [default: class,instance]
   --layout-only              Only save layout.
   --programs-only            Only save running programs.
+  -h, --help                 Show this message and exit.
 
 
-Usage: i3-resurrect restore [OPTIONS]
+Usage: i3-resurrect restore [OPTIONS] [WORKSPACES]...
 
-  Restore i3 workspace layout and programs.
+  Restore i3 workspace(s) layout(s) or whole session and programs.
+
+  Use cases:
+
+  i3-resurrect restore [--session]
+
+  i3-resurrect restore [--workspace] WORKSPACES
+
+  i3-resurrect restore WORKSPACE_LAYOUT TARGET_WORKSPACE
+
+  WORKSPACES are the workspace(s) to restore. [default: current workspace]
+
+  WORKSPACE_LAYOUT is the workspace file to load. TARGET_WORKSPACE is the target workspace [default:
+  current workspace]
 
 Options:
-  -w, --workspace TEXT       The workspace to restore.
-                             [default: current workspace]
-  -n, --numeric              Select workspace by number instead of name.
-  -d, --directory DIRECTORY  The directory to restore the workspace from.
-                             [default: ~/.i3/i3-resurrect]
-  -p, --profile TEXT         The profile to restore the workspace from.
+  -w, --workspace            Restore workspace(s).
+  -n, --numeric              Select workspace(s) by number instead of name.
+  -S, --session              Restore current session.
+  -d, --directory DIRECTORY  The directory to restore the workspace from. [default: ~/.i3/i3-resurrect]
+  -p, --profile TEXT         The profile to restore.
   --layout-only              Only restore layout.
   --programs-only            Only restore running programs.
+  -c, --clean                Move program that are not part of the workspace layout to               the
+                             scratchpad.
+  -r, --reload               Move program from the workspace to the scratchpad. before restore it.
+  -K, --kill                 Kill unwanted program insted of moving it the scratchpad.
+  -h, --help                 Show this message and exit.
 
 
-Usage: i3-resurrect ls [OPTIONS] [[workspaces|profiles]]
+Usage: i3-resurrect rm [OPTIONS] [WORKSPACES]...
 
-  List saved workspaces or profiles.
-
-Options:
-  -d, --directory DIRECTORY  The directory to search in.
-                             [default: ~/.i3/i3-resurrect]
-
-
-Usage: i3-resurrect rm [OPTIONS]
-
-  Remove saved layout or programs.
+  Remove saved worspace(s) layout(s), whole session, or programs.
 
 Options:
-  -w, --workspace TEXT       The saved workspace to delete.
-  -d, --directory DIRECTORY  The directory to delete from.
-                             [default: ~/.i3/i3-resurrect]
+  -w, --workspace            Delete workspace(s) files.
+  -S, --session              Delete saved session layout.
+  -d, --directory DIRECTORY  The directory to delete from. [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to delete.
   --layout-only              Only delete saved layout.
   --programs-only            Only delete saved programs.
+  -h, --help                 Show this message and exit.
+
+
+Usage: i3-resurrect kill [OPTIONS] [WORKSPACES]...
+
+  Kill workspace(s) or whole session.
+
+Options:
+  -w, --workspace  Kill workspace(s) layout(s) and program(s).
+  -S, --session    Kill all workspace(s) and program(s) in current session.
+  -F, --force      Do not ask for confirmation.
+  -h, --help       Show this message and exit.
 ```
 
 Basic usage, matching only window class/instance:
