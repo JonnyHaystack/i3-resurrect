@@ -576,6 +576,7 @@ the name of this project
 tmux-resurrect
 - [qutebrowser](https://github.com/qutebrowser/qutebrowser) - which has excellent session
 management, especially if you create bindings for saving and loading individual windows
+- [firefox-i3-workspaces](https://github.com/yurikhan/firefox-i3-workspaces) - to restore Firefox windows to the same workspaces, helper browser extension is needed to install
 
 ## License
 
