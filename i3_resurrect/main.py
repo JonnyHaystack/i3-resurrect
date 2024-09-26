@@ -138,6 +138,10 @@ def list_workspaces(directory, item):
     """
     directory = util.resolve_directory(directory)
 
+    if not path.isdir(directory):
+        print(f'Directory {directory} not found')
+        return
+    
     if item == 'workspaces':
         workspaces = []
         for entry in directory.iterdir():
