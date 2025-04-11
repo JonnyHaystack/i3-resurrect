@@ -114,9 +114,11 @@ def restore(workspace_name, layout):
         # Create fresh placeholder windows by appending layout to workspace.
         i3.command(f"append_layout {restorable_layout_file.name}")
 
-        # Restore to original output
-        if 'output' in layout:
-            i3.command(f'[workspace="{workspace_name}"] move workspace to output {layout["output"]}')
+        # Move workspace to original output
+        if "output" in layout:
+            i3.command(
+                f'[workspace="{workspace_name}"] move workspace to output {layout["output"]}'
+            )
 
         # Delete tempfile.
         restorable_layout_file.close()
@@ -139,9 +141,6 @@ def build_layout(tree, swallow):
     JSON serialisable.
     """
     processed = treeutils.process_node(tree, swallow)
-    # include output
-    if 'output' in tree:
-        processed['output'] = tree['output']
     return processed
 
 

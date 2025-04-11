@@ -41,6 +41,10 @@ def process_node(original, swallow):
         if attribute in original:
             processed[attribute] = original[attribute]
 
+    # Keep output attribute for workspace nodes.
+    if "type" in original and original["type"] == "workspace":
+        processed["output"] = original["output"]
+
     # Keep rect attribute for floating nodes.
     if "type" in original and original["type"] == "floating_con":
         processed["rect"] = original["rect"]
