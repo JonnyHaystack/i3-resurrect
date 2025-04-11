@@ -1,4 +1,4 @@
-__all__ = ['config', 'layout', 'main', 'programs', 'treeutils', 'util']
+__all__ = ["config", "layout", "main", "programs", "treeutils", "util"]
 
 from . import config
 from . import layout

@@ -7,20 +7,20 @@ from . import config
 
 # The tree node attributes that we want to save.
 REQUIRED_ATTRIBUTES = [
-    'border',
-    'current_border_width',
-    'floating',
-    'fullscreen_mode',
-    'geometry',
-    'layout',
-    'marks',
-    'name',
-    'orientation',
-    'percent',
-    'scratchpad_state',
-    'sticky',
-    'type',
-    'workspace_layout',
+    "border",
+    "current_border_width",
+    "floating",
+    "fullscreen_mode",
+    "geometry",
+    "layout",
+    "marks",
+    "name",
+    "orientation",
+    "percent",
+    "scratchpad_state",
+    "sticky",
+    "type",
+    "workspace_layout",
 ]
 
 
@@ -42,31 +42,29 @@ def process_node(original, swallow):
             processed[attribute] = original[attribute]
 
     # Keep rect attribute for floating nodes.
-    if 'type' in original and original['type'] == 'floating_con':
-        processed['rect'] = original['rect']
+    if "type" in original and original["type"] == "floating_con":
+        processed["rect"] = original["rect"]
 
     # Set swallow criteria if the node is a window.
-    if 'window_properties' in original:
-        processed['swallows'] = [{}]
+    if "window_properties" in original:
+        processed["swallows"] = [{}]
         # Local variable for swallow criteria.
         swallow_criteria = swallow
         # Get swallow criteria from config.
-        window_swallow_mappings = config.get('window_swallow_criteria', {})
-        window_class = original['window_properties'].get('class', '')
+        window_swallow_mappings = config.get("window_swallow_criteria", {})
+        window_class = original["window_properties"].get("class", "")
         # Swallow criteria from config override the command line parameters
         # if present.
         if window_class in window_swallow_mappings:
             swallow_criteria = window_swallow_mappings[window_class]
         for criterion in swallow_criteria:
-            if criterion in original['window_properties']:
+            if criterion in original["window_properties"]:
                 # Escape special characters in swallow criteria.
-                escaped = re.escape(original['window_properties'][criterion])
-                # Regex formatting.
-                value = f'^{escaped}$'
-                processed['swallows'][0][criterion] = value
+                escaped = re.escape(original["window_properties"][criterion])
+                processed["swallows"][0][criterion] = escaped
 
     # Recurse over child nodes (normal and floating).
-    for node_type in ['nodes', 'floating_nodes']:
+    for node_type in ["nodes", "floating_nodes"]:
         if node_type in original and original[node_type] != []:
             processed[node_type] = []
             for child in original[node_type]:
@@ -80,21 +78,21 @@ def get_workspace_tree(workspace, numeric):
     """
     Get full workspace layout tree from i3.
     """
-    root = json.loads(
-        subprocess.check_output(shlex.split('i3-msg -t get_tree'))
-    )
-    for output in root['nodes']:
-        for container in output['nodes']:
-            if container['type'] != 'con':
+    root = json.loads(subprocess.check_output(shlex.split("i3-msg -t get_tree")))
+    for output in root["nodes"]:
+        for container in output["nodes"]:
+            if container["type"] != "con":
                 pass
-            for ws in container['nodes']:
+            for ws in container["nodes"]:
                 # Select workspace and trigger name and num field
                 if numeric:
-                    if (workspace.isdigit()
-                            and 'num' in ws
-                            and ws['num'] == int(workspace)):
+                    if (
+                        workspace.isdigit()
+                        and "num" in ws
+                        and ws["num"] == int(workspace)
+                    ):
                         return ws
-                elif ws['name'] == workspace:
+                elif ws["name"] == workspace:
                     return ws
     return {}
 
@@ -110,10 +108,10 @@ def get_leaves(container):
     if container is None:
         return
 
-    nodes = container.get('nodes', []) + container.get('floating_nodes', [])
+    nodes = container.get("nodes", []) + container.get("floating_nodes", [])
 
     # Step case.
     for node in nodes:
-        if 'window_properties' in node:
+        if "window_properties" in node:
             yield node
         yield from get_leaves(node)
