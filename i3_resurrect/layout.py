@@ -16,14 +16,14 @@ def save(workspace, numeric, directory, profile, swallow_criteria):
     Save an i3 workspace layout to a file.
     """
     workspace_id = util.filename_filter(workspace)
-    filename = f'workspace_{workspace_id}_layout.json'
+    filename = f"workspace_{workspace_id}_layout.json"
     if profile is not None:
-        filename = f'{profile}_layout.json'
+        filename = f"{profile}_layout.json"
     layout_file = Path(directory) / filename
 
     workspace_tree = treeutils.get_workspace_tree(workspace, numeric)
 
-    with layout_file.open('w') as f:
+    with layout_file.open("w") as f:
         # Build new workspace tree suitable for restoring and write it to a
         # file.
         f.write(
@@ -39,9 +39,9 @@ def read(workspace, directory, profile):
     Read saved layout file.
     """
     workspace_id = util.filename_filter(workspace)
-    filename = f'workspace_{workspace_id}_layout.json'
+    filename = f"workspace_{workspace_id}_layout.json"
     if profile is not None:
-        filename = f'{profile}_layout.json'
+        filename = f"{profile}_layout.json"
     layout_file = Path(directory) / filename
 
     layout = None
@@ -51,8 +51,7 @@ def read(workspace, directory, profile):
         if profile is not None:
             util.eprint(f'Could not find saved layout for profile "{profile}"')
         else:
-            util.eprint('Could not find saved layout for workspace '
-                        f'"{workspace}"')
+            util.eprint('Could not find saved layout for workspace "{workspace}"')
         sys.exit(1)
     return layout
 
@@ -70,7 +69,7 @@ def restore(workspace_name, layout):
     ws = treeutils.get_workspace_tree(workspace_name, False)
     windows = treeutils.get_leaves(ws)
     for con in windows:
-        window_id = con['window']
+        window_id = con["window"]
         if is_placeholder(con):
             # If window is a placeholder, add it to list of placeholder
             # windows.
@@ -93,27 +92,27 @@ def restore(workspace_name, layout):
 
         # append_layout can only insert nodes so we must separately change the
         # layout mode of the workspace node.
-        ws_layout_mode = layout.get('layout', 'default')
+        ws_layout_mode = layout.get("layout", "default")
         tree = i3.get_tree()
         focused = tree.find_focused()
         workspace_node = focused.workspace()
-        workspace_node.command(f'layout {ws_layout_mode}')
+        workspace_node.command(f"layout {ws_layout_mode}")
 
         # We don't want to pass the whole layout file because we don't want to
         # append a new workspace. append_layout requires a file path so we must
         # extract the part of the json that we want and store it in a tempfile.
         restorable_layout = (
-            layout.get('nodes', []) + layout.get('floating_nodes', []),
+            layout.get("nodes", []) + layout.get("floating_nodes", []),
         )
         restorable_layout_file = tempfile.NamedTemporaryFile(
-            mode='w',
-            prefix='i3-resurrect_',
+            mode="w",
+            prefix="i3-resurrect_",
         )
         restorable_layout_file.write(json.dumps(restorable_layout))
         restorable_layout_file.flush()
 
         # Create fresh placeholder windows by appending layout to workspace.
-        i3.command(f'append_layout {restorable_layout_file.name}')
+        i3.command(f"append_layout {restorable_layout_file.name}")
 
         # Restore to original output
         if 'output' in layout:
@@ -122,9 +121,10 @@ def restore(workspace_name, layout):
         # Delete tempfile.
         restorable_layout_file.close()
     except Exception as e:
-        util.eprint('Error occurred restoring workspace layout. Note that if '
-                    'the layout was saved by a version prior to 1.4.0 it must '
-                    'be recreated.')
+        util.eprint(
+            "Error occurred restoring workspace layout. Note that if the layout was saved by a "
+            "version prior to 1.4.0 it must be recreated."
+        )
         util.eprint(str(e))
     finally:
         # Map all unmapped windows. We use finally because we don't want the
@@ -152,11 +152,11 @@ def is_placeholder(container):
     Args:
         container: The container to check.
     """
-    return container['swallows'] not in [[], None]
+    return container["swallows"] not in [[], None]
 
 
 def xdo_unmap_window(window_id):
-    command = shlex.split(f'xdotool windowunmap {window_id}')
+    command = shlex.split(f"xdotool windowunmap {window_id}")
     subprocess.call(
         command,
         stdout=subprocess.DEVNULL,
@@ -165,7 +165,7 @@ def xdo_unmap_window(window_id):
 
 
 def xdo_map_window(window_id):
-    command = shlex.split(f'xdotool windowmap {window_id}')
+    command = shlex.split(f"xdotool windowmap {window_id}")
     subprocess.call(
         command,
         stdout=subprocess.DEVNULL,
@@ -174,7 +174,7 @@ def xdo_map_window(window_id):
 
 
 def xdo_kill_window(window_id):
-    command = shlex.split(f'xdotool windowkill {window_id}')
+    command = shlex.split(f"xdotool windowkill {window_id}")
     subprocess.call(
         command,
         stdout=subprocess.DEVNULL,

@@ -20,7 +20,7 @@ def filename_filter(filename):
 
     # Remove blacklisted chars.
     for char in blacklist:
-        filename = filename.replace(char, '')
+        filename = filename.replace(char, "")
 
     return filename
 
@@ -28,5 +28,5 @@ def filename_filter(filename):
 def resolve_directory(directory, profile=None):
     directory = Path(expandvars(directory)).expanduser()
     if profile is not None:
-        directory = directory / 'profiles'
+        directory = directory / "profiles"
     return directory
