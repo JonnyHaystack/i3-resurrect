@@ -1,9 +1,9 @@
 import json
+from pathlib import Path
 import shlex
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
 
 import i3ipc
 

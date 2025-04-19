@@ -3,6 +3,8 @@ import re
 import shlex
 import subprocess
 
+from i3_resurrect.types import WindowSwallowMapping
+
 from . import config
 
 # The tree node attributes that we want to save.
@@ -24,7 +26,7 @@ REQUIRED_ATTRIBUTES = [
 ]
 
 
-def process_node(original, swallow):
+def process_node(original: dict, swallow: list[str]):
     """
     Recursive function which traverses a layout tree and builds a new tree from
     it which can be restored using append_layout and only contains attributes
@@ -51,21 +53,9 @@ def process_node(original, swallow):
 
     # Set swallow criteria if the node is a window.
     if "window_properties" in original:
-        processed["swallows"] = [{}]
-        # Local variable for swallow criteria.
-        swallow_criteria = swallow
-        # Get swallow criteria from config.
-        window_swallow_mappings = config.get("window_swallow_criteria", {})
-        window_class = original["window_properties"].get("class", "")
-        # Swallow criteria from config override the command line parameters
-        # if present.
-        if window_class in window_swallow_mappings:
-            swallow_criteria = window_swallow_mappings[window_class]
-        for criterion in swallow_criteria:
-            if criterion in original["window_properties"]:
-                # Escape special characters in swallow criteria.
-                escaped = re.escape(original["window_properties"][criterion])
-                processed["swallows"][0][criterion] = escaped
+        processed["swallows"] = get_window_swallow_values(
+            original["window_properties"], swallow
+        )
 
     # Recurse over child nodes (normal and floating).
     for node_type in ["nodes", "floating_nodes"]:
@@ -78,7 +68,22 @@ def process_node(original, swallow):
     return processed
 
 
-def get_workspace_tree(workspace, numeric):
+def get_window_swallow_values(
+    window_properties: dict, swallow: list[str]
+) -> list[dict[str, str]]:
+    """
+    Get swallow criteria for window
+    """
+    # Look for matching swallow criteria mapping from config, or fall back to param from CLI if not
+    # found.
+    swallow_mapping = WindowSwallowMapping.find_best_matching_rule(
+        window_properties, config.get_window_swallow_mappings()
+    ) or WindowSwallowMapping({}, swallow)
+
+    return [swallow_mapping.get_swallow_values(window_properties)]
+
+
+def get_workspace_tree(workspace: str, numeric: bool):
     """
     Get full workspace layout tree from i3.
     """
@@ -101,7 +106,7 @@ def get_workspace_tree(workspace, numeric):
     return {}
 
 
-def get_leaves(container):
+def get_leaves(container: dict | None):
     """
     Recursive generator for retrieving a list of a container's leaf nodes.
 
