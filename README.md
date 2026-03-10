@@ -151,6 +151,7 @@ Options:
   -d, --directory DIRECTORY  The directory to save the workspace to.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to save the workspace to.
+  -S, --session TEXT         The session to save all the workspaces to.
   -s, --swallow TEXT         The swallow criteria to use.
                              [options: class,instance,title,window_role]
                              [default: class,instance]
@@ -169,6 +170,7 @@ Options:
   -d, --directory DIRECTORY  The directory to restore the workspace from.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to restore the workspace from.
+  -S, --session TEXT         The session to restore all workspaces from.
   --layout-only              Only restore layout.
   --programs-only            Only restore running programs.
 
@@ -191,6 +193,7 @@ Options:
   -d, --directory DIRECTORY  The directory to delete from.
                              [default: ~/.i3/i3-resurrect]
   -p, --profile TEXT         The profile to delete.
+  -S, --session TEXT         The session to delete.
   --layout-only              Only delete saved layout.
   --programs-only            Only delete saved programs.
 ```
