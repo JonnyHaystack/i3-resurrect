@@ -1,12 +1,14 @@
 import json
+from pathlib import Path
 import shlex
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 
 import i3ipc
 import psutil
+
+from i3_resurrect.types import WindowCommandMapping
 
 from . import config
 from . import treeutils
@@ -24,8 +26,6 @@ def save(workspace, numeric, directory, profile):
         filename = f"{profile}_programs.json"
     programs_file = Path(directory) / filename
 
-    window_command_mappings = config.get("window_command_mappings", [])
-
     programs = get_programs(workspace, numeric)
 
     # Write list of commands to file as JSON.
@@ -33,7 +33,7 @@ def save(workspace, numeric, directory, profile):
         f.write(json.dumps(programs, indent=2))
 
 
-def read(workspace, directory, profile):
+def read(workspace: str, directory: Path, profile: str | None) -> list[dict]:
     """
     Read saved programs file.
     """
@@ -55,7 +55,7 @@ def read(workspace, directory, profile):
     return programs
 
 
-def restore(workspace_name, saved_programs):
+def restore(workspace_name: str, saved_programs: list[dict]):
     """
     Restore the running programs from an i3 workspace.
     """
@@ -94,7 +94,7 @@ def restore(workspace_name, saved_programs):
         i3.command(f'exec "cd \\"{working_directory}\\" && {command}"')
 
 
-def get_programs(workspace, numeric):
+def get_programs(workspace: str, numeric: bool) -> list[dict]:
     """
     Get running programs in specified workspace.
 
@@ -150,7 +150,7 @@ def get_programs(workspace, numeric):
     return programs
 
 
-def windows_in_workspace(workspace, numeric):
+def windows_in_workspace(workspace: str, numeric: bool):
     """
     Generator to iterate over windows in a workspace.
 
@@ -163,7 +163,7 @@ def windows_in_workspace(workspace, numeric):
         yield (con, pid)
 
 
-def get_window_pid(con):
+def get_window_pid(con) -> int:
     """
     Get window PID using xprop.
 
@@ -190,7 +190,9 @@ def get_window_pid(con):
     return pid
 
 
-def get_window_command(window_properties, cmdline, exe):
+def get_window_command(
+    window_properties: dict, cmdline: list[str], exe: str | None
+) -> list[str]:
     """
     Gets a window command.
 
@@ -198,8 +200,6 @@ def get_window_command(window_properties, cmdline, exe):
     window mappings and scores each matching rule. The command mapping with the
     highest score is then returned.
     """
-    window_command_mappings = config.get("window_command_mappings", [])
-
     # Remove empty args from cmdline.
     cmdline = [arg for arg in cmdline if arg != ""]
 
@@ -214,71 +214,12 @@ def get_window_command(window_properties, cmdline, exe):
     if exe is not None:
         cmdline[0] = exe
 
-    command = cmdline
-
-    # If window command mappings is a dictionary in the config file, use the
-    # old way.
-    # TODO: Remove in 2.0.0
-    if isinstance(window_command_mappings, dict):
-        window_class = window_properties["class"]
-        if window_class in window_command_mappings:
-            command = window_command_mappings[window_class]
-        return command
-
-    # Find the mapping that gets the highest score.
-    current_score = 0
-    best_match = None
-    for rule in window_command_mappings:
-        # Calculate score.
-        score = calc_rule_match_score(rule, window_properties)
-
-        if score > current_score:
-            current_score = score
-            best_match = rule
+    best_match = WindowCommandMapping.find_best_matching_rule(
+        window_properties, config.get_window_command_mappings()
+    )
 
     # If no match found, just use the original cmdline.
     if best_match is None:
-        return command
+        return cmdline
 
-    try:
-        if "command" not in best_match:
-            command = []
-        elif isinstance(best_match["command"], list):
-            command = [arg.format(*cmdline) for arg in best_match["command"]]
-        else:
-            command = shlex.split(best_match["command"].format(*cmdline))
-    except IndexError:
-        util.eprint(
-            "IndexError occurred while processing command mapping:\n"
-            f"  Mapping: {best_match}\n"
-            f"  Process cmdline: {cmdline}"
-        )
-
-    return command
-
-
-def calc_rule_match_score(rule, window_properties):
-    """
-    Score window command mapping match based on which criteria match.
-
-    Scoring is done based on which criteria are considered "more specific".
-    """
-    # Window properties and value to add to score when match is found.
-    criteria = {
-        "window_role": 1,
-        "class": 2,
-        "instance": 3,
-        "title": 10,
-    }
-
-    score = 0
-    for criterion in criteria:
-        if criterion in rule:
-            # Score is zero if there are any non-matching criteria.
-            if (
-                criterion not in window_properties
-                or rule[criterion] != window_properties[criterion]
-            ):
-                return 0
-            score += criteria[criterion]
-    return score
+    return best_match.format_cmdline(cmdline)
