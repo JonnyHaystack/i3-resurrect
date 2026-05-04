@@ -71,9 +71,12 @@ def save_workspace(workspace, numeric, directory, profile, session, swallow, tar
         i3 = i3ipc.Connection()
         workspaces = i3.get_workspaces()
         directory = directory / session
+        workspaces = [ ws.name for ws in workspaces]
     elif workspace is None:
         i3 = i3ipc.Connection()
         workspace = i3.get_tree().find_focused().workspace()
+        workspaces = [workspace.name]
+    else:
         workspaces = [workspace]
 
     # Create directory if non-existent.
@@ -84,11 +87,11 @@ def save_workspace(workspace, numeric, directory, profile, session, swallow, tar
         if target != "programs_only":
             # Save workspace layout to file.
             swallow_criteria = swallow.split(",")
-            layout.save(ws.name, numeric, directory, profile, swallow_criteria)
+            layout.save(ws, numeric, directory, profile, swallow_criteria)
 
         if target != "layout_only":
             # Save running programs to file.
-            programs.save(ws.name, numeric, directory, profile)
+            programs.save(ws, numeric, directory, profile)
 
 
 @main.command("restore")
